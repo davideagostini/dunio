@@ -68,6 +68,7 @@ class QuickEntryViewModel @Inject constructor(
             is EntryEvent.UpdateDescription -> _uiState.update { it.copy(description = event.value, descriptionError = null) }
             is EntryEvent.UpdatePrice       -> _uiState.update { it.copy(price = event.value, priceError = null) }
             is EntryEvent.SelectCategory    -> _uiState.update { it.copy(selectedCategory = event.category) }
+            EntryEvent.Reset                -> _uiState.value = EntryUiState()
             EntryEvent.Next                 -> advanceStep()
             EntryEvent.Back                 -> _uiState.update { it.copy(step = (it.step - 1).coerceAtLeast(0)) }
             EntryEvent.Save                 -> save()

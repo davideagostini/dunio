@@ -90,6 +90,10 @@ fun QuickEntryScreen(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.handleEvent(EntryEvent.Reset)
+    }
+
+    LaunchedEffect(Unit) {
         viewModel.navEvents.collect { event ->
             when (event) {
                 EntryNavEvent.Saved -> onDismiss()

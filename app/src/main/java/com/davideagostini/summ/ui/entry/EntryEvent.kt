@@ -8,6 +8,7 @@ sealed class EntryEvent {
     data class UpdateDescription(val value: String) : EntryEvent()
     data class UpdatePrice(val value: String)       : EntryEvent()
     data class SelectCategory(val category: Category) : EntryEvent()
+    data object Reset : EntryEvent()
     data object Next : EntryEvent()
     data object Back : EntryEvent()
     data object Save : EntryEvent()
