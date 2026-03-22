@@ -38,16 +38,25 @@
     <string name="auth_google_unavailable">Google sign-in is unavailable until Firebase is configured.</string>
     <string name="auth_sign_in_title">Sign in with Google</string>
     <string name="auth_sign_in_message">Use the same Firebase project and household data as the web app.</string>
+    <string name="auth_sign_in_helper">Sign in once and keep your shared household synced across devices.</string>
+    <string name="auth_sign_in_headline">See your spending, assets, and net worth in one shared view.</string>
+    <string name="auth_sign_in_body">Track income and expenses, monitor assets and liabilities, and keep your household finances in sync every day.</string>
     <string name="auth_signing_in">Signing in…</string>
     <string name="auth_continue_with_google">Continue with Google</string>
     <string name="auth_household_setup_title">Household setup</string>
+    <string name="auth_household_setup_message">Create a new household or join an existing one to unlock the dashboard.</string>
     <string name="auth_signed_in_as">Signed in as %1$s</string>
     <string name="auth_create_household_title">Create a household</string>
+    <string name="auth_create_household_message">Start a shared workspace for your finances.</string>
     <string name="auth_household_name_label">Household name</string>
     <string name="auth_create_household_action">Create household</string>
+    <string name="auth_create_short">Create</string>
     <string name="auth_join_household_title">Join an existing household</string>
+    <string name="auth_join_household_message">Enter the household ID shared with you.</string>
     <string name="auth_household_id_label">Household ID</string>
     <string name="auth_join_household_action">Join household</string>
+    <string name="auth_join_short">Join</string>
+    <string name="auth_join_household_helper">Ask your partner to share the household ID.</string>
 
     <string name="quick_entry_signed_out_message">Sign in to add a quick entry.</string>
     <string name="quick_entry_needs_household_message">Create or join a household before adding entries.</string>

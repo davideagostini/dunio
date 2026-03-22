@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
+import com.davideagostini.summ.ui.theme.AppButtonShape
 
 @Composable
 internal fun StepIndicator(currentStep: Int, totalSteps: Int) {
@@ -66,13 +67,13 @@ internal fun StepNavRow(onBack: (() -> Unit)?, onNext: () -> Unit) {
         if (onBack != null) {
             OutlinedButton(
                 onClick  = onBack,
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.action_back)) }
         }
         Button(
             onClick  = onNext,
-            shape    = RoundedCornerShape(12.dp),
+            shape    = AppButtonShape,
             modifier = Modifier.weight(1f),
         ) { Text(stringResource(R.string.action_next)) }
     }

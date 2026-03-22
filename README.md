@@ -8,7 +8,6 @@ This public setup is focused on:
 - Firebase Authentication
 - Cloud Firestore
 
-The web app is intentionally not documented here for now.
 
 ## What the app does
 

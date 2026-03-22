@@ -51,6 +51,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.categories.CategoriesEvent
 import com.davideagostini.summ.ui.categories.CategoriesUiState
 import com.davideagostini.summ.ui.categories.CategorySheetMode
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 
@@ -153,7 +154,7 @@ private fun ActionContent(uiState: CategoriesUiState, onEvent: (CategoriesEvent)
         ) {
             OutlinedButton(
                 onClick  = { onEvent(CategoriesEvent.RequestDelete) },
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 colors   = ButtonDefaults.outlinedButtonColors(contentColor = ExpenseRed),
                 modifier = Modifier.weight(1f),
             ) {
@@ -164,7 +165,7 @@ private fun ActionContent(uiState: CategoriesUiState, onEvent: (CategoriesEvent)
 
             Button(
                 onClick  = { onEvent(CategoriesEvent.StartEdit) },
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) {
                 Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -252,13 +253,13 @@ private fun CategoryFormContent(
         ) {
             OutlinedButton(
                 onClick  = onCancel,
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.action_cancel)) }
 
             Button(
                 onClick  = onSave,
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) { Text(confirmLabel) }
         }

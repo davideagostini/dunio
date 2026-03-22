@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -53,6 +54,7 @@ import com.davideagostini.summ.ui.entries.components.EmptyState
 import com.davideagostini.summ.ui.entries.components.EntryActionSheet
 import com.davideagostini.summ.ui.entries.components.EntriesToolbar
 import com.davideagostini.summ.ui.entries.components.UnusualSpendingCard
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import kotlinx.coroutines.launch
 
@@ -275,12 +277,19 @@ internal fun EntriesContent(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { onEvent(EntriesEvent.ConfirmDelete) }) {
-                    Text(stringResource(R.string.action_delete), color = ExpenseRed, fontWeight = FontWeight.SemiBold)
+                TextButton(
+                    onClick = { onEvent(EntriesEvent.ConfirmDelete) },
+                    shape = AppButtonShape,
+                    colors = ButtonDefaults.textButtonColors(contentColor = ExpenseRed),
+                ) {
+                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { onEvent(EntriesEvent.DismissDeleteDialog) }) {
+                TextButton(
+                    onClick = { onEvent(EntriesEvent.DismissDeleteDialog) },
+                    shape = AppButtonShape,
+                ) {
                     Text(stringResource(R.string.action_cancel))
                 }
             },

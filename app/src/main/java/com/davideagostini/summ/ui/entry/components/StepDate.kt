@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -39,7 +40,7 @@ internal fun StepDate(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
 
         OutlinedButton(
             onClick = { showDatePicker = true },
-            shape = RoundedCornerShape(12.dp),
+            shape = AppButtonShape,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
@@ -61,10 +62,11 @@ internal fun StepDate(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
                         datePickerState.selectedDateMillis?.let { onEvent(EntryEvent.UpdateDate(it)) }
                         showDatePicker = false
                     },
+                    shape = AppButtonShape,
                 ) { Text(stringResource(R.string.action_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = { showDatePicker = false }, shape = AppButtonShape) { Text(stringResource(R.string.action_cancel)) }
             },
         ) {
             DatePicker(state = datePickerState)

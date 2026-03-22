@@ -26,6 +26,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
 import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import java.text.SimpleDateFormat
@@ -94,13 +95,13 @@ internal fun StepReview(
         ) {
             OutlinedButton(
                 onClick  = onCancel,
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.action_cancel)) }
 
             Button(
                 onClick  = { onEvent(EntryEvent.Save) },
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.action_confirm)) }
         }

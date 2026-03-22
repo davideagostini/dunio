@@ -71,6 +71,7 @@ import com.davideagostini.summ.ui.entries.EntriesEvent
 import com.davideagostini.summ.ui.entries.EntriesUiState
 import com.davideagostini.summ.ui.entries.EntrySheetMode
 import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.listItemShape
@@ -245,7 +246,7 @@ private fun ActionContent(
         ) {
             OutlinedButton(
                 onClick  = onDelete,
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 colors   = ButtonDefaults.outlinedButtonColors(contentColor = ExpenseRed),
                 modifier = Modifier.weight(1f),
             ) {
@@ -256,7 +257,7 @@ private fun ActionContent(
 
             Button(
                 onClick  = onEdit,
-                shape    = RoundedCornerShape(12.dp),
+                shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) {
                 Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -301,7 +302,7 @@ private fun EntryEditForm(
                         val color    = if (value == "income") IncomeGreen else ExpenseRed
                         OutlinedButton(
                             onClick  = { onEvent(EntriesEvent.UpdateType(value)) },
-                            shape    = RoundedCornerShape(12.dp),
+                            shape    = AppButtonShape,
                             modifier = Modifier.weight(1f),
                             colors   = if (selected) ButtonDefaults.outlinedButtonColors(
                                 containerColor = color.copy(alpha = 0.12f),
@@ -347,7 +348,7 @@ private fun EntryEditForm(
             item {
                 OutlinedButton(
                     onClick = { showDatePicker = true },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AppButtonShape,
                     border = androidx.compose.foundation.BorderStroke(
                         1.dp,
                         MaterialTheme.colorScheme.outline,
@@ -399,13 +400,13 @@ private fun EntryEditForm(
             ) {
                 OutlinedButton(
                     onClick  = onCancel,
-                    shape    = RoundedCornerShape(12.dp),
+                    shape    = AppButtonShape,
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(R.string.action_cancel)) }
 
                 Button(
                     onClick  = { onEvent(EntriesEvent.SaveEdit) },
-                    shape    = RoundedCornerShape(12.dp),
+                    shape    = AppButtonShape,
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(R.string.action_save)) }
             }
@@ -421,10 +422,11 @@ private fun EntryEditForm(
                         datePickerState.selectedDateMillis?.let { onEvent(EntriesEvent.UpdateDate(it)) }
                         showDatePicker = false
                     },
+                    shape = AppButtonShape,
                 ) { Text(stringResource(R.string.action_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = { showDatePicker = false }, shape = AppButtonShape) { Text(stringResource(R.string.action_cancel)) }
             },
         ) {
             DatePicker(state = datePickerState)

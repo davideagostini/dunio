@@ -50,6 +50,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Invite
 import com.davideagostini.summ.data.entity.Member
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
 import com.davideagostini.summ.ui.theme.listItemShape
 
@@ -203,7 +204,7 @@ private fun MembersHeaderCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                OutlinedButton(onClick = onCopyHouseholdId, shape = RoundedCornerShape(999.dp)) {
+                OutlinedButton(onClick = onCopyHouseholdId, shape = AppButtonShape) {
                     Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.size(6.dp))
                     Text(stringResource(R.string.members_copy_id))
@@ -364,7 +365,7 @@ private fun InviteCard(
             Button(
                 onClick = onSaveInvite,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(999.dp),
+                shape = AppButtonShape,
             ) {
                 Text(stringResource(R.string.members_save_invite))
             }

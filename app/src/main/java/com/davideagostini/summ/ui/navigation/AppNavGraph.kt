@@ -3,6 +3,7 @@ package com.davideagostini.summ.ui.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +53,7 @@ import androidx.navigation.compose.rememberNavController
 import com.davideagostini.summ.data.session.SessionState
 import com.davideagostini.summ.ui.assets.AssetsScreen
 import com.davideagostini.summ.ui.auth.AuthGateScreen
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.auth.SessionViewModel
 import com.davideagostini.summ.ui.categories.CategoriesScreen
 import com.davideagostini.summ.ui.dashboard.DashboardScreen
@@ -279,21 +281,18 @@ private fun NavTab(
     if (selected) {
         Button(
             onClick = onClick,
-            shape = RoundedCornerShape(42.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = 12.dp,
-                vertical = 12.dp
-            ),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
         ) {
-            Icon(icon, contentDescription = label, modifier = Modifier.size(18.dp))
+            Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
             Text(
                 label,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(start = 4.dp)
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(start = 6.dp)
             )
         }
     } else {
@@ -302,6 +301,7 @@ private fun NavTab(
                 imageVector = icon,
                 contentDescription = label,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.45f),
+                modifier = Modifier.size(22.dp),
             )
         }
     }

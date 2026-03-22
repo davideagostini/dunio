@@ -3,6 +3,9 @@ package com.davideagostini.summ.ui.theme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 
+/** Shared corner shape for action buttons across the app. */
+val AppButtonShape = RoundedCornerShape(16.dp)
+
 /** Returns the correct corner shape for a list item at [index] out of [count] total items. */
 fun listItemShape(index: Int, count: Int): RoundedCornerShape = when {
     count == 1       -> RoundedCornerShape(16.dp)

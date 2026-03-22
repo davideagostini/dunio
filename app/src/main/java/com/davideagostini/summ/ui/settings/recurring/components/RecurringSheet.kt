@@ -62,6 +62,7 @@ import com.davideagostini.summ.ui.format.formatEuro
 import com.davideagostini.summ.ui.settings.recurring.RecurringEvent
 import com.davideagostini.summ.ui.settings.recurring.RecurringSheetMode
 import com.davideagostini.summ.ui.settings.recurring.RecurringUiState
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.listItemShape
@@ -136,10 +137,10 @@ internal fun RecurringSheet(
                                 textAlign = TextAlign.Center,
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                                OutlinedButton(onClick = { onEvent(RecurringEvent.RequestDelete) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                                OutlinedButton(onClick = { onEvent(RecurringEvent.RequestDelete) }, modifier = Modifier.weight(1f), shape = AppButtonShape) {
                                     Text(stringResource(R.string.action_delete), color = ExpenseRed)
                                 }
-                                Button(onClick = { onEvent(RecurringEvent.StartEdit) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                                Button(onClick = { onEvent(RecurringEvent.StartEdit) }, modifier = Modifier.weight(1f), shape = AppButtonShape) {
                                     Text(stringResource(R.string.action_edit))
                                 }
                             }
@@ -197,7 +198,7 @@ internal fun RecurringSheet(
                             item {
                                 OutlinedButton(
                                     onClick = { showDatePicker = true },
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = AppButtonShape,
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
@@ -260,13 +261,13 @@ internal fun RecurringSheet(
                                     .fillMaxWidth()
                                     .padding(top = 12.dp),
                             ) {
-                                OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                                OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f), shape = AppButtonShape) {
                                     Text(stringResource(R.string.action_cancel))
                                 }
                                 Button(
                                     onClick = { onEvent(if (uiState.sheetMode == RecurringSheetMode.Add) RecurringEvent.SaveAdd else RecurringEvent.SaveEdit) },
                                     modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = AppButtonShape,
                                 ) {
                                     Text(if (uiState.sheetMode == RecurringSheetMode.Add) stringResource(R.string.action_create) else stringResource(R.string.action_save))
                                 }
@@ -297,9 +298,9 @@ internal fun RecurringSheet(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { onEvent(RecurringEvent.UpdateStartDate(it)) }
                     showDatePicker = false
-                }) { Text(stringResource(R.string.action_ok)) }
+                }, shape = AppButtonShape) { Text(stringResource(R.string.action_ok)) }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) } },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }, shape = AppButtonShape) { Text(stringResource(R.string.action_cancel)) } },
         ) { DatePicker(state = datePickerState) }
     }
 }
@@ -316,7 +317,7 @@ private fun TypeToggle(selectedType: String, onSelect: (String) -> Unit) {
             OutlinedButton(
                 onClick = { onSelect(value) },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
+                shape = AppButtonShape,
                 colors = if (selected) ButtonDefaults.outlinedButtonColors(
                     containerColor = color.copy(alpha = 0.12f),
                     contentColor = color,

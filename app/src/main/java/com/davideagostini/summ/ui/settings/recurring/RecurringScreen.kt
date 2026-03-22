@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -66,6 +67,7 @@ import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.format.formatEuro
 import com.davideagostini.summ.ui.settings.recurring.components.RecurringSheet
 import com.davideagostini.summ.ui.settings.recurring.components.RecurringSplitButton
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.SummColors
@@ -313,8 +315,19 @@ private fun RecurringContent(
             onDismissRequest = { onEvent(RecurringEvent.DismissDeleteDialog) },
             title = { Text(stringResource(R.string.recurring_delete_title, desc)) },
             text = { Text(stringResource(R.string.recurring_delete_message)) },
-            confirmButton = { TextButton(onClick = { onEvent(RecurringEvent.ConfirmDelete) }) { Text(stringResource(R.string.action_delete), color = ExpenseRed) } },
-            dismissButton = { TextButton(onClick = { onEvent(RecurringEvent.DismissDeleteDialog) }) { Text(stringResource(R.string.action_cancel)) } },
+            confirmButton = {
+                TextButton(
+                    onClick = { onEvent(RecurringEvent.ConfirmDelete) },
+                    shape = AppButtonShape,
+                    colors = ButtonDefaults.textButtonColors(contentColor = ExpenseRed),
+                ) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { onEvent(RecurringEvent.DismissDeleteDialog) },
+                    shape = AppButtonShape,
+                ) { Text(stringResource(R.string.action_cancel)) }
+            },
         )
     }
 }

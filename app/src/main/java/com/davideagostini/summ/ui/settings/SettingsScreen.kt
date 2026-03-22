@@ -38,8 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,6 +51,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.settings.components.SettingsInfoItem
 import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.settings.components.SettingsSectionLabel
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +68,7 @@ fun SettingsScreen(
     userPhotoUrl: String?,
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
 
     Column(
         modifier = Modifier
@@ -83,12 +87,14 @@ fun SettingsScreen(
             item { SettingsSectionLabel(stringResource(R.string.settings_account)) }
 
             item {
-                AccountCard(
-                    userName = userName,
-                    userPhotoUrl = userPhotoUrl,
-                    householdName = householdName,
-                    onSignOut = { showSignOutDialog = true },
-                )
+            AccountCard(
+                userName = userName,
+                userPhotoUrl = userPhotoUrl,
+                householdName = householdName,
+                householdId = householdId,
+                onCopyHouseholdId = { clipboardManager.setText(AnnotatedString(householdId)) },
+                onSignOut = { showSignOutDialog = true },
+            )
             }
 
             item { SettingsSectionLabel(stringResource(R.string.settings_data)) }
@@ -152,6 +158,7 @@ fun SettingsScreen(
                         showSignOutDialog = false
                         onSignOut()
                     },
+                    shape = AppButtonShape,
                 ) {
                     Text(
                         stringResource(R.string.action_sign_out),
@@ -160,7 +167,10 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showSignOutDialog = false }) {
+                TextButton(
+                    onClick = { showSignOutDialog = false },
+                    shape = AppButtonShape,
+                ) {
                     Text(stringResource(R.string.action_cancel))
                 }
             },
@@ -173,6 +183,8 @@ private fun AccountCard(
     userName: String,
     userPhotoUrl: String?,
     householdName: String,
+    householdId: String,
+    onCopyHouseholdId: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     Card(
@@ -199,6 +211,8 @@ private fun AccountCard(
             AccountInfoBlock(
                 label = stringResource(R.string.settings_current_household),
                 value = householdName,
+                actionLabel = stringResource(R.string.members_copy_id),
+                onActionClick = onCopyHouseholdId,
             )
 
             OutlinedButton(
@@ -206,7 +220,7 @@ private fun AccountCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppButtonShape,
             ) {
                 Text(
                     stringResource(R.string.action_sign_out),
@@ -222,6 +236,8 @@ private fun AccountInfoBlock(
     label: String,
     value: String,
     leading: @Composable (() -> Unit)? = null,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -251,6 +267,16 @@ private fun AccountInfoBlock(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+
+            if (!actionLabel.isNullOrBlank() && onActionClick != null) {
+                Spacer(Modifier.size(12.dp))
+                OutlinedButton(
+                    onClick = onActionClick,
+                    shape = AppButtonShape,
+                ) {
+                    Text(actionLabel)
+                }
             }
         }
     }

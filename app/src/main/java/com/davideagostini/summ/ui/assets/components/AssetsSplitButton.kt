@@ -1,4 +1,4 @@
-package com.davideagostini.summ.ui.settings.recurring.components
+package com.davideagostini.summ.ui.assets.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.UnfoldMore
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,46 +31,47 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
-import com.davideagostini.summ.ui.theme.AppButtonShape
 
 @Composable
-internal fun RecurringSplitButton(
-    onAddRecurring: () -> Unit,
-    onApplyDue: () -> Unit,
+fun AssetsSplitButton(
+    canCopyPreviousMonth: Boolean,
+    onAddAsset: () -> Unit,
+    onCopyPreviousMonth: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier.wrapContentSize(Alignment.CenterStart),
-        contentAlignment = Alignment.CenterStart,
+        modifier = modifier.wrapContentSize(Alignment.BottomEnd),
+        contentAlignment = Alignment.BottomEnd,
     ) {
         DropdownMenu(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
             offset = DpOffset(x = 0.dp, y = (-8).dp),
-            shape = AppButtonShape,
+            shape = RoundedCornerShape(20.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             shadowElevation = 6.dp,
         ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.recurring_add)) },
+                text = { Text(stringResource(R.string.assets_add_asset)) },
                 onClick = {
                     menuExpanded = false
-                    onAddRecurring()
+                    onAddAsset()
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.recurring_apply_due)) },
+                text = { Text(stringResource(R.string.assets_copy_prev_month)) },
+                enabled = canCopyPreviousMonth,
                 onClick = {
                     menuExpanded = false
-                    onApplyDue()
+                    onCopyPreviousMonth()
                 },
             )
         }
 
         Surface(
-            shape = AppButtonShape,
+            shape = RoundedCornerShape(18.dp),
             color = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shadowElevation = 6.dp,
@@ -79,14 +80,14 @@ internal fun RecurringSplitButton(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(
                     modifier = Modifier
-                        .clickable(onClick = onAddRecurring)
+                        .clickable(onClick = onAddAsset)
                         .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(Icons.Outlined.Repeat, contentDescription = null)
+                    Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.content_desc_add_asset))
                     Text(
-                        text = stringResource(R.string.recurring_add),
+                        text = stringResource(R.string.assets_add_asset),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -103,7 +104,7 @@ internal fun RecurringSplitButton(
                 IconButton(onClick = { menuExpanded = !menuExpanded }) {
                     Icon(
                         imageVector = Icons.Outlined.UnfoldMore,
-                        contentDescription = stringResource(R.string.recurring_more_actions),
+                        contentDescription = stringResource(R.string.assets_more_actions),
                     )
                 }
             }

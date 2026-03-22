@@ -26,9 +26,10 @@ When working in this folder:
 2. Reuse validated UI patterns already present in the app.
 3. Keep screen files focused on orchestration, state, and navigation.
 4. Move reusable or presentational UI into each feature's `components/` folder.
-5. Avoid introducing new patterns when an approved one already exists.
-6. Keep the app aligned with the current mobile-first design and Firebase household model.
-7. Verify Android changes with:
+5. Do not let screen files grow into long monolithic `.kt` files; extract UI sections early into `components/`.
+6. Avoid introducing new patterns when an approved one already exists.
+7. Keep the app aligned with the current mobile-first design and Firebase household model.
+8. Verify Android changes with:
    - `./gradlew assembleDebug`
 
 ## Notes

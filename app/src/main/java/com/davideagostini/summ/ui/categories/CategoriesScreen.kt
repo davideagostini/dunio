@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -43,6 +44,7 @@ import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.categories.components.CategoryActionSheet
 import com.davideagostini.summ.ui.categories.components.CategoryCard
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.SummColors
 import kotlinx.coroutines.launch
@@ -166,12 +168,19 @@ private fun CategoriesContent(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { onEvent(CategoriesEvent.ConfirmDelete) }) {
-                    Text(stringResource(R.string.action_delete), color = ExpenseRed, fontWeight = FontWeight.SemiBold)
+                TextButton(
+                    onClick = { onEvent(CategoriesEvent.ConfirmDelete) },
+                    shape = AppButtonShape,
+                    colors = ButtonDefaults.textButtonColors(contentColor = ExpenseRed),
+                ) {
+                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { onEvent(CategoriesEvent.DismissDeleteDialog) }) {
+                TextButton(
+                    onClick = { onEvent(CategoriesEvent.DismissDeleteDialog) },
+                    shape = AppButtonShape,
+                ) {
                     Text(stringResource(R.string.action_cancel))
                 }
             },

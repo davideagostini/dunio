@@ -39,6 +39,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthPickerField
+import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.SummColors
@@ -199,12 +200,12 @@ private fun MonthCloseContent(
                         onClick = { onSetStatus("closed") },
                         enabled = uiState.canClose,
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = AppButtonShape,
                     ) { Text(stringResource(R.string.month_close_action_close)) }
                     OutlinedButton(
                         onClick = { onSetStatus("draft") },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = AppButtonShape,
                     ) {
                         Text(stringResource(R.string.month_close_action_reopen))
                     }
