@@ -7,7 +7,6 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.NoCredentialException
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AppUser
 import com.davideagostini.summ.data.entity.Category
@@ -83,11 +82,11 @@ class SessionRepository @Inject constructor(
 
     suspend fun signInWithGoogle(context: Context) {
         val credentialManager = CredentialManager.create(context)
-        val idToken = try {
-            getGoogleIdToken(credentialManager, context, filterByAuthorizedAccounts = true)
-        } catch (_: NoCredentialException) {
-            getGoogleIdToken(credentialManager, context, filterByAuthorizedAccounts = false)
-        }
+        val idToken = getGoogleIdToken(
+            credentialManager = credentialManager,
+            context = context,
+            filterByAuthorizedAccounts = false,
+        )
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         val firebaseAuth = requireNotNull(auth) { appContext.getString(R.string.session_auth_unavailable) }
 
@@ -330,7 +329,7 @@ class SessionRepository @Inject constructor(
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(webClientId)
             .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
-            .setAutoSelectEnabled(filterByAuthorizedAccounts)
+            .setAutoSelectEnabled(false)
             .build()
 
         val request = GetCredentialRequest.Builder()

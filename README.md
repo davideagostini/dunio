@@ -117,6 +117,54 @@ cd mobile-app
 ./gradlew installDebug
 ```
 
+## Create a Play Console release
+
+Google Play expects an Android App Bundle (`.aab`), not an APK, for a normal release flow.
+
+### 1. Generate an upload key
+
+```bash
+keytool -genkeypair -v \
+  -keystore summ-upload-key.jks \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000 \
+  -alias summ
+```
+
+### 2. Create `keystore.properties`
+
+Copy [keystore.properties.example](./keystore.properties.example) to `keystore.properties` and fill in your values:
+
+```properties
+storeFile=/absolute/path/to/summ-upload-key.jks
+storePassword=your-store-password
+keyAlias=summ
+keyPassword=your-key-password
+```
+
+`keystore.properties` and keystore files are ignored by Git.
+
+### 3. Build the release bundle
+
+```bash
+cd mobile-app
+./gradlew bundleRelease
+```
+
+Output:
+
+```text
+mobile-app/app/build/outputs/bundle/release/app-release.aab
+```
+
+### 4. Upload to Google Play Console
+
+- Create the app in Play Console
+- Go to a testing or production track
+- Upload the `.aab`
+- Follow Play App Signing instructions when prompted
+
 ## First-run checklist
 
 1. Sign in with Google.
