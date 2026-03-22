@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base app theme — Compose handles all visual theming internally -->
+    <style name="Theme.Summ" parent="Theme.AppCompat.DayNight.NoActionBar" />
+
+    <!-- Window styling for QuickEntryActivity dialog appearance -->
+    <style name="Theme.Summ.Dialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">95%</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+</resources>

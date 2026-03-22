@@ -1,0 +1,1 @@
+-keep class com.davideagostini.summ.data.entity.** { *; }

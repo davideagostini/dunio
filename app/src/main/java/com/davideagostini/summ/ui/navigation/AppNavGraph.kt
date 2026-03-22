@@ -1,0 +1,308 @@
+package com.davideagostini.summ.ui.navigation
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Receipt
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Wallet
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.davideagostini.summ.data.session.SessionState
+import com.davideagostini.summ.ui.assets.AssetsScreen
+import com.davideagostini.summ.ui.auth.AuthGateScreen
+import com.davideagostini.summ.ui.auth.SessionViewModel
+import com.davideagostini.summ.ui.categories.CategoriesScreen
+import com.davideagostini.summ.ui.dashboard.DashboardScreen
+import com.davideagostini.summ.ui.entries.EntriesScreen
+import com.davideagostini.summ.ui.entry.QuickEntryScreen
+import com.davideagostini.summ.ui.settings.SettingsScreen
+import com.davideagostini.summ.ui.settings.members.MembersScreen
+import com.davideagostini.summ.ui.settings.monthclose.MonthCloseScreen
+import com.davideagostini.summ.ui.settings.recurring.RecurringScreen
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppNavGraph(
+    navController: NavHostController = rememberNavController(),
+    sessionViewModel: SessionViewModel = hiltViewModel(),
+) {
+    val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
+
+    val readyState = sessionState as? SessionState.Ready
+    if (readyState == null) {
+        AuthGateScreen(sessionViewModel)
+        return
+    }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    var showEntrySheet by remember { mutableStateOf(false) }
+    var showEntriesFullscreenEditor by remember { mutableStateOf(false) }
+    var allowEntrySheetHide by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden || allowEntrySheetHide },
+    )
+
+    fun navigate(route: String) = navController.navigate(route) { launchSingleTop = true }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = "dashboard",
+            modifier = Modifier.matchParentSize(),
+        ) {
+            composable("entries") {
+                EntriesScreenWithOverlayState(
+                    onFullscreenEditVisibilityChanged = { showEntriesFullscreenEditor = it },
+                )
+            }
+            composable("dashboard") {
+                DashboardScreen()
+            }
+            composable("assets") { AssetsScreen() }
+            composable("settings") {
+                SettingsScreen(
+                    onNavigateCategories = { navigate("categories") },
+                    onNavigateMembers = { navigate("members") },
+                    onNavigateRecurring = { navigate("recurring") },
+                    onNavigateMonthClose = { navigate("month-close") },
+                    onSignOut = sessionViewModel::signOut,
+                    householdName = readyState.household.name,
+                    householdId = readyState.household.id,
+                    userName = readyState.user.name,
+                    userPhotoUrl = readyState.user.photoUrl,
+                )
+            }
+            composable("members") {
+                MembersScreen(
+                    householdId = readyState.household.id,
+                    currentUserId = readyState.user.uid,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("categories") {
+                CategoriesScreen(onBack = { navController.popBackStack() })
+            }
+            composable("recurring") {
+                RecurringScreen(onBack = { navController.popBackStack() })
+            }
+            composable("month-close") {
+                MonthCloseScreen(onBack = { navController.popBackStack() })
+            }
+        }
+
+        if (currentRoute != "categories" &&
+            currentRoute != "members" &&
+            currentRoute != "recurring" &&
+            currentRoute != "month-close" &&
+            !showEntriesFullscreenEditor
+        ) {
+            Box(
+                modifier = Modifier.matchParentSize(),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                SummBottomBar(
+                    currentRoute = currentRoute,
+                    onNavigateDashboard = { navigate("dashboard") },
+                    onNavigateEntries = { navigate("entries") },
+                    onAddEntry = { showEntrySheet = true },
+                    onNavigateAssets = { navigate("assets") },
+                    onNavigateSettings = { navigate("settings") },
+                )
+            }
+        }
+    }
+
+    if (showEntrySheet) {
+        ModalBottomSheet(
+            onDismissRequest = {},
+            sheetState = sheetState,
+            containerColor = Color.Transparent,
+            dragHandle = null,
+            scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f),
+        ) {
+            QuickEntryScreen(
+                resolvedSessionState = readyState,
+                onDismiss = {
+                    scope.launch {
+                        allowEntrySheetHide = true
+                        sheetState.hide()
+                        showEntrySheet = false
+                        allowEntrySheetHide = false
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun EntriesScreenWithOverlayState(
+    onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
+    viewModel: com.davideagostini.summ.ui.entries.EntriesViewModel = hiltViewModel(),
+) {
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val homeState by viewModel.homeState.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    if (isLoading) {
+        com.davideagostini.summ.ui.components.FullScreenLoading()
+        return
+    }
+
+    com.davideagostini.summ.ui.entries.EntriesContent(
+        homeState = homeState,
+        categories = categories,
+        uiState = uiState,
+        onEvent = viewModel::handleEvent,
+        onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
+    )
+}
+
+@Composable
+private fun SummBottomBar(
+    currentRoute: String?,
+    onNavigateDashboard: () -> Unit,
+    onNavigateEntries: () -> Unit,
+    onAddEntry: () -> Unit,
+    onNavigateAssets: () -> Unit,
+    onNavigateSettings: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 6.dp)
+            .navigationBarsPadding()
+            .background(Color.Transparent),
+        contentAlignment = Alignment.Center,
+    ) {
+        Surface(
+            shape = RoundedCornerShape(50.dp),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shadowElevation = 8.dp,
+            tonalElevation = 4.dp,
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+            ) {
+                NavTab(
+                    label = "Dashboard",
+                    icon = if (currentRoute == "dashboard") Icons.Filled.BarChart else Icons.Outlined.BarChart,
+                    selected = currentRoute == "dashboard",
+                    onClick = onNavigateDashboard,
+                )
+                NavTab(
+                    label = "Entries",
+                    icon = if (currentRoute == "entries") Icons.Filled.Receipt else Icons.Outlined.Receipt,
+                    selected = currentRoute == "entries",
+                    onClick = onNavigateEntries,
+                )
+                NavTab(
+                    label = "Add Entry",
+                    icon = Icons.Outlined.Add,
+                    selected = false,
+                    onClick = onAddEntry,
+                )
+                NavTab(
+                    label = "Assets",
+                    icon = if (currentRoute == "assets") Icons.Filled.Wallet else Icons.Outlined.Wallet,
+                    selected = currentRoute == "assets",
+                    onClick = onNavigateAssets,
+                )
+                NavTab(
+                    label = "Settings",
+                    icon = if (currentRoute == "settings") Icons.Filled.Settings else Icons.Outlined.Settings,
+                    selected = currentRoute == "settings",
+                    onClick = onNavigateSettings,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NavTab(
+    label: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    if (selected) {
+        Button(
+            onClick = onClick,
+            shape = RoundedCornerShape(42.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                horizontal = 12.dp,
+                vertical = 12.dp
+            ),
+        ) {
+            Icon(icon, contentDescription = label, modifier = Modifier.size(18.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+    } else {
+        IconButton(onClick = onClick) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.45f),
+            )
+        }
+    }
+}
