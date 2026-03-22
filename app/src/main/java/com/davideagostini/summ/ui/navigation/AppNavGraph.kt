@@ -53,11 +53,9 @@ import androidx.navigation.compose.rememberNavController
 import com.davideagostini.summ.data.session.SessionState
 import com.davideagostini.summ.ui.assets.AssetsScreen
 import com.davideagostini.summ.ui.auth.AuthGateScreen
-import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.auth.SessionViewModel
 import com.davideagostini.summ.ui.categories.CategoriesScreen
 import com.davideagostini.summ.ui.dashboard.DashboardScreen
-import com.davideagostini.summ.ui.entries.EntriesScreen
 import com.davideagostini.summ.ui.entry.QuickEntryScreen
 import com.davideagostini.summ.ui.settings.SettingsScreen
 import com.davideagostini.summ.ui.settings.members.MembersScreen

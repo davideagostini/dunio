@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.settings.recurring
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
@@ -11,7 +12,6 @@ import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

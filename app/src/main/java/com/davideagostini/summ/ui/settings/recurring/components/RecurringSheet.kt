@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -57,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
-import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.ui.format.formatEuro
 import com.davideagostini.summ.ui.settings.recurring.RecurringEvent
 import com.davideagostini.summ.ui.settings.recurring.RecurringSheetMode

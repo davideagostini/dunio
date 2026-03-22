@@ -1,6 +1,5 @@
 package com.davideagostini.summ.data.di
 
-import com.google.firebase.firestore.FirebaseFirestore
 import com.davideagostini.summ.data.dao.AssetDao
 import com.davideagostini.summ.data.dao.CategoryDao
 import com.davideagostini.summ.data.dao.EntryDao
@@ -9,6 +8,7 @@ import com.davideagostini.summ.data.dao.MemberDao
 import com.davideagostini.summ.data.dao.MonthCloseDao
 import com.davideagostini.summ.data.dao.RecurringTransactionDao
 import com.davideagostini.summ.data.session.SessionRepository
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.data.entity.Entry
-import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.repository.AssetRepository
 import com.davideagostini.summ.data.repository.EntryRepository
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 import javax.inject.Inject

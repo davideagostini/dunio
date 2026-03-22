@@ -1,7 +1,6 @@
 package com.davideagostini.summ.ui.dashboard.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,6 +25,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.davideagostini.summ.ui.dashboard.ChartPoint
+import com.davideagostini.summ.ui.dashboard.DashboardRange
+import com.davideagostini.summ.ui.dashboard.formatMonthOption
+import com.davideagostini.summ.ui.dashboard.formatPercent
+import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.theme.ExpenseRed
+import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.Companion.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis.Companion.rememberStart
@@ -38,13 +44,6 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
-import com.davideagostini.summ.ui.dashboard.ChartPoint
-import com.davideagostini.summ.ui.dashboard.DashboardRange
-import com.davideagostini.summ.ui.dashboard.formatMonthOption
-import com.davideagostini.summ.ui.dashboard.formatPercent
-import com.davideagostini.summ.ui.format.formatEuro
-import com.davideagostini.summ.ui.theme.ExpenseRed
-import com.davideagostini.summ.ui.theme.IncomeGreen
 import kotlin.math.abs
 
 @Composable
