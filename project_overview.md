@@ -81,15 +81,25 @@ googleId             = "1.1.1"
 
 ### Future roadmap
 
-- Add Android home screen widgets for key household metrics and quick entry actions.
-- Add Wear OS support for glanceable metrics and fast transaction capture.
-- Add AI-powered features for insights, categorization help, unusual-spending explanations, and natural-language entry assistance.
-- Add import/export data flows for backup, migration, and interoperability.
-- Add recurring reminders and smart notifications for due recurring entries and monthly close tasks.
-- Add household activity history and audit trail for shared changes.
-- Add attachment support for receipts and relevant documents.
-- Add budget goals and progress tracking by category and month.
-- Add better onboarding, sample data, and demo mode for first-time users.
+- Prioritize product-completion work before platform expansion. The app already covers the core household flows: Google sign-in, create/join household, dashboard, assets, entries, categories, recurring transactions, month close, members/invites, and quick entry via sheet/activity/tile.
+- Close the biggest functional gaps in the current product surface:
+  - add proper invite lifecycle flows (accept invite, resend/cancel invite, revoke invite, remove member, change member role) instead of limiting collaboration to household ID sharing plus invite creation
+  - add background automation for recurring transactions and month-close reminders via WorkManager + notifications; recurring exists today, but `Apply due` is still a manual action
+  - add richer transaction analytics already expected by the product direction: category spending summary, monthly income-vs-expense chart, and clearer trend breakdowns per month
+  - add asset-management improvements: explicit sorting options, liquid/non-liquid filters, and better history/change exploration beyond the current monthly snapshot comparison
+  - add import/export and backup flows (CSV, JSON, device backup) to make migration, recovery, and cross-product portability realistic
+- Improve first-run and shared-household usability:
+  - add stronger onboarding, sample/demo data, and clearer empty states so a new household can understand the app without manual setup friction
+  - add safer validation and admin guardrails around destructive/shared actions, especially for multi-user editing and settings flows
+  - add better household transparency with activity history and an audit trail for shared changes
+- Add planning and long-term finance features once the core workflows are fully mature:
+  - budget goals by category/month, target tracking, and lightweight planning views
+  - attachment support for receipts and household documents
+  - multi-currency handling and conversion-aware reporting
+- Explore platform-extension features only after the core data and collaboration flows are solid:
+  - Android home screen widgets for net worth, cash flow, and quick entry
+  - Wear OS support for glanceable metrics and fast capture
+  - AI-assisted features for categorization, insights, unusual-spending explanations, and natural-language entry
 
 ---
 

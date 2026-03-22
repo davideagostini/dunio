@@ -1,7 +1,9 @@
 package com.davideagostini.summ.ui.entries
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.repository.CategoryRepository
@@ -10,6 +12,7 @@ import com.davideagostini.summ.domain.model.HomeState
 import com.davideagostini.summ.domain.usecase.GetHomeDataUseCase
 import com.davideagostini.summ.ui.format.formatAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EntriesViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     getHomeData: GetHomeDataUseCase,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
@@ -95,12 +99,12 @@ class EntriesViewModel @Inject constructor(
         var hasError = false
 
         if (state.editDescription.isBlank()) {
-            _uiState.update { it.copy(descriptionError = "Description is required") }
+            _uiState.update { it.copy(descriptionError = appContext.getString(R.string.entries_validation_description_required)) }
             hasError = true
         }
         val price = state.editPrice.toDoubleOrNull()
         if (price == null || price <= 0) {
-            _uiState.update { it.copy(priceError = "Enter a valid amount") }
+            _uiState.update { it.copy(priceError = appContext.getString(R.string.entries_validation_amount_valid)) }
             hasError = true
         }
         if (hasError) return

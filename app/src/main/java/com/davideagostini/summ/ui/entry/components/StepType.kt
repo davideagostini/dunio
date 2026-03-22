@@ -18,9 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
 import com.davideagostini.summ.ui.theme.ExpenseRed
@@ -29,7 +31,7 @@ import com.davideagostini.summ.ui.theme.IncomeGreen
 @Composable
 internal fun StepType(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        StepTitle("What type of entry?")
+        StepTitle(stringResource(R.string.entry_step_type_title))
         Spacer(Modifier.height(20.dp))
 
         Row(
@@ -37,7 +39,7 @@ internal fun StepType(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             TypeCard(
-                label    = "Expense",
+                label    = stringResource(R.string.entry_type_expense_plain),
                 emoji    = "💸",
                 selected = uiState.type == "expense",
                 color    = ExpenseRed,
@@ -45,7 +47,7 @@ internal fun StepType(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
                 onClick  = { onEvent(EntryEvent.SelectType("expense")) },
             )
             TypeCard(
-                label    = "Income",
+                label    = stringResource(R.string.entry_type_income_plain),
                 emoji    = "💰",
                 selected = uiState.type == "income",
                 color    = IncomeGreen,

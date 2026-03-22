@@ -9,15 +9,12 @@ import com.davideagostini.summ.ui.dashboard.formatMonthOption
 
 @Composable
 fun DashboardToolbar(
-    monthOptions: List<String>,
     selectedMonth: String,
-    onSelectMonth: (String) -> Unit,
+    onOpenMonthPicker: () -> Unit,
 ) {
     MonthPickerField(
         label = formatMonthOption(selectedMonth),
-        options = monthOptions,
-        optionLabel = ::formatMonthOption,
-        onSelect = onSelectMonth,
+        onClick = onOpenMonthPicker,
         modifier = Modifier.padding(horizontal = 20.dp),
     )
 }

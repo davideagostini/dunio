@@ -8,6 +8,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AppUser
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Household
@@ -33,16 +34,6 @@ import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val DEFAULT_CATEGORIES = listOf(
-    Category(name = "Food", emoji = "🍕"),
-    Category(name = "Transport", emoji = "🚗"),
-    Category(name = "Home", emoji = "🏠"),
-    Category(name = "Health", emoji = "💊"),
-    Category(name = "Leisure", emoji = "🎉"),
-    Category(name = "Work", emoji = "💼"),
-    Category(name = "Other", emoji = "📦"),
-)
-
 private data class UserDocument(
     val uid: String = "",
     val email: String = "",
@@ -67,10 +58,19 @@ class SessionRepository @Inject constructor(
     private val firestore: FirebaseFirestore?,
     private val defaultWebClientId: String?,
 ) {
+    private val defaultCategories = listOf(
+        Category(name = appContext.getString(R.string.default_category_food), emoji = "🍕"),
+        Category(name = appContext.getString(R.string.default_category_transport), emoji = "🚗"),
+        Category(name = appContext.getString(R.string.default_category_home), emoji = "🏠"),
+        Category(name = appContext.getString(R.string.default_category_health), emoji = "💊"),
+        Category(name = appContext.getString(R.string.default_category_leisure), emoji = "🎉"),
+        Category(name = appContext.getString(R.string.default_category_work), emoji = "💼"),
+        Category(name = appContext.getString(R.string.default_category_other), emoji = "📦"),
+    )
 
     val sessionState: Flow<SessionState> =
         if (auth == null || firestore == null) {
-            flowOf(SessionState.ConfigurationError("Firebase failed to initialize on this device."))
+            flowOf(SessionState.ConfigurationError(appContext.getString(R.string.session_configuration_error)))
         } else {
             authStateFlow(auth).flatMapLatest { firebaseUser ->
                 if (firebaseUser == null) {
@@ -89,10 +89,10 @@ class SessionRepository @Inject constructor(
             getGoogleIdToken(credentialManager, context, filterByAuthorizedAccounts = false)
         }
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        val firebaseAuth = requireNotNull(auth) { "Firebase Auth is not available." }
+        val firebaseAuth = requireNotNull(auth) { appContext.getString(R.string.session_auth_unavailable) }
 
         firebaseAuth.signInWithCredential(credential).await()
-        upsertUser(firebaseAuth.currentUser ?: error("Sign-in completed without a Firebase user."))
+        upsertUser(firebaseAuth.currentUser ?: error(appContext.getString(R.string.session_sign_in_missing_user)))
     }
 
     suspend fun signOut() {
@@ -103,9 +103,9 @@ class SessionRepository @Inject constructor(
     }
 
     suspend fun createHousehold(name: String) {
-        val firebaseUser = requireNotNull(auth?.currentUser) { "You must be signed in first." }
-        val db = requireNotNull(firestore) { "Firestore is not available." }
-        require(name.trim().isNotEmpty()) { "Enter a household name." }
+        val firebaseUser = requireNotNull(auth?.currentUser) { appContext.getString(R.string.session_sign_in_required) }
+        val db = requireNotNull(firestore) { appContext.getString(R.string.session_firestore_unavailable) }
+        require(name.trim().isNotEmpty()) { appContext.getString(R.string.session_household_name_required) }
         val householdRef = db.collection("households").document()
         val batch = db.batch()
 
@@ -127,7 +127,7 @@ class SessionRepository @Inject constructor(
             )
         )
 
-        DEFAULT_CATEGORIES.forEach { category ->
+        defaultCategories.forEach { category ->
             val categoryId = encodeCategoryId(category.name)
             batch.set(
                 db.document(FirestorePaths.category(householdRef.id, categoryId)),
@@ -145,7 +145,7 @@ class SessionRepository @Inject constructor(
             mapOf(
                 "uid" to firebaseUser.uid,
                 "email" to (firebaseUser.email ?: ""),
-                "name" to (firebaseUser.displayName ?: firebaseUser.email ?: "Member"),
+                "name" to (firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name)),
                 "photoURL" to firebaseUser.photoUrl?.toString(),
                 "householdId" to householdRef.id,
                 "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
@@ -157,14 +157,14 @@ class SessionRepository @Inject constructor(
     }
 
     suspend fun joinHousehold(householdId: String) {
-        val firebaseUser = requireNotNull(auth?.currentUser) { "You must be signed in first." }
-        val db = requireNotNull(firestore) { "Firestore is not available." }
+        val firebaseUser = requireNotNull(auth?.currentUser) { appContext.getString(R.string.session_sign_in_required) }
+        val db = requireNotNull(firestore) { appContext.getString(R.string.session_firestore_unavailable) }
         val trimmedId = householdId.trim()
-        require(trimmedId.isNotEmpty()) { "Enter a household ID." }
+        require(trimmedId.isNotEmpty()) { appContext.getString(R.string.session_household_id_required) }
         val householdSnapshot = db.document(FirestorePaths.household(trimmedId)).get().await()
 
         if (!householdSnapshot.exists()) {
-            error("Household not found.")
+            error(appContext.getString(R.string.session_household_not_found))
         }
 
         val batch = db.batch()
@@ -181,7 +181,7 @@ class SessionRepository @Inject constructor(
             mapOf(
                 "uid" to firebaseUser.uid,
                 "email" to (firebaseUser.email ?: ""),
-                "name" to (firebaseUser.displayName ?: firebaseUser.email ?: "Member"),
+                "name" to (firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name)),
                 "photoURL" to firebaseUser.photoUrl?.toString(),
                 "householdId" to trimmedId,
                 "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
@@ -192,7 +192,7 @@ class SessionRepository @Inject constructor(
     }
 
     suspend fun requireHouseholdId(): String {
-        val currentUser = requireNotNull(auth?.currentUser) { "You must be signed in first." }
+        val currentUser = requireNotNull(auth?.currentUser) { appContext.getString(R.string.session_sign_in_required) }
         val snapshot = requireNotNull(firestore)
             .document(FirestorePaths.user(currentUser.uid))
             .get()
@@ -200,11 +200,11 @@ class SessionRepository @Inject constructor(
 
         return snapshot.getString("householdId")
             ?.takeIf(String::isNotBlank)
-            ?: error("Create or join a household first.")
+            ?: error(appContext.getString(R.string.session_household_required))
     }
 
     fun requireFirebaseUser(): FirebaseUser =
-        requireNotNull(auth?.currentUser) { "You must be signed in first." }
+        requireNotNull(auth?.currentUser) { appContext.getString(R.string.session_sign_in_required) }
 
     private suspend fun upsertUser(firebaseUser: FirebaseUser) {
         requireNotNull(firestore)
@@ -213,7 +213,7 @@ class SessionRepository @Inject constructor(
                 mapOf(
                     "uid" to firebaseUser.uid,
                     "email" to (firebaseUser.email ?: ""),
-                    "name" to (firebaseUser.displayName ?: firebaseUser.email ?: "Member"),
+                    "name" to (firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name)),
                     "photoURL" to firebaseUser.photoUrl?.toString(),
                     "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
                 ),
@@ -230,7 +230,7 @@ class SessionRepository @Inject constructor(
             val registration = db.document(FirestorePaths.user(firebaseUser.uid))
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
-                        trySend(SessionState.ConfigurationError(error.message ?: "Could not load session."))
+                        trySend(SessionState.ConfigurationError(error.message ?: appContext.getString(R.string.session_load_error)))
                         return@addSnapshotListener
                     }
 
@@ -245,14 +245,14 @@ class SessionRepository @Inject constructor(
                     val document = snapshot.toObject(UserDocument::class.java) ?: UserDocument(
                         uid = firebaseUser.uid,
                         email = firebaseUser.email.orEmpty(),
-                        name = firebaseUser.displayName ?: firebaseUser.email ?: "Member",
+                        name = firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name),
                         photoURL = firebaseUser.photoUrl?.toString(),
                     )
 
                     val user = AppUser(
                         uid = firebaseUser.uid,
                         email = document.email.ifBlank { firebaseUser.email.orEmpty() },
-                        name = document.name.ifBlank { firebaseUser.displayName ?: firebaseUser.email ?: "Member" },
+                        name = document.name.ifBlank { firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name) },
                         photoUrl = document.photoURL ?: firebaseUser.photoUrl?.toString(),
                         householdId = document.householdId,
                     )
@@ -274,7 +274,7 @@ class SessionRepository @Inject constructor(
                     householdRegistration = db.document(FirestorePaths.household(householdId))
                         .addSnapshotListener { householdSnapshot, householdError ->
                             if (householdError != null) {
-                                trySend(SessionState.ConfigurationError(householdError.message ?: "Could not load household."))
+                                trySend(SessionState.ConfigurationError(householdError.message ?: appContext.getString(R.string.session_household_load_error)))
                                 return@addSnapshotListener
                             }
 
@@ -324,7 +324,7 @@ class SessionRepository @Inject constructor(
         filterByAuthorizedAccounts: Boolean,
     ): String {
         val webClientId = requireNotNull(defaultWebClientId) {
-            "Google sign-in is not configured on this build."
+            appContext.getString(R.string.session_google_not_configured)
         }
 
         val googleIdOption = GetGoogleIdOption.Builder()
@@ -343,7 +343,7 @@ class SessionRepository @Inject constructor(
                 request = request,
             )
         } catch (exception: GetCredentialCancellationException) {
-            error("Google sign-in was canceled.")
+            error(appContext.getString(R.string.session_google_canceled))
         } catch (exception: GetCredentialException) {
             throw exception
         }
@@ -354,10 +354,10 @@ class SessionRepository @Inject constructor(
         ) {
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
             return requireNotNull(googleIdTokenCredential.idToken) {
-                "Google sign-in did not return an ID token."
+                appContext.getString(R.string.session_google_missing_token)
             }
         }
 
-        error("Google sign-in returned an unsupported credential.")
+        error(appContext.getString(R.string.session_google_unsupported_credential))
     }
 }

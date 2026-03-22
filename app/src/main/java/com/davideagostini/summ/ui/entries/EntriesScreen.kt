@@ -45,6 +45,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.domain.model.HomeState
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.entries.components.BalanceCard
@@ -89,6 +90,7 @@ internal fun EntriesContent(
 ) {
     var allowSheetHide by remember { mutableStateOf(false) }
     var showFullScreenEdit by remember { mutableStateOf(uiState.sheetMode == EntrySheetMode.Edit) }
+    var showMonthPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
@@ -158,7 +160,7 @@ internal fun EntriesContent(
             ) {
                 item {
                     Text(
-                        text = "Activity",
+                        text = stringResource(R.string.entries_action_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -167,11 +169,10 @@ internal fun EntriesContent(
 
                 item {
                     EntriesToolbar(
-                        monthOptions = monthOptions,
                         selectedMonth = selectedMonth,
                         searchVisible = uiState.searchVisible,
                         searchQuery = uiState.searchQuery,
-                        onSelectMonth = { onEvent(EntriesEvent.SelectMonth(it)) },
+                        onOpenMonthPicker = { showMonthPicker = true },
                         onToggleSearch = { onEvent(EntriesEvent.ToggleSearch) },
                         onSearchQueryChange = { onEvent(EntriesEvent.UpdateSearchQuery(it)) },
                     )
@@ -200,9 +201,9 @@ internal fun EntriesContent(
                     item {
                         EmptyState(
                             message = if (homeState.entries.isEmpty()) {
-                                "No entries yet.\nTap Add Entry to get started."
+                                stringResource(R.string.entries_empty_message)
                             } else {
-                                "No entries match the current month, filter, or search."
+                                stringResource(R.string.entries_empty_filtered_message)
                             }
                         )
                     }
@@ -261,6 +262,15 @@ internal fun EntriesContent(
                 )
             }
         }
+
+        MonthPickerOverlay(
+            visible = showMonthPicker,
+            selectedOption = selectedMonth,
+            options = monthOptions,
+            optionLabel = ::formatMonthLabel,
+            onSelect = { onEvent(EntriesEvent.SelectMonth(it)) },
+            onDismiss = { showMonthPicker = false },
+        )
     }
 
     if (uiState.showDeleteDialog) {

@@ -3,8 +3,10 @@ package com.davideagostini.summ.ui.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,6 +24,8 @@ data class SessionUiState(
 
 @HiltViewModel
 class SessionViewModel @Inject constructor(
+    @param:ApplicationContext
+    private val appContext: Context,
     private val sessionRepository: SessionRepository,
 ) : ViewModel() {
 
@@ -73,7 +77,7 @@ class SessionViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isSubmitting = false,
-                        errorMessage = throwable.message ?: "Something went wrong.",
+                        errorMessage = throwable.message ?: appContext.getString(R.string.session_generic_error),
                     )
                 }
             }

@@ -60,6 +60,16 @@
 
     <string name="quick_entry_signed_out_message">Sign in to add a quick entry.</string>
     <string name="quick_entry_needs_household_message">Create or join a household before adding entries.</string>
+    <string name="entry_step_type_title">What type of entry?</string>
+    <string name="entry_success_title">Entry added!</string>
+    <string name="entry_success_message">Your transaction has been saved.</string>
+    <string name="entries_balance_spent_in">Spent in %1$s</string>
+    <string name="entries_balance_income">Income %1$s</string>
+    <string name="entries_balance_positive">In the green %1$s</string>
+    <string name="entries_balance_negative">Over budget %1$s</string>
+    <string name="entries_filter_all">All</string>
+    <string name="entries_filter_expenses">Expenses</string>
+    <string name="entries_filter_income">Income</string>
 
     <string name="entry_step_date_title">When did it happen?</string>
     <string name="entry_step_amount_title">How much?</string>
@@ -101,14 +111,27 @@
     <string name="asset_type_asset">Asset</string>
     <string name="asset_type_liability">Liability</string>
     <string name="asset_done_message">Asset updated successfully.</string>
+    <string name="asset_validation_name_required">Name is required</string>
+    <string name="asset_validation_value_required">Value is required</string>
 
     <string name="entries_delete_title">Delete \"%1$s\"?</string>
     <string name="entries_delete_message">This will permanently delete the entry and update your balance.</string>
-    <string name="entries_unusual_spending_title">UNUSUAL SPENDING</string>
-    <string name="entries_unusual_spending_subtitle">Compared with your previous 3-month average.</string>
+    <string name="entries_unusual_spending_title">Unusual spending</string>
+    <string name="entries_unusual_spending_subtitle">Compared with recent months.</string>
+    <string name="entries_unusual_spending_message">%1$s is %2$d%% above (%3$s vs %4$s).</string>
     <string name="entries_search_placeholder">Search description or category</string>
     <string name="entries_edit_title">Edit Entry</string>
     <string name="entries_done_message">Entry updated successfully.</string>
+    <string name="entries_empty_message">No entries yet.\nTap Add Entry to get started.</string>
+    <string name="entries_empty_filtered_message">No entries match the current month, filter, or search.</string>
+    <string name="entries_action_title">Activity</string>
+    <string name="entries_action_group_separator">·</string>
+    <string name="entries_today">Today</string>
+    <string name="entries_yesterday">Yesterday</string>
+    <string name="entries_validation_description_required">Description is required</string>
+    <string name="entries_validation_amount_valid">Enter a valid amount</string>
+    <string name="dashboard_nav_label">Dashboard</string>
+    <string name="add_entry">Add Entry</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_account">Account</string>
@@ -164,6 +187,7 @@
     <string name="recurring_validation_description">Description is required</string>
     <string name="recurring_validation_amount">Amount is required</string>
     <string name="recurring_validation_day">Day must be between 1 and 31</string>
+    <string name="recurring_day_chip">%1$s · day %2$d</string>
 
     <string name="month_close_closed">Closed</string>
     <string name="month_close_draft">Draft</string>
@@ -181,4 +205,51 @@
     <string name="month_close_all_recurring_applied">All recurring entries are already applied.</string>
     <string name="month_close_action_close">Close month</string>
     <string name="month_close_action_reopen">Reopen month</string>
+    <string name="entries">Entries</string>
+    <string name="dashboard_title">Overview</string>
+    <string name="dashboard_assets_label">Assets</string>
+    <string name="dashboard_current_value">Current value</string>
+    <string name="dashboard_liabilities_label">Liabilities</string>
+    <string name="dashboard_outstanding">Outstanding</string>
+    <string name="dashboard_cash_flow_label">Cash flow</string>
+    <string name="dashboard_cash_flow_note">Income - expenses</string>
+    <string name="dashboard_change_vs_previous_month">%1$s vs previous month</string>
+    <string name="dashboard_savings_rate_label">Savings rate</string>
+    <string name="dashboard_savings_rate_note">Saved from income</string>
+    <string name="dashboard_change_vs_3m_avg">%1$s vs 3M avg</string>
+    <string name="dashboard_runway_label">Runway</string>
+    <string name="dashboard_monthly_expenses_label">Monthly expenses</string>
+    <string name="dashboard_no_previous_month">No previous month to compare</string>
+    <string name="dashboard_no_history_yet">No history yet</string>
+    <string name="category_validation_name_required">Name is required</string>
+    <string name="quick_entry_validation_description">Description is required</string>
+    <string name="quick_entry_validation_amount_required">Amount is required</string>
+    <string name="quick_entry_validation_amount_positive">Enter a valid positive amount</string>
+    <string name="members_invite_email_required">Invite email is required</string>
+    <string name="session_configuration_error">Firebase failed to initialize on this device.</string>
+    <string name="session_auth_unavailable">Firebase Auth is not available.</string>
+    <string name="session_sign_in_missing_user">Sign-in completed without a Firebase user.</string>
+    <string name="session_sign_in_required">You must be signed in first.</string>
+    <string name="session_firestore_unavailable">Firestore is not available.</string>
+    <string name="session_household_name_required">Enter a household name.</string>
+    <string name="session_default_member_name">Member</string>
+    <string name="session_household_id_required">Enter a household ID.</string>
+    <string name="session_household_not_found">Household not found.</string>
+    <string name="session_household_required">Create or join a household first.</string>
+    <string name="session_load_error">Could not load session.</string>
+    <string name="session_household_load_error">Could not load household.</string>
+    <string name="session_google_not_configured">Google sign-in is not configured on this build.</string>
+    <string name="session_google_canceled">Google sign-in was canceled.</string>
+    <string name="session_google_missing_token">Google sign-in did not return an ID token.</string>
+    <string name="session_google_unsupported_credential">Google sign-in returned an unsupported credential.</string>
+    <string name="session_generic_error">Something went wrong.</string>
+    <string name="default_category_food">Food</string>
+    <string name="default_category_transport">Transport</string>
+    <string name="default_category_home">Home</string>
+    <string name="default_category_health">Health</string>
+    <string name="default_category_leisure">Leisure</string>
+    <string name="default_category_work">Work</string>
+    <string name="default_category_other">Other</string>
+    <string name="entry_step_pick_category">Pick a category</string>
+    <string name="entry_step_select_category">Please select a category</string>
 </resources>

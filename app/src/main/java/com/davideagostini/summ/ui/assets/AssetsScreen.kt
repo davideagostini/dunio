@@ -39,6 +39,7 @@ import com.davideagostini.summ.ui.assets.components.AssetsSummaryCard
 import com.davideagostini.summ.ui.assets.components.AssetsToolbar
 import com.davideagostini.summ.ui.assets.components.EmptyAssetsState
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.theme.AppButtonShape
@@ -75,6 +76,7 @@ private fun AssetsContent(
     onEvent: (AssetsEvent) -> Unit,
 ) {
     var allowSheetHide by remember { mutableStateOf(false) }
+    var showMonthPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
@@ -119,7 +121,7 @@ private fun AssetsContent(
         ) {
             item {
                 Text(
-                    text = "Assets",
+                    text = stringResource(R.string.dashboard_assets_label),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -128,11 +130,10 @@ private fun AssetsContent(
 
             item {
                 AssetsToolbar(
-                    monthOptions = monthOptions,
                     selectedMonth = selectedMonth,
                     searchVisible = uiState.searchVisible,
                     searchQuery = uiState.searchQuery,
-                    onSelectMonth = { onEvent(AssetsEvent.SelectMonth(it)) },
+                    onOpenMonthPicker = { showMonthPicker = true },
                     onToggleSearch = { onEvent(AssetsEvent.ToggleSearch) },
                     onSearchQueryChange = { onEvent(AssetsEvent.UpdateSearchQuery(it)) },
                 )
@@ -171,6 +172,15 @@ private fun AssetsContent(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 94.dp),
+        )
+
+        MonthPickerOverlay(
+            visible = showMonthPicker,
+            selectedOption = selectedMonth,
+            options = monthOptions,
+            optionLabel = ::formatMonthLabel,
+            onSelect = { onEvent(AssetsEvent.SelectMonth(it)) },
+            onDismiss = { showMonthPicker = false },
         )
     }
 

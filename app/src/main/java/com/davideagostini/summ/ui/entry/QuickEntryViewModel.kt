@@ -1,13 +1,16 @@
 package com.davideagostini.summ.ui.entry
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.EntryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +39,7 @@ data class EntryUiState(
 
 @HiltViewModel
 class QuickEntryViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
@@ -77,7 +81,7 @@ class QuickEntryViewModel @Inject constructor(
             1 -> _uiState.update { it.copy(step = 2) }
             2 -> {
                 if (state.description.isBlank()) {
-                    _uiState.update { it.copy(descriptionError = "Description is required") }
+                    _uiState.update { it.copy(descriptionError = appContext.getString(R.string.quick_entry_validation_description)) }
                 } else {
                     _uiState.update { it.copy(step = 3, descriptionError = null) }
                 }
@@ -85,8 +89,8 @@ class QuickEntryViewModel @Inject constructor(
             3 -> {
                 val parsed = state.price.toDoubleOrNull()
                 val error = when {
-                    state.price.isBlank()             -> "Amount is required"
-                    parsed == null || parsed <= 0     -> "Enter a valid positive amount"
+                    state.price.isBlank()             -> appContext.getString(R.string.quick_entry_validation_amount_required)
+                    parsed == null || parsed <= 0     -> appContext.getString(R.string.quick_entry_validation_amount_positive)
                     else                              -> null
                 }
                 if (error != null) {

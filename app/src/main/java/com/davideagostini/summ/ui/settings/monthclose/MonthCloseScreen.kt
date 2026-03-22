@@ -2,6 +2,7 @@ package com.davideagostini.summ.ui.settings.monthclose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthPickerField
+import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -70,51 +75,55 @@ private fun MonthCloseContent(
     onSelectMonth: (String) -> Unit,
     onSetStatus: (String) -> Unit,
 ) {
-    Column(
+    var showMonthPicker by remember { mutableStateOf(false) }
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.settings_month_close_title), fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_desc_back))
-                }
-            },
-            colors = SummColors.topBarColors,
-        )
-
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .navigationBarsPadding(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    MonthPickerField(
-                        label = formatMonthOption(uiState.month),
-                        options = uiState.monthOptions,
-                        optionLabel = ::formatMonthOption,
-                        onSelect = onSelectMonth,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Surface(
-                        shape = RoundedCornerShape(999.dp),
-                        color = if (uiState.status == "closed") IncomeGreen.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceContainerLowest,
-                    ) {
-                        Text(
-                            text = if (uiState.status == "closed") stringResource(R.string.month_close_closed) else stringResource(R.string.month_close_draft),
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = if (uiState.status == "closed") IncomeGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+            TopAppBar(
+                title = { Text(stringResource(R.string.settings_month_close_title), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_desc_back))
+                    }
+                },
+                colors = SummColors.topBarColors,
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        MonthPickerField(
+                            label = formatMonthOption(uiState.month),
+                            onClick = { showMonthPicker = true },
+                            modifier = Modifier.weight(1f),
                         )
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = if (uiState.status == "closed") IncomeGreen.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceContainerLowest,
+                        ) {
+                            Text(
+                                text = if (uiState.status == "closed") stringResource(R.string.month_close_closed) else stringResource(R.string.month_close_draft),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = if (uiState.status == "closed") IncomeGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
-            }
 
             item {
                 Card(
@@ -210,7 +219,17 @@ private fun MonthCloseContent(
                     }
                 }
             }
+            }
         }
+
+        MonthPickerOverlay(
+            visible = showMonthPicker,
+            selectedOption = uiState.month,
+            options = uiState.monthOptions,
+            optionLabel = ::formatMonthOption,
+            onSelect = onSelectMonth,
+            onDismiss = { showMonthPicker = false },
+        )
     }
 }
 

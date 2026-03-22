@@ -28,11 +28,10 @@ import com.davideagostini.summ.ui.entries.formatMonthLabel
 
 @Composable
 internal fun EntriesToolbar(
-    monthOptions: List<String>,
     selectedMonth: String,
     searchVisible: Boolean,
     searchQuery: String,
-    onSelectMonth: (String) -> Unit,
+    onOpenMonthPicker: () -> Unit,
     onToggleSearch: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
 ) {
@@ -43,9 +42,7 @@ internal fun EntriesToolbar(
         ) {
             MonthPickerField(
                 label = formatMonthLabel(selectedMonth),
-                options = monthOptions,
-                optionLabel = ::formatMonthLabel,
-                onSelect = onSelectMonth,
+                onClick = onOpenMonthPicker,
                 modifier = Modifier.weight(1f),
             )
 

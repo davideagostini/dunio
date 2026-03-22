@@ -27,11 +27,10 @@ import com.davideagostini.summ.ui.components.MonthPickerField
 
 @Composable
 fun AssetsToolbar(
-    monthOptions: List<String>,
     selectedMonth: String,
     searchVisible: Boolean,
     searchQuery: String,
-    onSelectMonth: (String) -> Unit,
+    onOpenMonthPicker: () -> Unit,
     onToggleSearch: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
 ) {
@@ -42,9 +41,7 @@ fun AssetsToolbar(
         ) {
             MonthPickerField(
                 label = formatMonthLabel(selectedMonth),
-                options = monthOptions,
-                optionLabel = ::formatMonthLabel,
-                onSelect = onSelectMonth,
+                onClick = onOpenMonthPicker,
                 modifier = Modifier.weight(1f),
             )
 

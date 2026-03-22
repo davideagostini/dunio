@@ -218,7 +218,7 @@ private fun ActionContent(
                 )
             }
 
-            Text("·", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.entries_action_group_separator), color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             Text(
                 text  = entry.category,
@@ -226,7 +226,7 @@ private fun ActionContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Text("·", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.entries_action_group_separator), color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             Text(
                 text  = dateFormat.format(Date(entry.date)),
@@ -294,7 +294,10 @@ private fun EntryEditForm(
                     modifier              = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    listOf("income" to "💰  Income", "expense" to "💸  Expense").forEach { (value, label) ->
+                    listOf(
+                        "income" to stringResource(R.string.entry_type_income),
+                        "expense" to stringResource(R.string.entry_type_expense),
+                    ).forEach { (value, label) ->
                         val selected = uiState.editType == value
                         val color    = if (value == "income") IncomeGreen else ExpenseRed
                         OutlinedButton(

@@ -21,6 +21,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.domain.model.EntryDisplayItem
 import com.davideagostini.summ.ui.entries.EntryDayGroup
 import com.davideagostini.summ.ui.entries.UnusualSpendingInsight
+import com.davideagostini.summ.ui.entries.formatDayLabel
 import com.davideagostini.summ.ui.format.formatEuro
 import java.util.Locale
 
@@ -31,48 +32,54 @@ internal fun UnusualSpendingCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+            .padding(horizontal = 20.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = stringResource(R.string.entries_unusual_spending_title),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Medium,
                 )
                 Text(
                     text = stringResource(R.string.entries_unusual_spending_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 )
             }
 
             insights.forEach { insight ->
                 Surface(
-                    shape = RoundedCornerShape(22.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
                     ) {
                         Text(
                             text = insight.category,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
                         )
                         Text(
-                            text = insight.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            text = stringResource(
+                                R.string.entries_unusual_spending_message,
+                                insight.category,
+                                insight.percentChange,
+                                formatEuro(insight.currentAmount),
+                                formatEuro(insight.averageAmount),
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                         )
                     }
                 }
@@ -87,6 +94,11 @@ internal fun DayGroupSection(
     onEntryClick: (EntryDisplayItem) -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+        val dayLabel = formatDayLabel(
+            date = group.key,
+            todayLabel = stringResource(R.string.entries_today),
+            yesterdayLabel = stringResource(R.string.entries_yesterday),
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -94,7 +106,7 @@ internal fun DayGroupSection(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = group.label.uppercase(Locale.getDefault()),
+                text = dayLabel.uppercase(Locale.getDefault()),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 fontWeight = FontWeight.Medium,

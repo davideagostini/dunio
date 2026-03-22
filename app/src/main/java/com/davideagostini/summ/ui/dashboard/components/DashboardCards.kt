@@ -1,20 +1,23 @@
 package com.davideagostini.summ.ui.dashboard.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowOutward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.dashboard.ChartPoint
 import com.davideagostini.summ.ui.dashboard.DashboardRange
 import com.davideagostini.summ.ui.dashboard.formatMonthOption
@@ -80,15 +85,26 @@ fun NetWorthCard(
             )
             Spacer(Modifier.height(6.dp))
             if (monthlyChangePercent != null) {
-                Text(
-                    text = "${if (monthlyChangePercent >= 0) "↑" else "↓"} ${formatPercent(abs(monthlyChangePercent))} vs previous month",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (monthlyChangePercent >= 0) IncomeGreen else ExpenseRed,
-                )
+                val changeColor = if (monthlyChangePercent >= 0) IncomeGreen else ExpenseRed
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        imageVector = if (monthlyChangePercent >= 0) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
+                        contentDescription = null,
+                        tint = changeColor,
+                    )
+                    Text(
+                        text = stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(monthlyChangePercent))),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = changeColor,
+                    )
+                }
             } else {
                 Text(
-                    text = "No previous month to compare",
+                    text = stringResource(R.string.dashboard_no_previous_month),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -116,6 +132,7 @@ fun MetricCard(
     note: String? = null,
     trailingValue: String? = null,
     trendLabel: String? = null,
+    trendPositive: Boolean? = null,
     valueColor: Color = MaterialTheme.colorScheme.onSurface,
     trendColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
@@ -159,12 +176,24 @@ fun MetricCard(
             }
             if (!trendLabel.isNullOrBlank()) {
                 Spacer(Modifier.height(10.dp))
-                Text(
-                    text = trendLabel,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = trendColor,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                ) {
+                    if (trendPositive != null) {
+                        Icon(
+                            imageVector = if (trendPositive) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
+                            contentDescription = null,
+                            tint = trendColor,
+                        )
+                    }
+                    Text(
+                        text = trendLabel,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = trendColor,
+                    )
+                }
             }
         }
     }
@@ -181,7 +210,7 @@ private fun NetWorthChart(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "No history yet",
+                text = stringResource(R.string.dashboard_no_history_yet),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -263,29 +292,19 @@ private fun DashboardRangeGroup(
     selectedRange: DashboardRange,
     onSelectRange: (DashboardRange) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(999.dp),
-            )
-            .padding(4.dp),
-    ) {
+    SingleChoiceSegmentedButtonRow {
         listOf(
             DashboardRange.ThreeMonths to "3M",
             DashboardRange.SixMonths to "6M",
             DashboardRange.OneYear to "1Y",
-        ).forEach { (range, label) ->
-            val selected = range == selectedRange
-            Button(
-                onClick = { onSelectRange(range) },
-                shape = RoundedCornerShape(999.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selected) MaterialTheme.colorScheme.surfaceContainerLowest else Color.Transparent,
-                    contentColor = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+        ).forEachIndexed { index, (range, label) ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = 3,
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = if (selected) 2.dp else 0.dp),
-                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+                onClick = { onSelectRange(range) },
+                selected = range == selectedRange,
             ) {
                 Text(text = label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             }

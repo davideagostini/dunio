@@ -1,11 +1,14 @@
 package com.davideagostini.summ.ui.assets
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.data.repository.AssetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AssetsViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repository: AssetRepository,
 ) : ViewModel() {
     private val historyLoaded = MutableStateFlow(false)
@@ -101,7 +105,7 @@ class AssetsViewModel @Inject constructor(
         val state = _uiState.value
         val value = validateValue(state) ?: return
         if (state.editName.isBlank()) {
-            _uiState.update { it.copy(nameError = "Name is required") }
+            _uiState.update { it.copy(nameError = appContext.getString(R.string.asset_validation_name_required)) }
             return
         }
         viewModelScope.launch {
@@ -125,7 +129,7 @@ class AssetsViewModel @Inject constructor(
         val current = state.selectedAsset ?: return
         val value = validateValue(state) ?: return
         if (state.editName.isBlank()) {
-            _uiState.update { it.copy(nameError = "Name is required") }
+            _uiState.update { it.copy(nameError = appContext.getString(R.string.asset_validation_name_required)) }
             return
         }
         viewModelScope.launch {
@@ -167,7 +171,7 @@ class AssetsViewModel @Inject constructor(
     private fun validateValue(state: AssetsUiState): Double? {
         val value = state.editValue.replace(',', '.').toDoubleOrNull()
         if (value == null) {
-            _uiState.update { it.copy(valueError = "Value is required") }
+            _uiState.update { it.copy(valueError = appContext.getString(R.string.asset_validation_value_required)) }
             return null
         }
         return value

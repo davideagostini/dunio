@@ -16,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.IncomeGreen
 
 @Composable
@@ -47,13 +49,13 @@ internal fun StepSuccess() {
         }
 
         Text(
-            text       = "Entry added!",
+            text       = stringResource(R.string.entry_success_title),
             style      = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
 
         Text(
-            text      = "Your transaction has been saved.",
+            text      = stringResource(R.string.entry_success_message),
             style     = MaterialTheme.typography.bodyMedium,
             color     = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

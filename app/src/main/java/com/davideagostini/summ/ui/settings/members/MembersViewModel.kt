@@ -1,11 +1,14 @@
 package com.davideagostini.summ.ui.settings.members
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Invite
 import com.davideagostini.summ.data.entity.Member
 import com.davideagostini.summ.data.repository.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MembersViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repository: MemberRepository,
 ) : ViewModel() {
     private val membersLoaded = MutableStateFlow(false)
@@ -50,7 +54,7 @@ class MembersViewModel @Inject constructor(
     fun saveInvite() {
         val email = _uiState.value.inviteEmail.trim()
         if (email.isBlank()) {
-            _uiState.update { it.copy(emailError = "Invite email is required") }
+            _uiState.update { it.copy(emailError = appContext.getString(R.string.members_invite_email_required)) }
             return
         }
         viewModelScope.launch {

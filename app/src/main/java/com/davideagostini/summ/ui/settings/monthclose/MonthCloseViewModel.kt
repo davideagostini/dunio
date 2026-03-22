@@ -1,7 +1,9 @@
 package com.davideagostini.summ.ui.settings.monthclose
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.entity.RecurringTransaction
@@ -10,6 +12,7 @@ import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MonthCloseViewModel @Inject constructor(
+    @param:ApplicationContext
+    private val appContext: Context,
     assetRepository: AssetRepository,
     entryRepository: EntryRepository,
     recurringRepository: RecurringTransactionRepository,
@@ -75,7 +80,9 @@ class MonthCloseViewModel @Inject constructor(
             assetSnapshotCount = monthAssets.size,
             transactionCount = monthTransactions.size,
             recurringMissingCount = missingRecurring.size,
-            recurringMissingLabels = missingRecurring.map { "${it.description} · day ${it.dayOfMonth}" },
+            recurringMissingLabels = missingRecurring.map {
+                appContext.getString(R.string.recurring_day_chip, it.description, it.dayOfMonth)
+            },
             canClose = monthAssets.isNotEmpty() && missingRecurring.isEmpty(),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MonthCloseUiState())

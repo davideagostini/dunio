@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,6 +51,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.session.SessionState
 import com.davideagostini.summ.ui.assets.AssetsScreen
 import com.davideagostini.summ.ui.auth.AuthGateScreen
@@ -235,31 +237,31 @@ private fun SummBottomBar(
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 NavTab(
-                    label = "Dashboard",
+                    label = stringResource(R.string.dashboard_nav_label),
                     icon = if (currentRoute == "dashboard") Icons.Filled.BarChart else Icons.Outlined.BarChart,
                     selected = currentRoute == "dashboard",
                     onClick = onNavigateDashboard,
                 )
                 NavTab(
-                    label = "Entries",
+                    label = stringResource(R.string.entries),
                     icon = if (currentRoute == "entries") Icons.Filled.Receipt else Icons.Outlined.Receipt,
                     selected = currentRoute == "entries",
                     onClick = onNavigateEntries,
                 )
                 NavTab(
-                    label = "Add Entry",
+                    label = stringResource(R.string.add_entry),
                     icon = Icons.Outlined.Add,
                     selected = false,
                     onClick = onAddEntry,
                 )
                 NavTab(
-                    label = "Assets",
+                    label = stringResource(R.string.dashboard_assets_label),
                     icon = if (currentRoute == "assets") Icons.Filled.Wallet else Icons.Outlined.Wallet,
                     selected = currentRoute == "assets",
                     onClick = onNavigateAssets,
                 )
                 NavTab(
-                    label = "Settings",
+                    label = stringResource(R.string.settings_title),
                     icon = if (currentRoute == "settings") Icons.Filled.Settings else Icons.Outlined.Settings,
                     selected = currentRoute == "settings",
                     onClick = onNavigateSettings,

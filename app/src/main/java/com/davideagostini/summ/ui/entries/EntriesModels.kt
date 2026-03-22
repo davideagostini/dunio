@@ -12,7 +12,6 @@ import java.util.Locale
 
 internal data class EntryDayGroup(
     val key: LocalDate,
-    val label: String,
     val expenseTotal: Double,
     val entries: List<EntryDisplayItem>,
 )
@@ -22,7 +21,6 @@ internal data class UnusualSpendingInsight(
     val currentAmount: Double,
     val averageAmount: Double,
     val percentChange: Int,
-    val message: String,
 )
 
 internal fun matchesFilter(entry: EntryDisplayItem, filterType: EntriesFilterType): Boolean =
@@ -46,7 +44,6 @@ internal fun buildDayGroups(entries: List<EntryDisplayItem>): List<EntryDayGroup
         .map { (date, dayEntries) ->
             EntryDayGroup(
                 key = date,
-                label = formatDayLabel(date),
                 expenseTotal = dayEntries.sumOf { entry -> if (entry.type == "expense") entry.price else 0.0 },
                 entries = dayEntries.sortedByDescending { it.date },
             )
@@ -93,7 +90,6 @@ internal fun buildUnusualSpendingInsights(
                 currentAmount = currentAmount,
                 averageAmount = averageAmount,
                 percentChange = percentChange.toInt().coerceAtLeast(0),
-                message = "$category is ${percentChange.toInt()}% above your 3-month average (${formatEuro(currentAmount)} vs ${formatEuro(averageAmount)}).",
             )
         }
         .sortedByDescending { it.percentChange }
@@ -121,11 +117,15 @@ internal fun formatMonthLabel(monthKey: String): String {
     return "${month.month.getDisplayName(TextStyle.SHORT, locale).replaceFirstChar { it.titlecase(locale) }} ${month.year}"
 }
 
-internal fun formatDayLabel(date: LocalDate): String {
+internal fun formatDayLabel(
+    date: LocalDate,
+    todayLabel: String,
+    yesterdayLabel: String,
+): String {
     val today = LocalDate.now()
     return when (date) {
-        today -> "Today"
-        today.minusDays(1) -> "Yesterday"
+        today -> todayLabel
+        today.minusDays(1) -> yesterdayLabel
         else -> date.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
     }
 }

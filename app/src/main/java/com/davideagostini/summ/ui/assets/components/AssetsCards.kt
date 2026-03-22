@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,23 +68,40 @@ fun AssetsSummaryCard(
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(Modifier.size(14.dp))
+            Spacer(Modifier.size(16.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                SummaryStatCard(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.assets_label),
-                    value = formatCurrency(totalAssets),
-                    accent = IncomeGreen,
-                )
-                SummaryStatCard(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.liabilities_label),
-                    value = formatCurrency(totalLiabilities),
-                    accent = ExpenseRed,
-                )
+                Column {
+                    Text(
+                        text = stringResource(R.string.assets_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.size(2.dp))
+                    Text(
+                        text = formatCurrency(totalAssets),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = IncomeGreen,
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = stringResource(R.string.liabilities_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.size(2.dp))
+                    Text(
+                        text = formatCurrency(totalLiabilities),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = ExpenseRed,
+                    )
+                }
             }
         }
     }
@@ -168,12 +184,14 @@ fun AssetCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Icon(
-                            imageVector = if (change >= 0) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
-                            contentDescription = null,
-                            tint = changeColor,
-                            modifier = Modifier.size(14.dp),
-                        )
+                        if (abs(change) >= 0.0005) {
+                            Icon(
+                                imageVector = if (change >= 0) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
+                                contentDescription = null,
+                                tint = changeColor,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        }
                         Text(
                             text = buildChangeLabel(change),
                             style = MaterialTheme.typography.labelMedium,
@@ -223,34 +241,5 @@ fun EmptyAssetsState(hasAssets: Boolean) {
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-    }
-}
-
-@Composable
-private fun SummaryStatCard(
-    modifier: Modifier = Modifier,
-    label: String,
-    value: String,
-    accent: Color,
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.size(6.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = accent,
-            )
-        }
     }
 }

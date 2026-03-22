@@ -8,6 +8,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 data class DashboardMetrics(
@@ -130,6 +131,13 @@ fun formatMonthOption(monthValue: String): String =
 
 fun formatShortMonth(monthValue: String): String =
     YearMonth.parse(monthValue).format(DateTimeFormatter.ofPattern("MMM", Locale.getDefault()))
+
+fun calculateRelativeChange(currentValue: Double, previousValue: Double?): Double? =
+    if (previousValue == null || previousValue == 0.0) {
+        null
+    } else {
+        (currentValue - previousValue) / abs(previousValue)
+    }
 
 fun formatPercent(value: Double): String = "${(value * 100).roundToInt()}%"
 

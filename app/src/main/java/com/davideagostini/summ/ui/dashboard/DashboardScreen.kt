@@ -1,6 +1,7 @@
 package com.davideagostini.summ.ui.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,16 +14,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.dashboard.components.DashboardToolbar
@@ -68,6 +74,7 @@ private fun DashboardContent(
     onSelectMonth: (String) -> Unit,
     onSelectRange: (DashboardRange) -> Unit,
 ) {
+    var showMonthPicker by remember { mutableStateOf(false) }
     val currentMonth = YearMonth.now().toString()
     val monthOptions = remember { buildRecentMonthOptions() }
     val defaultMonth = remember(monthOptions, currentMonth) {
@@ -113,6 +120,15 @@ private fun DashboardContent(
     val previousMonth = remember(selectedMonth) {
         YearMonth.parse(selectedMonth).minusMonths(1).toString()
     }
+    val previousAssetsForMonth = remember(assetHistory, previousMonth) {
+        buildAssetsSnapshotForMonth(assetHistory, previousMonth)
+    }
+    val previousMonthEntries = remember(entries, previousMonth) {
+        entries.filter { entry -> monthKey(entry.date) == previousMonth }
+    }
+    val previousMetrics = remember(previousAssetsForMonth, previousMonthEntries, entries, previousMonth) {
+        calculateDashboardMetrics(previousAssetsForMonth, previousMonthEntries, entries, previousMonth)
+    }
     val currentValue = metrics.netWorth
     val previousValue = remember(assetHistory, previousMonth) {
         calculateNetWorthForMonth(assetHistory, previousMonth)
@@ -124,104 +140,173 @@ private fun DashboardContent(
     } else {
         null
     }
+    val cashFlowChangePercent = remember(metrics.monthlyCashFlow, previousMonthEntries) {
+        calculateRelativeChange(
+            currentValue = metrics.monthlyCashFlow,
+            previousValue = previousMetrics.monthlyCashFlow.takeIf { previousMonthEntries.isNotEmpty() },
+        )
+    }
+    val monthlyExpenses = remember(monthEntries) {
+        monthEntries.filter { it.type == "expense" }.sumOf { it.price }
+    }
+    val previousMonthlyExpenses = remember(previousMonthEntries) {
+        previousMonthEntries.filter { it.type == "expense" }.sumOf { it.price }
+    }
+    val monthlyExpensesChangePercent = remember(monthlyExpenses, previousMonthEntries) {
+        calculateRelativeChange(
+            currentValue = monthlyExpenses,
+            previousValue = previousMonthlyExpenses.takeIf { previousMonthEntries.isNotEmpty() },
+        )
+    }
+    val runwayChangePercent = remember(metrics.financialRunway, previousMetrics.financialRunway, previousMonthEntries) {
+        calculateRelativeChange(
+            currentValue = metrics.financialRunway ?: return@remember null,
+            previousValue = previousMetrics.financialRunway?.takeIf { previousMonthEntries.isNotEmpty() },
+        )
+    }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding(),
-            contentPadding = PaddingValues(bottom = 92.dp),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+                .background(MaterialTheme.colorScheme.surfaceContainer),
         ) {
-            item {
-                Text(
-                    text = "Overview",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                )
-            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+                contentPadding = PaddingValues(bottom = 92.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+            ) {
+                item {
+                    Text(
+                        text = stringResource(R.string.dashboard_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    )
+                }
 
-            item {
-                DashboardToolbar(
-                    monthOptions = monthOptions,
-                    selectedMonth = selectedMonth,
-                    onSelectMonth = onSelectMonth,
-                )
-            }
+                item {
+                    DashboardToolbar(
+                        selectedMonth = selectedMonth,
+                        onOpenMonthPicker = { showMonthPicker = true },
+                    )
+                }
 
-            item {
-                NetWorthCard(
-                    month = selectedMonth,
-                    netWorth = metrics.netWorth,
-                    monthlyChangePercent = monthlyChangePercent,
-                    chartPoints = chartPoints,
-                    selectedRange = uiState.selectedRange,
-                    onSelectRange = onSelectRange,
-                )
-            }
+                item {
+                    NetWorthCard(
+                        month = selectedMonth,
+                        netWorth = metrics.netWorth,
+                        monthlyChangePercent = monthlyChangePercent,
+                        chartPoints = chartPoints,
+                        selectedRange = uiState.selectedRange,
+                        onSelectRange = onSelectRange,
+                    )
+                }
 
-            item {
-                MetricCard(
-                    label = "Assets",
-                    value = formatEuro(metrics.totalAssets),
-                    note = "Current value",
-                )
-            }
+                item {
+                    MetricCard(
+                        label = stringResource(R.string.dashboard_assets_label),
+                        value = formatEuro(metrics.totalAssets),
+                        note = stringResource(R.string.dashboard_current_value),
+                    )
+                }
 
-            item {
-                MetricCard(
-                    label = "Liabilities",
-                    value = formatEuro(metrics.totalLiabilities),
-                    note = "Outstanding",
-                )
-            }
+                item {
+                    MetricCard(
+                        label = stringResource(R.string.dashboard_liabilities_label),
+                        value = formatEuro(metrics.totalLiabilities),
+                        note = stringResource(R.string.dashboard_outstanding),
+                    )
+                }
 
-            item {
-                MetricCard(
-                    label = "Cash flow",
-                    value = formatEuro(metrics.monthlyCashFlow),
-                    note = "Income - expenses",
-                    valueColor = if (metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
-                )
-            }
+                item {
+                    MetricCard(
+                        label = stringResource(R.string.dashboard_cash_flow_label),
+                        value = formatEuro(metrics.monthlyCashFlow),
+                        note = stringResource(R.string.dashboard_cash_flow_note),
+                        trendLabel = cashFlowChangePercent?.let {
+                            stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
+                        },
+                        trendPositive = cashFlowChangePercent?.let { it >= 0 },
+                        trendColor = when {
+                            cashFlowChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                            cashFlowChangePercent > 0 -> IncomeGreen
+                            cashFlowChangePercent < 0 -> ExpenseRed
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        valueColor = if (metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
+                    )
+                }
 
-            item {
-                MetricCard(
-                    label = "Savings rate",
-                    value = metrics.savingsRate?.let { formatPercent(it) } ?: "N/A",
-                    note = "Saved from income",
-                    trendLabel = savingsRateDelta?.let {
-                        "${if (it >= 0) "↑" else "↓"} ${formatPercent(abs(it))} vs 3M avg"
-                    },
+                item {
+                    MetricCard(
+                        label = stringResource(R.string.dashboard_savings_rate_label),
+                        value = metrics.savingsRate?.let { formatPercent(it) } ?: "N/A",
+                        note = stringResource(R.string.dashboard_savings_rate_note),
+                        trendLabel = savingsRateDelta?.let {
+                            stringResource(R.string.dashboard_change_vs_3m_avg, formatPercent(abs(it)))
+                        },
+                        trendPositive = savingsRateDelta?.let { it >= 0 },
+                        trendColor = when {
+                            savingsRateDelta == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                            savingsRateDelta > 0 -> IncomeGreen
+                            savingsRateDelta < 0 -> ExpenseRed
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+
+                item {
+                    MetricCard(
+                        label = stringResource(R.string.dashboard_runway_label),
+                        value = metrics.financialRunway?.let { formatRunwayMonths(it) } ?: "N/A",
+                        trailingValue = metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
+                        trendLabel = runwayChangePercent?.let {
+                            stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
+                        },
+                        trendPositive = runwayChangePercent?.let { it >= 0 },
+                        trendColor = when {
+                            runwayChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                            runwayChangePercent > 0 -> IncomeGreen
+                            runwayChangePercent < 0 -> ExpenseRed
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+
+                item {
+                    MetricCard(
+                        label = stringResource(R.string.dashboard_monthly_expenses_label),
+                        value = formatEuro(monthlyExpenses),
+                        trendLabel = monthlyExpensesChangePercent?.let {
+                            stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
+                        },
+                    trendPositive = monthlyExpensesChangePercent?.let { it >= 0 },
                     trendColor = when {
-                        savingsRateDelta == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                        savingsRateDelta > 0 -> IncomeGreen
-                        savingsRateDelta < 0 -> ExpenseRed
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                )
-            }
-
-            item {
-                MetricCard(
-                    label = "Runway",
-                    value = metrics.financialRunway?.let { formatRunwayMonths(it) } ?: "N/A",
-                    trailingValue = metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
-                )
-            }
-
-            item {
-                MetricCard(
-                    label = "Monthly expenses",
-                    value = formatEuro(monthEntries.filter { it.type == "expense" }.sumOf { it.price }),
-                )
+                        monthlyExpensesChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                        monthlyExpensesChangePercent < 0 -> IncomeGreen
+                        monthlyExpensesChangePercent > 0 -> ExpenseRed
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
             }
         }
+
+        MonthPickerOverlay(
+            visible = showMonthPicker,
+            selectedOption = selectedMonth,
+            options = monthOptions,
+            optionLabel = ::formatMonthOption,
+            onSelect = onSelectMonth,
+            onDismiss = { showMonthPicker = false },
+        )
     }
 }

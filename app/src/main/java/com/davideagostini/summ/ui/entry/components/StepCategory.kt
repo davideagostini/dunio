@@ -19,9 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
@@ -33,7 +35,7 @@ internal fun StepCategory(
     onEvent: (EntryEvent) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        StepTitle("Pick a category")
+        StepTitle(stringResource(R.string.entry_step_pick_category))
         Spacer(Modifier.height(12.dp))
 
         LazyColumn(
@@ -54,7 +56,7 @@ internal fun StepCategory(
         if (uiState.selectedCategory == null) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text  = "Please select a category",
+                text  = stringResource(R.string.entry_step_select_category),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
             )

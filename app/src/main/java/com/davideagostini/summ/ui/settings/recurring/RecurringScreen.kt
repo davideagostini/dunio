@@ -107,7 +107,11 @@ private fun RecurringContent(
     onEvent: (RecurringEvent) -> Unit,
 ) {
     var allowHide by remember { mutableStateOf(false) }
-    var showFullScreenEdit by remember { mutableStateOf(uiState.sheetMode == RecurringSheetMode.Edit) }
+    var showFullScreenForm by remember {
+        mutableStateOf(
+            uiState.sheetMode == RecurringSheetMode.Add || uiState.sheetMode == RecurringSheetMode.Edit
+        )
+    }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
@@ -121,23 +125,23 @@ private fun RecurringContent(
     }
 
     LaunchedEffect(uiState.sheetMode) {
-        if (uiState.sheetMode == RecurringSheetMode.Edit) {
-            showFullScreenEdit = true
+        if (uiState.sheetMode == RecurringSheetMode.Add || uiState.sheetMode == RecurringSheetMode.Edit) {
+            showFullScreenForm = true
         } else if (uiState.sheetMode == RecurringSheetMode.Hidden) {
-            showFullScreenEdit = false
+            showFullScreenForm = false
         }
     }
 
-    val dismissFullscreenEdit: () -> Unit = {
-        showFullScreenEdit = false
+    val dismissFullscreenForm: () -> Unit = {
+        showFullScreenForm = false
         scope.launch {
             kotlinx.coroutines.delay(220)
             onEvent(RecurringEvent.DismissSheet)
         }
     }
 
-    BackHandler(enabled = showFullScreenEdit) {
-        dismissFullscreenEdit()
+    BackHandler(enabled = showFullScreenForm) {
+        dismissFullscreenForm()
     }
 
     Column(
@@ -261,7 +265,11 @@ private fun RecurringContent(
         }
     }
 
-    if (uiState.sheetMode != RecurringSheetMode.Hidden && uiState.sheetMode != RecurringSheetMode.Edit) {
+    if (
+        uiState.sheetMode != RecurringSheetMode.Hidden &&
+        uiState.sheetMode != RecurringSheetMode.Add &&
+        uiState.sheetMode != RecurringSheetMode.Edit
+    ) {
         ModalBottomSheet(
             onDismissRequest = {},
             sheetState = sheetState,
@@ -286,7 +294,7 @@ private fun RecurringContent(
     }
 
     AnimatedVisibility(
-        visible = showFullScreenEdit,
+        visible = showFullScreenForm,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         modifier = Modifier.fillMaxSize(),
@@ -300,7 +308,7 @@ private fun RecurringContent(
                 uiState = uiState,
                 categories = categories,
                 onEvent = onEvent,
-                onDismiss = dismissFullscreenEdit,
+                onDismiss = dismissFullscreenForm,
                 fullScreen = true,
             )
         }

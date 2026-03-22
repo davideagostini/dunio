@@ -280,9 +280,9 @@ private fun AssetSuccessContent() {
         ) {
             Text("✓", fontSize = 36.sp, color = IncomeGreen, fontWeight = FontWeight.Bold)
         }
-        Text(text = "Done!", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(text = stringResource(R.string.done_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(
-            text = "Asset updated successfully.",
+            text = stringResource(R.string.asset_done_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -1,10 +1,13 @@
 package com.davideagostini.summ.ui.categories
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repository: CategoryRepository,
 ) : ViewModel() {
     private val categoriesLoaded = MutableStateFlow(false)
@@ -62,7 +66,7 @@ class CategoriesViewModel @Inject constructor(
     private fun saveAdd() {
         val state = _uiState.value
         if (state.editName.isBlank()) {
-            _uiState.update { it.copy(nameError = "Name is required") }
+            _uiState.update { it.copy(nameError = appContext.getString(R.string.category_validation_name_required)) }
             return
         }
         viewModelScope.launch {
@@ -77,7 +81,7 @@ class CategoriesViewModel @Inject constructor(
         val state = _uiState.value
         val cat   = state.selectedCategory ?: return
         if (state.editName.isBlank()) {
-            _uiState.update { it.copy(nameError = "Name is required") }
+            _uiState.update { it.copy(nameError = appContext.getString(R.string.category_validation_name_required)) }
             return
         }
         viewModelScope.launch {
