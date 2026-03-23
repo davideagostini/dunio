@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="widget_lab_title">Widget Lab</string>
-    <string name="widget_lab_spending_subtitle">Preview the real small, medium, and large spending variants.</string>
-    <string name="widget_lab_quick_entry_subtitle">Preview the real quick entry widget size.</string>
-</resources>
-

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_preview_outer">#0F1413</color>
+    <color name="widget_preview_card_fill">#18201E</color>
+    <color name="widget_preview_icon_fill">#1E2725</color>
+    <color name="widget_preview_text_primary">#E6EDEB</color>
+    <color name="widget_preview_text_secondary">#AAB7B3</color>
+    <color name="widget_preview_delta_positive">#7AD7C7</color>
+</resources>

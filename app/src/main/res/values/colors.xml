@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="widget_preview_outer">#F4FBFA</color>
+    <color name="widget_preview_card_fill">#F0F7F5</color>
+    <color name="widget_preview_icon_fill">#FFFFFF</color>
+    <color name="widget_preview_text_primary">#111418</color>
+    <color name="widget_preview_text_secondary">#5F6368</color>
+    <color name="widget_preview_delta_positive">#006B5E</color>
 </resources>

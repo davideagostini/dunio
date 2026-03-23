@@ -117,11 +117,11 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                                 text = formatEuro(state.monthAmount),
                                 style = TextStyle(
                                     color = neutralTextColor,
-                                    fontSize = if (isSmall) 24.sp else 26.sp,
+                                    fontSize = if (isSmall) 26.sp else 28.sp,
                                     fontWeight = FontWeight.Bold,
                                 ),
                             )
-                            if (!isSmall && deltaText != null) {
+                            if (deltaText != null) {
                                 // The delta only appears once there is enough room to keep
                                 // the primary monthly amount visually dominant.
                                 Spacer(modifier = GlanceModifier.height(3.dp))
@@ -142,7 +142,7 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                                 // Secondary breakdown is reserved for the largest size.
                                 // This avoids the first-insert clipping issue seen on some
                                 // launchers when they initially report an optimistic height.
-                                Spacer(modifier = GlanceModifier.height(6.dp))
+                                Spacer(modifier = GlanceModifier.height(8.dp))
                                 Text(
                                     text = secondaryLine,
                                     style = TextStyle(

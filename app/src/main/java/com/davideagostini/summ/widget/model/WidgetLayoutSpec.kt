@@ -14,27 +14,25 @@ enum class SpendingWidgetVariant {
 }
 
 object WidgetLayoutSpec {
-    // Canonical spending widget sizes. These values drive Glance's responsive mode
-    // and are also reused by the preview gallery and Widget Lab screen.
+    // Canonical spending widget sizes aligned to the standard launcher buckets used
+    // by the project: 4x1, 4x2, and 4x3.
     val spendingSizes = setOf(
-        DpSize(180.dp, 96.dp),
-        DpSize(240.dp, 112.dp),
-        DpSize(240.dp, 152.dp),
+        DpSize(245.dp, 56.dp),
+        DpSize(245.dp, 115.dp),
+        DpSize(245.dp, 185.dp),
     )
 
-    // Canonical square size for the quick-entry widget.
-    val quickEntrySize = DpSize(96.dp, 96.dp)
+    // Quick access is designed around the standard 2x2 widget bucket.
+    val quickEntrySize = DpSize(109.dp, 115.dp)
 
     fun spendingVariant(width: Dp, height: Dp): SpendingWidgetVariant {
-        // The variant thresholds are intentionally conservative. In practice many launchers
-        // report slightly awkward sizes on first insertion, so we only promote to the large
-        // layout when there is clearly enough room for the secondary line.
-        val isSmall = height < 108.dp || width < 200.dp
-        val isLarge = height >= 150.dp && width >= 220.dp
         return when {
-            isSmall -> SpendingWidgetVariant.Small
-            isLarge -> SpendingWidgetVariant.Large
-            else -> SpendingWidgetVariant.Medium
+            // 4x3 bucket: enough room for the secondary breakdown row.
+            width >= 245.dp && height >= 185.dp -> SpendingWidgetVariant.Large
+            // 4x2 bucket: enough room for the primary amount plus delta.
+            width >= 245.dp && height >= 115.dp -> SpendingWidgetVariant.Medium
+            // Anything smaller falls back to the compact 4x1-style presentation.
+            else -> SpendingWidgetVariant.Small
         }
     }
 }

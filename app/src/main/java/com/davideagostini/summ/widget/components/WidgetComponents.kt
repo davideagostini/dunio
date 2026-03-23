@@ -5,8 +5,6 @@ import android.content.Intent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
@@ -81,12 +79,6 @@ fun SummWidgetScaffold(
                 ) {
                     // Small brand mark in the header so the widget still reads as Summ
                     // even when the launcher crops or scales the preview aggressively.
-                    Image(
-                        provider = ImageProvider(R.drawable.ic_launcher_foreground),
-                        contentDescription = null,
-                        modifier = GlanceModifier.width(28.dp).height(28.dp),
-                    )
-                    Spacer(modifier = GlanceModifier.width(6.dp))
                     Text(
                         text = title,
                         style = TextStyle(

@@ -2,7 +2,6 @@ package com.davideagostini.summ.widget
 
 import android.content.Context
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -16,17 +15,11 @@ import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
-import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import androidx.glance.text.FontWeight
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
 import com.davideagostini.summ.R
-import com.davideagostini.summ.ui.theme.onSurfaceDark
-import com.davideagostini.summ.ui.theme.onSurfaceLight
 import com.davideagostini.summ.ui.theme.surfaceContainerLowDark
 import com.davideagostini.summ.ui.theme.surfaceContainerLowestLight
 import com.davideagostini.summ.widget.components.quickEntryAction
@@ -54,7 +47,7 @@ class QuickAccessWidget : GlanceAppWidget() {
                         .cornerRadius(28.dp)
                         .background(ColorProvider(androidx.compose.ui.graphics.Color.White, surfaceContainerLowDark))
                         .clickable(quickEntryAction(context))
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = 6.dp, vertical = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -63,18 +56,7 @@ class QuickAccessWidget : GlanceAppWidget() {
                     Image(
                         provider = ImageProvider(R.drawable.ic_launcher_foreground),
                         contentDescription = context.getString(R.string.widget_quick_access_name),
-                        modifier = GlanceModifier.width(44.dp).height(44.dp),
-                    )
-                    Spacer(modifier = GlanceModifier.height(8.dp))
-                    // Short label clarifies the widget intent. Without it the square
-                    // would look too similar to a launcher shortcut.
-                    Text(
-                        text = context.getString(R.string.widget_quick_entry_label),
-                        style = TextStyle(
-                            color = ColorProvider(onSurfaceLight, onSurfaceDark),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                        ),
+                        modifier = GlanceModifier.width(60.dp).height(60.dp),
                     )
                 }
             }
