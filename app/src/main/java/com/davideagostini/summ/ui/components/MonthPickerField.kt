@@ -8,9 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -34,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -106,10 +103,11 @@ fun MonthPickerOverlay(
         ),
         modifier = modifier.fillMaxSize(),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceContainer),
+        // Keep the whole overlay on a themed surface so title text and icons inherit the dark-mode palette.
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
             Column(
                 modifier = Modifier
@@ -126,12 +124,14 @@ fun MonthPickerOverlay(
                         text = stringResource(R.string.month_picker_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = stringResource(R.string.content_desc_close),
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
@@ -145,6 +145,7 @@ fun MonthPickerOverlay(
                     }
                     val isSelected = option == selectedOption
 
+                    // The month options follow the app surface palette so they stay readable in dark mode.
                     Card(
                         onClick = {
                             onSelect(option)
@@ -155,7 +156,8 @@ fun MonthPickerOverlay(
                             .padding(verticalPadding),
                         shape = listItemShape(index, options.size),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                         ),
                         border = if (isSelected) {
                             BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)

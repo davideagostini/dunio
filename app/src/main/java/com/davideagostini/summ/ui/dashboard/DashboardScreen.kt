@@ -42,6 +42,7 @@ import kotlin.math.abs
 
 @Composable
 fun DashboardScreen(
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -62,6 +63,7 @@ fun DashboardScreen(
         uiState = uiState,
         onSelectMonth = viewModel::selectMonth,
         onSelectRange = viewModel::selectRange,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
     )
 }
 
@@ -73,6 +75,7 @@ private fun DashboardContent(
     uiState: DashboardUiState,
     onSelectMonth: (String) -> Unit,
     onSelectRange: (DashboardRange) -> Unit,
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
     val currentMonth = YearMonth.now().toString()
@@ -165,6 +168,11 @@ private fun DashboardContent(
         )
     }
 
+    // Keep the shared bottom bar hidden while the month picker overlay is open.
+    LaunchedEffect(showMonthPicker) {
+        onMonthPickerVisibilityChanged(showMonthPicker)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -188,6 +196,7 @@ private fun DashboardContent(
                         text = stringResource(R.string.dashboard_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     )
                 }

@@ -22,5 +22,6 @@ data class EntriesUiState(
     val editCategory: Category?       = null,
     val descriptionError: String?     = null,
     val priceError: String?           = null,
+    val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean     = false,
 )

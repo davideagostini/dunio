@@ -55,6 +55,7 @@ internal fun StepTitle(text: String) {
         text       = text,
         style      = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.Bold,
+        color      = MaterialTheme.colorScheme.onSurface,
     )
 }
 

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
+import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.EntryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +36,7 @@ data class EntryUiState(
     val selectedCategory: Category? = null,
     val descriptionError: String?   = null,
     val priceError: String?         = null,
+    val operationErrorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -63,14 +65,14 @@ class QuickEntryViewModel @Inject constructor(
 
     fun handleEvent(event: EntryEvent) {
         when (event) {
-            is EntryEvent.SelectType        -> _uiState.update { it.copy(type = event.type) }
-            is EntryEvent.UpdateDate        -> _uiState.update { it.copy(date = event.value) }
-            is EntryEvent.UpdateDescription -> _uiState.update { it.copy(description = event.value, descriptionError = null) }
-            is EntryEvent.UpdatePrice       -> _uiState.update { it.copy(price = event.value, priceError = null) }
-            is EntryEvent.SelectCategory    -> _uiState.update { it.copy(selectedCategory = event.category) }
+            is EntryEvent.SelectType        -> _uiState.update { it.copy(type = event.type, operationErrorMessage = null) }
+            is EntryEvent.UpdateDate        -> _uiState.update { it.copy(date = event.value, operationErrorMessage = null) }
+            is EntryEvent.UpdateDescription -> _uiState.update { it.copy(description = event.value, descriptionError = null, operationErrorMessage = null) }
+            is EntryEvent.UpdatePrice       -> _uiState.update { it.copy(price = event.value, priceError = null, operationErrorMessage = null) }
+            is EntryEvent.SelectCategory    -> _uiState.update { it.copy(selectedCategory = event.category, operationErrorMessage = null) }
             EntryEvent.Reset                -> _uiState.value = EntryUiState()
             EntryEvent.Next                 -> advanceStep()
-            EntryEvent.Back                 -> _uiState.update { it.copy(step = (it.step - 1).coerceAtLeast(0)) }
+            EntryEvent.Back                 -> _uiState.update { it.copy(step = (it.step - 1).coerceAtLeast(0), operationErrorMessage = null) }
             EntryEvent.Save                 -> save()
         }
     }
@@ -112,19 +114,25 @@ class QuickEntryViewModel @Inject constructor(
         val state = _uiState.value
         val parsedPrice = state.price.toDoubleOrNull() ?: return
         val category    = state.selectedCategory ?: return
+
+        // Quick entry runs as a fast-path form, but Firestore failures still need the same graceful handling.
         viewModelScope.launch {
-            entryRepository.insert(
-                Entry(
-                    type        = state.type,
-                    description = state.description.trim(),
-                    price       = parsedPrice,
-                    category    = category.name,
-                    date        = state.date,
+            try {
+                entryRepository.insert(
+                    Entry(
+                        type        = state.type,
+                        description = state.description.trim(),
+                        price       = parsedPrice,
+                        category    = category.name,
+                        date        = state.date,
+                    )
                 )
-            )
-            _uiState.update { it.copy(step = 6) }
-            delay(1_500L)
-            _navEvents.send(EntryNavEvent.Saved)
+                _uiState.update { it.copy(step = 6, operationErrorMessage = null) }
+                delay(1_500L)
+                _navEvents.send(EntryNavEvent.Saved)
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+            }
         }
     }
 }

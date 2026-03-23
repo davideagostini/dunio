@@ -35,6 +35,7 @@ import com.davideagostini.summ.R
 @Composable
 fun AssetsSplitButton(
     canCopyPreviousMonth: Boolean,
+    readOnly: Boolean,
     onAddAsset: () -> Unit,
     onCopyPreviousMonth: () -> Unit,
     modifier: Modifier = Modifier,
@@ -55,6 +56,7 @@ fun AssetsSplitButton(
         ) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.assets_add_asset)) },
+                enabled = !readOnly,
                 onClick = {
                     menuExpanded = false
                     onAddAsset()
@@ -62,7 +64,7 @@ fun AssetsSplitButton(
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.assets_copy_prev_month)) },
-                enabled = canCopyPreviousMonth,
+                enabled = canCopyPreviousMonth && !readOnly,
                 onClick = {
                     menuExpanded = false
                     onCopyPreviousMonth()
@@ -72,15 +74,15 @@ fun AssetsSplitButton(
 
         Surface(
             shape = RoundedCornerShape(18.dp),
-            color = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
+            color = if (readOnly) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.primary,
+            contentColor = if (readOnly) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
             shadowElevation = 6.dp,
             tonalElevation = 0.dp,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(
                     modifier = Modifier
-                        .clickable(onClick = onAddAsset)
+                        .clickable(enabled = !readOnly, onClick = onAddAsset)
                         .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

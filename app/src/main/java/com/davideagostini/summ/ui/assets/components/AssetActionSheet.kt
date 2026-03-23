@@ -1,6 +1,11 @@
 package com.davideagostini.summ.ui.assets.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,6 +44,8 @@ import com.davideagostini.summ.ui.assets.AssetSheetMode
 import com.davideagostini.summ.ui.assets.AssetsEvent
 import com.davideagostini.summ.ui.assets.AssetsUiState
 import com.davideagostini.summ.ui.assets.formatCurrency
+import com.davideagostini.summ.ui.auth.components.AuthErrorCard
+import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -47,6 +53,8 @@ import com.davideagostini.summ.ui.theme.IncomeGreen
 @Composable
 fun AssetActionSheet(
     uiState: AssetsUiState,
+    readOnly: Boolean,
+    readOnlyMessage: String,
     onEvent: (AssetsEvent) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -68,27 +76,31 @@ fun AssetActionSheet(
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }
-            AnimatedContent(targetState = uiState.sheetMode, label = "asset_sheet_mode") { mode ->
+
+            AnimatedContent(
+                targetState = uiState.sheetMode,
+                transitionSpec = {
+                    val forward = targetState.ordinal > initialState.ordinal
+                    if (forward) {
+                        (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
+                    } else {
+                        (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
+                    }
+                },
+                label = "asset_sheet_mode",
+            ) { mode ->
                 when (mode) {
-                    AssetSheetMode.Action -> AssetActionContent(uiState = uiState, onEvent = onEvent)
-                    AssetSheetMode.Add -> AssetFormContent(
-                        title = stringResource(R.string.asset_new_title),
-                        confirmLabel = stringResource(R.string.action_create),
+                    AssetSheetMode.Action -> AssetActionContent(
                         uiState = uiState,
+                        readOnly = readOnly,
+                        readOnlyMessage = readOnlyMessage,
                         onEvent = onEvent,
-                        onSave = { onEvent(AssetsEvent.SaveAdd) },
-                        onCancel = onDismiss,
                     )
-                    AssetSheetMode.Edit -> AssetFormContent(
-                        title = stringResource(R.string.asset_edit_title),
-                        confirmLabel = stringResource(R.string.action_save),
-                        uiState = uiState,
-                        onEvent = onEvent,
-                        onSave = { onEvent(AssetsEvent.SaveEdit) },
-                        onCancel = onDismiss,
-                    )
+                    // Add/Edit now live in a dedicated fullscreen editor composable.
                     AssetSheetMode.Success -> AssetSuccessContent()
-                    AssetSheetMode.Hidden -> Unit
+                    AssetSheetMode.Hidden,
+                    AssetSheetMode.Add,
+                    AssetSheetMode.Edit -> Unit
                 }
             }
         }
@@ -98,6 +110,8 @@ fun AssetActionSheet(
 @Composable
 private fun AssetActionContent(
     uiState: AssetsUiState,
+    readOnly: Boolean,
+    readOnlyMessage: String,
     onEvent: (AssetsEvent) -> Unit,
 ) {
     val asset = uiState.selectedAsset ?: return
@@ -105,6 +119,16 @@ private fun AssetActionContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        uiState.operationErrorMessage?.let { message ->
+            AuthErrorCard(message)
+            Spacer(Modifier.size(12.dp))
+        }
+
+        if (readOnly) {
+            MonthCloseReadOnlyBanner(readOnlyMessage)
+            Spacer(Modifier.size(12.dp))
+        }
+
         Box(
             modifier = Modifier
                 .size(72.dp)
@@ -115,7 +139,12 @@ private fun AssetActionContent(
         }
 
         Spacer(Modifier.size(12.dp))
-        Text(text = asset.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(
+            text = asset.name,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         Spacer(Modifier.size(6.dp))
         Text(
             text = formatCurrency(asset.value, asset.currency),
@@ -130,134 +159,25 @@ private fun AssetActionContent(
         ) {
             OutlinedButton(
                 onClick = { onEvent(AssetsEvent.RequestDelete) },
+                enabled = !readOnly,
                 modifier = Modifier.weight(1f),
                 shape = AppButtonShape,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ExpenseRed),
             ) {
                 Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(4.dp))
-                Text(stringResource(R.string.action_delete), color = ExpenseRed)
+                Text(stringResource(R.string.action_delete))
             }
 
             Button(
                 onClick = { onEvent(AssetsEvent.StartEdit) },
+                enabled = !readOnly,
                 modifier = Modifier.weight(1f),
                 shape = AppButtonShape,
             ) {
                 Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(4.dp))
                 Text(stringResource(R.string.action_edit))
-            }
-        }
-    }
-}
-
-@Composable
-private fun AssetFormContent(
-    title: String,
-    confirmLabel: String,
-    uiState: AssetsUiState,
-    onEvent: (AssetsEvent) -> Unit,
-    onSave: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    Column {
-        Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.size(16.dp))
-
-        AssetTypeButtonGroup(
-            selectedType = uiState.editType,
-            onSelectType = { onEvent(AssetsEvent.UpdateType(it)) },
-        )
-
-        Spacer(Modifier.size(12.dp))
-        OutlinedTextField(
-            value = uiState.editName,
-            onValueChange = { onEvent(AssetsEvent.UpdateName(it)) },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.asset_name_label)) },
-            singleLine = true,
-            isError = uiState.nameError != null,
-            supportingText = uiState.nameError?.let { msg -> { Text(msg) } },
-            shape = RoundedCornerShape(12.dp),
-        )
-        Spacer(Modifier.size(12.dp))
-        OutlinedTextField(
-            value = uiState.editCategory,
-            onValueChange = { onEvent(AssetsEvent.UpdateCategory(it)) },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.asset_category_label)) },
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp),
-        )
-        Spacer(Modifier.size(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = uiState.editValue,
-                onValueChange = { onEvent(AssetsEvent.UpdateValue(it)) },
-                modifier = Modifier.weight(1f),
-                label = { Text(stringResource(R.string.asset_value_label)) },
-                singleLine = true,
-                isError = uiState.valueError != null,
-                supportingText = uiState.valueError?.let { msg -> { Text(msg) } },
-                shape = RoundedCornerShape(12.dp),
-            )
-            OutlinedTextField(
-                value = uiState.editCurrency,
-                onValueChange = { onEvent(AssetsEvent.UpdateCurrency(it)) },
-                modifier = Modifier.weight(0.42f),
-                label = { Text(stringResource(R.string.asset_currency_label)) },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-            )
-        }
-
-        Spacer(Modifier.size(18.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OutlinedButton(
-                onClick = onCancel,
-                modifier = Modifier.weight(1f),
-                shape = AppButtonShape,
-            ) {
-                Text(stringResource(R.string.action_cancel))
-            }
-            Button(
-                onClick = onSave,
-                modifier = Modifier.weight(1f),
-                shape = AppButtonShape,
-            ) {
-                Text(confirmLabel)
-            }
-        }
-    }
-}
-
-@Composable
-private fun AssetTypeButtonGroup(
-    selectedType: String,
-    onSelectType: (String) -> Unit,
-) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        listOf(
-            "asset" to stringResource(R.string.asset_type_asset),
-            "liability" to stringResource(R.string.asset_type_liability),
-        ).forEachIndexed { index, item ->
-            val selected = selectedType == item.first
-            Button(
-                onClick = { onSelectType(item.first) },
-                modifier = Modifier.weight(1f),
-                shape = when (index) {
-                    0 -> RoundedCornerShape(topStart = 18.dp, bottomStart = 18.dp, topEnd = 6.dp, bottomEnd = 6.dp)
-                    else -> RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp, topEnd = 18.dp, bottomEnd = 18.dp)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLowest,
-                    contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-            ) {
-                Text(item.second)
             }
         }
     }
@@ -280,7 +200,12 @@ private fun AssetSuccessContent() {
         ) {
             Text("✓", fontSize = 36.sp, color = IncomeGreen, fontWeight = FontWeight.Bold)
         }
-        Text(text = stringResource(R.string.done_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.done_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         Text(
             text = stringResource(R.string.asset_done_message),
             style = MaterialTheme.typography.bodyMedium,

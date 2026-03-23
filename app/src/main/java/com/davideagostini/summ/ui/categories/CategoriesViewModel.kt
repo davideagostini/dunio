@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
+import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -41,21 +42,37 @@ class CategoriesViewModel @Inject constructor(
     fun handleEvent(event: CategoriesEvent) {
         when (event) {
             CategoriesEvent.StartAdd        -> _uiState.update {
-                it.copy(sheetMode = CategorySheetMode.Add, editName = "", editEmoji = "", nameError = null)
+                it.copy(
+                    sheetMode = CategorySheetMode.Add,
+                    editName = "",
+                    editEmoji = "",
+                    nameError = null,
+                    operationErrorMessage = null,
+                )
             }
             is CategoriesEvent.Select       -> _uiState.update {
-                it.copy(sheetMode = CategorySheetMode.Action, selectedCategory = event.category)
+                it.copy(
+                    sheetMode = CategorySheetMode.Action,
+                    selectedCategory = event.category,
+                    operationErrorMessage = null,
+                )
             }
             CategoriesEvent.StartEdit       -> {
                 val cat = _uiState.value.selectedCategory ?: return
                 _uiState.update {
-                    it.copy(sheetMode = CategorySheetMode.Edit, editName = cat.name, editEmoji = cat.emoji, nameError = null)
+                    it.copy(
+                        sheetMode = CategorySheetMode.Edit,
+                        editName = cat.name,
+                        editEmoji = cat.emoji,
+                        nameError = null,
+                        operationErrorMessage = null,
+                    )
                 }
             }
-            CategoriesEvent.RequestDelete   -> _uiState.update { it.copy(showDeleteDialog = true) }
+            CategoriesEvent.RequestDelete   -> _uiState.update { it.copy(showDeleteDialog = true, operationErrorMessage = null) }
             CategoriesEvent.DismissSheet    -> _uiState.update { CategoriesUiState() }
-            is CategoriesEvent.UpdateFormName  -> _uiState.update { it.copy(editName = event.value, nameError = null) }
-            is CategoriesEvent.UpdateFormEmoji -> _uiState.update { it.copy(editEmoji = event.value) }
+            is CategoriesEvent.UpdateFormName  -> _uiState.update { it.copy(editName = event.value, nameError = null, operationErrorMessage = null) }
+            is CategoriesEvent.UpdateFormEmoji -> _uiState.update { it.copy(editEmoji = event.value, operationErrorMessage = null) }
             CategoriesEvent.SaveAdd         -> saveAdd()
             CategoriesEvent.SaveEdit        -> saveEdit()
             CategoriesEvent.ConfirmDelete   -> confirmDelete()
@@ -69,11 +86,17 @@ class CategoriesViewModel @Inject constructor(
             _uiState.update { it.copy(nameError = appContext.getString(R.string.category_validation_name_required)) }
             return
         }
+
+        // Firestore write rejections must be translated into UI state instead of bubbling up as a crash.
         viewModelScope.launch {
-            repository.insert(Category(name = state.editName.trim(), emoji = state.editEmoji.trim().ifEmpty { "📦" }))
-            _uiState.update { it.copy(sheetMode = CategorySheetMode.Success) }
-            delay(1_500L)
-            _uiState.update { CategoriesUiState() }
+            try {
+                repository.insert(Category(name = state.editName.trim(), emoji = state.editEmoji.trim().ifEmpty { "📦" }))
+                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, operationErrorMessage = null) }
+                delay(1_500L)
+                _uiState.update { CategoriesUiState() }
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+            }
         }
     }
 
@@ -85,20 +108,35 @@ class CategoriesViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            repository.update(cat.copy(name = state.editName.trim(), emoji = state.editEmoji.trim().ifEmpty { "📦" }))
-            _uiState.update { it.copy(sheetMode = CategorySheetMode.Success) }
-            delay(1_500L)
-            _uiState.update { CategoriesUiState() }
+            try {
+                repository.update(cat.copy(name = state.editName.trim(), emoji = state.editEmoji.trim().ifEmpty { "📦" }))
+                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, operationErrorMessage = null) }
+                delay(1_500L)
+                _uiState.update { CategoriesUiState() }
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+            }
         }
     }
 
     private fun confirmDelete() {
         val cat = _uiState.value.selectedCategory ?: return
+
+        // Delete uses the same protection as save flows because a denied delete is still a rejected write.
         viewModelScope.launch {
-            repository.delete(cat)
-            _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, showDeleteDialog = false) }
-            delay(1_500L)
-            _uiState.update { CategoriesUiState() }
+            try {
+                repository.delete(cat)
+                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
+                delay(1_500L)
+                _uiState.update { CategoriesUiState() }
+            } catch (throwable: Throwable) {
+                _uiState.update {
+                    it.copy(
+                        showDeleteDialog = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
+            }
         }
     }
 }

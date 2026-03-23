@@ -84,6 +84,8 @@ fun AppNavGraph(
 
     var showEntrySheet by remember { mutableStateOf(false) }
     var showEntriesFullscreenEditor by remember { mutableStateOf(false) }
+    var showAssetsFullscreenEditor by remember { mutableStateOf(false) }
+    var showMonthPickerOverlay by remember { mutableStateOf(false) }
     var allowEntrySheetHide by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
@@ -102,12 +104,20 @@ fun AppNavGraph(
             composable("entries") {
                 EntriesScreenWithOverlayState(
                     onFullscreenEditVisibilityChanged = { showEntriesFullscreenEditor = it },
+                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                 )
             }
             composable("dashboard") {
-                DashboardScreen()
+                DashboardScreen(
+                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
+                )
             }
-            composable("assets") { AssetsScreen() }
+            composable("assets") {
+                AssetsScreen(
+                    onFullscreenEditVisibilityChanged = { showAssetsFullscreenEditor = it },
+                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
+                )
+            }
             composable("settings") {
                 SettingsScreen(
                     onNavigateCategories = { navigate("categories") },
@@ -135,7 +145,10 @@ fun AppNavGraph(
                 RecurringScreen(onBack = { navController.popBackStack() })
             }
             composable("month-close") {
-                MonthCloseScreen(onBack = { navController.popBackStack() })
+                MonthCloseScreen(
+                    onBack = { navController.popBackStack() },
+                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
+                )
             }
         }
 
@@ -143,7 +156,9 @@ fun AppNavGraph(
             currentRoute != "members" &&
             currentRoute != "recurring" &&
             currentRoute != "month-close" &&
-            !showEntriesFullscreenEditor
+            !showMonthPickerOverlay &&
+            !showEntriesFullscreenEditor &&
+            !showAssetsFullscreenEditor
         ) {
             Box(
                 modifier = Modifier.matchParentSize(),
@@ -187,11 +202,13 @@ fun AppNavGraph(
 @Composable
 private fun EntriesScreenWithOverlayState(
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit,
     viewModel: com.davideagostini.summ.ui.entries.EntriesViewModel = hiltViewModel(),
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (isLoading) {
@@ -202,9 +219,11 @@ private fun EntriesScreenWithOverlayState(
     com.davideagostini.summ.ui.entries.EntriesContent(
         homeState = homeState,
         categories = categories,
+        monthCloses = monthCloses,
         uiState = uiState,
         onEvent = viewModel::handleEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
     )
 }
 

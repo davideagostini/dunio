@@ -76,6 +76,8 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     implementation(libs.coil.compose)
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)

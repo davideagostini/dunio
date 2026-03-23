@@ -29,8 +29,11 @@ When working in this folder:
 5. Do not let screen files grow into long monolithic `.kt` files; extract UI sections early into `components/`.
 6. Avoid introducing new patterns when an approved one already exists.
 7. Keep the app aligned with the current mobile-first design and Firebase household model.
-8. Verify Android changes with:
+8. If the user asks to align one screen or flow to another existing screen, replicate the same structural pattern and navigation behavior, not just a visually similar approximation.
+9. When mirroring an existing implementation, do not improvise an alternative container pattern (for example sheet-like fullscreen instead of a true dedicated screen) unless the user explicitly asks for it.
+10. Verify Android changes with:
    - `./gradlew assembleDebug`
+11. All code you add or change must be commented clearly. Document file responsibility and every non-trivial block of logic with explicit comments; do not leave produced code undocumented.
 
 ## Notes
 

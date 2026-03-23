@@ -1,7 +1,6 @@
 package com.davideagostini.summ.ui.entries
 
 import com.davideagostini.summ.domain.model.EntryDisplayItem
-import com.davideagostini.summ.ui.format.formatEuro
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth

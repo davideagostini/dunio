@@ -71,7 +71,7 @@ fun HouseholdSetupScreen(
     if (showSignOutDialog) {
         AlertDialog(
             onDismissRequest = { showSignOutDialog = false },
-            title = { Text(stringResource(R.string.settings_sign_out_title)) },
+            title = { Text(stringResource(R.string.settings_sign_out_title), color = MaterialTheme.colorScheme.onSurface) },
             text = { Text(stringResource(R.string.settings_sign_out_message)) },
             confirmButton = {
                 TextButton(

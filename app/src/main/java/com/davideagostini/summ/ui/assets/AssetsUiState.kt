@@ -19,5 +19,6 @@ data class AssetsUiState(
     val editType: String = "asset",
     val nameError: String? = null,
     val valueError: String? = null,
+    val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean = false,
 )

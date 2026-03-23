@@ -52,6 +52,7 @@ internal fun SettingsNavItem(
                     text       = title,
                     style      = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
+                    color      = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text  = subtitle,
@@ -95,6 +96,7 @@ internal fun SettingsInfoItem(
                 text       = title,
                 style      = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
+                color      = MaterialTheme.colorScheme.onSurface,
                 modifier   = Modifier
                     .weight(1f)
                     .padding(horizontal = 14.dp),

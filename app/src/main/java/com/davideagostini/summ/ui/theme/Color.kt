@@ -91,6 +91,9 @@ object SummColors {
     val topBarColors: TopAppBarColors
         @Composable get() = TopAppBarDefaults.topAppBarColors(
             containerColor          = colorScheme.surfaceContainer,
-            scrolledContainerColor  = colorScheme.surfaceContainer
+            scrolledContainerColor  = colorScheme.surfaceContainer,
+            titleContentColor       = colorScheme.onSurface,
+            navigationIconContentColor = colorScheme.onSurface,
+            actionIconContentColor   = colorScheme.onSurface,
         )
 }

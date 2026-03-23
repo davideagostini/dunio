@@ -17,15 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,8 +39,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
+import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.domain.model.HomeState
+import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
@@ -54,8 +53,6 @@ import com.davideagostini.summ.ui.entries.components.EmptyState
 import com.davideagostini.summ.ui.entries.components.EntriesToolbar
 import com.davideagostini.summ.ui.entries.components.EntryActionSheet
 import com.davideagostini.summ.ui.entries.components.UnusualSpendingCard
-import com.davideagostini.summ.ui.theme.AppButtonShape
-import com.davideagostini.summ.ui.theme.ExpenseRed
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,7 +60,9 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val onEvent = viewModel::handleEvent
 
     if (isLoading) {
         FullScreenLoading()
@@ -73,10 +72,13 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
     EntriesContent(
         homeState = homeState,
         categories = categories,
+        monthCloses = monthCloses,
         uiState = uiState,
-        onEvent = viewModel::handleEvent,
+        onEvent = onEvent,
         onFullscreenEditVisibilityChanged = {},
+        onMonthPickerVisibilityChanged = {},
     )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,12 +86,15 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
 internal fun EntriesContent(
     homeState: HomeState,
     categories: List<Category>,
+    monthCloses: List<MonthClose>,
     uiState: EntriesUiState,
     onEvent: (EntriesEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var allowSheetHide by remember { mutableStateOf(false) }
     var showFullScreenEdit by remember { mutableStateOf(uiState.sheetMode == EntrySheetMode.Edit) }
+    var isFullscreenEditFlow by remember { mutableStateOf(uiState.sheetMode == EntrySheetMode.Edit) }
     var showMonthPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
@@ -99,6 +104,9 @@ internal fun EntriesContent(
     val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = uiState.selectedMonth
         ?: preferredRecentMonth(monthOptions)
+    val isMonthClosed = remember(monthCloses, selectedMonth) {
+        monthCloses.any { it.period == selectedMonth && it.status == "closed" }
+    }
 
     val monthEntries = remember(homeState.entries, selectedMonth) {
         homeState.entries.filter { entry -> monthKey(entry.date) == selectedMonth }
@@ -117,10 +125,18 @@ internal fun EntriesContent(
     val totalIncome = monthEntries.sumOf { entry -> if (entry.type == "income") entry.price else 0.0 }
     val monthLabel = formatMonthLabel(selectedMonth)
 
+    // Keep the shared bottom bar hidden while the month picker overlay is open.
+    LaunchedEffect(showMonthPicker) {
+        onMonthPickerVisibilityChanged(showMonthPicker)
+    }
+
     LaunchedEffect(uiState.sheetMode) {
         if (uiState.sheetMode == EntrySheetMode.Edit) {
+            // Once edit starts, the whole edit/success flow stays fullscreen until it is fully dismissed.
+            isFullscreenEditFlow = true
             showFullScreenEdit = true
         } else if (uiState.sheetMode == EntrySheetMode.Hidden) {
+            isFullscreenEditFlow = false
             showFullScreenEdit = false
         }
     }
@@ -163,6 +179,7 @@ internal fun EntriesContent(
                         text = stringResource(R.string.entries_action_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     )
                 }
@@ -176,6 +193,18 @@ internal fun EntriesContent(
                         onToggleSearch = { onEvent(EntriesEvent.ToggleSearch) },
                         onSearchQueryChange = { onEvent(EntriesEvent.UpdateSearchQuery(it)) },
                     )
+                }
+
+                if (isMonthClosed) {
+                    item {
+                        MonthCloseReadOnlyBanner(
+                            message = stringResource(
+                                R.string.month_close_read_only_message,
+                                formatMonthLabel(selectedMonth),
+                            ),
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                        )
+                    }
                 }
 
                 item {
@@ -211,55 +240,11 @@ internal fun EntriesContent(
                     items(dayGroups, key = { it.key.toString() }) { group ->
                         DayGroupSection(
                             group = group,
+                            readOnly = isMonthClosed,
                             onEntryClick = { onEvent(EntriesEvent.Select(it)) },
                         )
                     }
                 }
-            }
-        }
-
-        if (uiState.sheetMode != EntrySheetMode.Hidden && uiState.sheetMode != EntrySheetMode.Edit) {
-            ModalBottomSheet(
-                onDismissRequest = {},
-                sheetState = sheetState,
-                containerColor = Color.Transparent,
-                dragHandle = null,
-                scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f),
-            ) {
-                EntryActionSheet(
-                    uiState = uiState,
-                    categories = categories,
-                    onEvent = onEvent,
-                    onDismiss = {
-                        scope.launch {
-                            allowSheetHide = true
-                            sheetState.hide()
-                            onEvent(EntriesEvent.DismissSheet)
-                            allowSheetHide = false
-                        }
-                    },
-                )
-            }
-        }
-
-        AnimatedVisibility(
-            visible = showFullScreenEdit,
-            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)),
-            ) {
-                EntryActionSheet(
-                    uiState = uiState,
-                    categories = categories,
-                    onEvent = onEvent,
-                    onDismiss = dismissFullscreenEdit,
-                    fullScreen = true,
-                )
             }
         }
 
@@ -273,35 +258,70 @@ internal fun EntriesContent(
         )
     }
 
+    // Keep delete success in the compact bottom sheet, like assets. Fullscreen remains reserved for edit flow.
+    if ((uiState.sheetMode == EntrySheetMode.Action || uiState.sheetMode == EntrySheetMode.Success) && !isFullscreenEditFlow) {
+        ModalBottomSheet(
+            onDismissRequest = {},
+            sheetState = sheetState,
+            containerColor = Color.Transparent,
+            dragHandle = null,
+            scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f),
+        ) {
+            EntryActionSheet(
+                uiState = uiState,
+                categories = categories,
+                readOnly = isMonthClosed,
+                readOnlyMessage = stringResource(
+                    R.string.month_close_edit_disabled_message,
+                    formatMonthLabel(selectedMonth),
+                ),
+                onEvent = onEvent,
+                onDismiss = {
+                    scope.launch {
+                        allowSheetHide = true
+                        sheetState.hide()
+                        onEvent(EntriesEvent.DismissSheet)
+                        allowSheetHide = false
+                    }
+                },
+            )
+        }
+    }
+
+    AnimatedVisibility(
+        visible = isFullscreenEditFlow && uiState.sheetMode != EntrySheetMode.Hidden && uiState.sheetMode != EntrySheetMode.Action,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)),
+        ) {
+            EntryActionSheet(
+                uiState = uiState,
+                categories = categories,
+                readOnly = isMonthClosed,
+                readOnlyMessage = stringResource(
+                    R.string.month_close_edit_disabled_message,
+                    formatMonthLabel(selectedMonth),
+                ),
+                onEvent = onEvent,
+                onDismiss = dismissFullscreenEdit,
+                fullScreen = true,
+            )
+        }
+    }
+
     if (uiState.showDeleteDialog) {
         val desc = uiState.selectedEntry?.description.orEmpty()
-        AlertDialog(
-            onDismissRequest = { onEvent(EntriesEvent.DismissDeleteDialog) },
-            shape = RoundedCornerShape(20.dp),
-            title = { Text(stringResource(R.string.entries_delete_title, desc), fontWeight = FontWeight.SemiBold) },
-            text = {
-                Text(
-                    stringResource(R.string.entries_delete_message),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { onEvent(EntriesEvent.ConfirmDelete) },
-                    shape = AppButtonShape,
-                    colors = ButtonDefaults.textButtonColors(contentColor = ExpenseRed),
-                ) {
-                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.SemiBold)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { onEvent(EntriesEvent.DismissDeleteDialog) },
-                    shape = AppButtonShape,
-                ) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
+        DeleteConfirmationDialog(
+            title = stringResource(R.string.entries_delete_title, desc),
+            message = stringResource(R.string.entries_delete_message),
+            onConfirm = { onEvent(EntriesEvent.ConfirmDelete) },
+            onDismiss = { onEvent(EntriesEvent.DismissDeleteDialog) },
         )
     }
+
 }

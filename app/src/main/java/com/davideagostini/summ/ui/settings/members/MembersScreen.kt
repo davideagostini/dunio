@@ -106,7 +106,13 @@ private fun MembersContent(
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         TopAppBar(
-            title = { Text(stringResource(R.string.members_title), fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    stringResource(R.string.members_title),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(

@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
+import com.davideagostini.summ.data.entity.MonthClose
+import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.AssetRepository
+import com.davideagostini.summ.data.repository.MonthCloseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -14,7 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -25,15 +28,22 @@ import javax.inject.Inject
 class AssetsViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val repository: AssetRepository,
+    monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
     private val historyLoaded = MutableStateFlow(false)
+    private val monthClosesLoaded = MutableStateFlow(false)
 
     val assetHistory: StateFlow<List<AssetHistoryEntry>> = repository.allAssetHistory
         .onEach { historyLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val isLoading: StateFlow<Boolean> = historyLoaded
-        .map { loaded -> !loaded }
+    val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
+        .onEach { monthClosesLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val isLoading: StateFlow<Boolean> = combine(historyLoaded, monthClosesLoaded) { historyReady, monthClosesReady ->
+        !historyReady || !monthClosesReady
+    }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     private val _uiState = MutableStateFlow(AssetsUiState())
@@ -52,12 +62,13 @@ class AssetsViewModel @Inject constructor(
                     editType = "asset",
                     nameError = null,
                     valueError = null,
+                    operationErrorMessage = null,
                 )
             }
             AssetsEvent.CopyPreviousMonth -> copyPreviousMonth()
 
             is AssetsEvent.Select -> _uiState.update {
-                it.copy(sheetMode = AssetSheetMode.Action, selectedAsset = event.asset)
+                it.copy(sheetMode = AssetSheetMode.Action, selectedAsset = event.asset, operationErrorMessage = null)
             }
 
             AssetsEvent.StartEdit -> {
@@ -72,11 +83,12 @@ class AssetsViewModel @Inject constructor(
                         editType = asset.type,
                         nameError = null,
                         valueError = null,
+                        operationErrorMessage = null,
                     )
                 }
             }
 
-            AssetsEvent.RequestDelete -> _uiState.update { it.copy(showDeleteDialog = true) }
+            AssetsEvent.RequestDelete -> _uiState.update { it.copy(showDeleteDialog = true, operationErrorMessage = null) }
             AssetsEvent.ConfirmDelete -> confirmDelete()
             AssetsEvent.DismissDeleteDialog -> _uiState.update { it.copy(showDeleteDialog = false) }
             AssetsEvent.DismissSheet -> _uiState.update {
@@ -91,11 +103,11 @@ class AssetsViewModel @Inject constructor(
                 it.copy(searchVisible = !it.searchVisible)
             }
             is AssetsEvent.UpdateSearchQuery -> _uiState.update { it.copy(searchQuery = event.value) }
-            is AssetsEvent.UpdateName -> _uiState.update { it.copy(editName = event.value, nameError = null) }
-            is AssetsEvent.UpdateCategory -> _uiState.update { it.copy(editCategory = event.value) }
-            is AssetsEvent.UpdateValue -> _uiState.update { it.copy(editValue = event.value, valueError = null) }
-            is AssetsEvent.UpdateCurrency -> _uiState.update { it.copy(editCurrency = event.value.uppercase()) }
-            is AssetsEvent.UpdateType -> _uiState.update { it.copy(editType = event.value) }
+            is AssetsEvent.UpdateName -> _uiState.update { it.copy(editName = event.value, nameError = null, operationErrorMessage = null) }
+            is AssetsEvent.UpdateCategory -> _uiState.update { it.copy(editCategory = event.value, operationErrorMessage = null) }
+            is AssetsEvent.UpdateValue -> _uiState.update { it.copy(editValue = event.value, valueError = null, operationErrorMessage = null) }
+            is AssetsEvent.UpdateCurrency -> _uiState.update { it.copy(editCurrency = event.value.uppercase(), operationErrorMessage = null) }
+            is AssetsEvent.UpdateType -> _uiState.update { it.copy(editType = event.value, operationErrorMessage = null) }
             AssetsEvent.SaveAdd -> saveAdd()
             AssetsEvent.SaveEdit -> saveEdit()
         }
@@ -108,19 +120,25 @@ class AssetsViewModel @Inject constructor(
             _uiState.update { it.copy(nameError = appContext.getString(R.string.asset_validation_name_required)) }
             return
         }
+
+        // Save failures are converted to a friendly inline message so asset writes never crash the screen.
         viewModelScope.launch {
-            repository.insert(
-                Asset(
-                    name = state.editName.trim(),
-                    category = state.editCategory.trim(),
-                    value = value,
-                    currency = state.editCurrency.ifBlank { "EUR" },
-                    type = state.editType,
-                    period = state.selectedMonth.orEmpty(),
-                    snapshotDate = monthToSnapshotDate(state.selectedMonth),
+            try {
+                repository.insert(
+                    Asset(
+                        name = state.editName.trim(),
+                        category = state.editCategory.trim(),
+                        value = value,
+                        currency = state.editCurrency.ifBlank { "EUR" },
+                        type = state.editType,
+                        period = state.selectedMonth.orEmpty(),
+                        snapshotDate = monthToSnapshotDate(state.selectedMonth),
+                    )
                 )
-            )
-            showSuccess()
+                showSuccess()
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+            }
         }
     }
 
@@ -133,31 +151,44 @@ class AssetsViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            repository.update(
-                current.copy(
-                    name = state.editName.trim(),
-                    category = state.editCategory.trim(),
-                    value = value,
-                    currency = state.editCurrency.ifBlank { "EUR" },
-                    type = state.editType,
-                    period = state.selectedMonth.orEmpty(),
-                    snapshotDate = monthToSnapshotDate(state.selectedMonth),
+            try {
+                repository.update(
+                    current.copy(
+                        name = state.editName.trim(),
+                        category = state.editCategory.trim(),
+                        value = value,
+                        currency = state.editCurrency.ifBlank { "EUR" },
+                        type = state.editType,
+                        period = state.selectedMonth.orEmpty(),
+                        snapshotDate = monthToSnapshotDate(state.selectedMonth),
+                    )
                 )
-            )
-            showSuccess()
+                showSuccess()
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+            }
         }
     }
 
     private fun confirmDelete() {
         val current = _uiState.value.selectedAsset ?: return
         viewModelScope.launch {
-            repository.delete(current)
-            showSuccess()
+            try {
+                repository.delete(current)
+                showSuccess()
+            } catch (throwable: Throwable) {
+                _uiState.update {
+                    it.copy(
+                        showDeleteDialog = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
+            }
         }
     }
 
     private suspend fun showSuccess() {
-        _uiState.update { it.copy(sheetMode = AssetSheetMode.Success, showDeleteDialog = false) }
+        _uiState.update { it.copy(sheetMode = AssetSheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
         delay(1_500L)
         _uiState.update {
             AssetsUiState(
@@ -200,14 +231,20 @@ class AssetsViewModel @Inject constructor(
 
         if (assetsToCopy.isEmpty()) return
 
+        // Bulk copy performs multiple writes, so handle the whole operation as a single user-visible failure.
         viewModelScope.launch {
-            assetsToCopy.forEach { asset ->
-                repository.insert(
-                    asset.copy(
-                        period = selectedMonth,
-                        snapshotDate = monthToSnapshotDate(selectedMonth),
+            try {
+                assetsToCopy.forEach { asset ->
+                    repository.insert(
+                        asset.copy(
+                            period = selectedMonth,
+                            snapshotDate = monthToSnapshotDate(selectedMonth),
+                        )
                     )
-                )
+                }
+                _uiState.update { it.copy(operationErrorMessage = null) }
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
             }
         }
     }

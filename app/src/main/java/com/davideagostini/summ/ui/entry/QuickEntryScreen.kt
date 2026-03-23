@@ -1,17 +1,12 @@
 package com.davideagostini.summ.ui.entry
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,7 +62,8 @@ fun QuickEntryScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .imePadding(),
             shape = RoundedCornerShape(24.dp),
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
@@ -105,7 +101,8 @@ fun QuickEntryScreen(
         modifier  = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .imePadding(),
         shape     = RoundedCornerShape(24.dp),
         colors    = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -124,26 +121,16 @@ fun QuickEntryScreen(
                 Spacer(Modifier.height(24.dp))
             }
 
-            AnimatedContent(
-                targetState    = uiState.step,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
-                    } else {
-                        (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
-                    }
-                },
-                label = "entry_step",
-            ) { step ->
-                when (step) {
-                    0 -> StepType(uiState = uiState, onEvent = viewModel::handleEvent)
-                    1 -> StepDate(uiState = uiState, onEvent = viewModel::handleEvent)
-                    2 -> StepDescription(uiState = uiState, onEvent = viewModel::handleEvent)
-                    3 -> StepAmount(uiState = uiState, onEvent = viewModel::handleEvent)
-                    4 -> StepCategory(categories = categories, uiState = uiState, onEvent = viewModel::handleEvent)
-                    5 -> StepReview(uiState = uiState, onEvent = viewModel::handleEvent, onCancel = onDismiss)
-                    6 -> StepSuccess()
-                }
+            // The step body now swaps immediately without container animations. This avoids the flicker caused
+            // by different step heights and keeps the card naturally sized to the current content.
+            when (uiState.step) {
+                0 -> StepType(uiState = uiState, onEvent = viewModel::handleEvent)
+                1 -> StepDate(uiState = uiState, onEvent = viewModel::handleEvent)
+                2 -> StepDescription(uiState = uiState, onEvent = viewModel::handleEvent)
+                3 -> StepAmount(uiState = uiState, onEvent = viewModel::handleEvent)
+                4 -> StepCategory(categories = categories, uiState = uiState, onEvent = viewModel::handleEvent)
+                5 -> StepReview(uiState = uiState, onEvent = viewModel::handleEvent, onCancel = onDismiss)
+                6 -> StepSuccess()
             }
         }
     }

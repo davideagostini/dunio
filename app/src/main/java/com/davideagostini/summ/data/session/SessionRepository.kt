@@ -12,6 +12,7 @@ import com.davideagostini.summ.data.entity.AppUser
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Household
 import com.davideagostini.summ.data.firebase.FirestorePaths
+import com.davideagostini.summ.widget.SummWidgetsUpdater
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.Timestamp
@@ -92,6 +93,9 @@ class SessionRepository @Inject constructor(
 
         firebaseAuth.signInWithCredential(credential).await()
         upsertUser(firebaseAuth.currentUser ?: error(appContext.getString(R.string.session_sign_in_missing_user)))
+        // Widgets depend on both auth state and household membership. Refresh right after
+        // sign-in so launcher content does not lag behind the app session.
+        SummWidgetsUpdater.refreshAll(appContext)
     }
 
     suspend fun signOut() {
@@ -99,6 +103,8 @@ class SessionRepository @Inject constructor(
         runCatching {
             CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
         }
+        // Clears household-aware widgets back to their signed-out fallback state.
+        SummWidgetsUpdater.refreshAll(appContext)
     }
 
     suspend fun createHousehold(name: String) {
@@ -153,6 +159,8 @@ class SessionRepository @Inject constructor(
         )
 
         batch.commit().await()
+        // A newly created household changes widget eligibility immediately.
+        SummWidgetsUpdater.refreshAll(appContext)
     }
 
     suspend fun joinHousehold(householdId: String) {
@@ -188,6 +196,8 @@ class SessionRepository @Inject constructor(
             SetOptions.merge()
         )
         batch.commit().await()
+        // Joining an existing household unlocks widget data for the first time on a new device.
+        SummWidgetsUpdater.refreshAll(appContext)
     }
 
     suspend fun requireHouseholdId(): String {

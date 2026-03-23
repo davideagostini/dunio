@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
+import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
 import com.davideagostini.summ.ui.format.formatEuro
@@ -88,6 +89,11 @@ internal fun StepReview(
         }
 
         Spacer(Modifier.height(24.dp))
+
+        uiState.operationErrorMessage?.let { message ->
+            AuthErrorCard(message)
+            Spacer(Modifier.height(16.dp))
+        }
 
         Row(
             modifier              = Modifier.fillMaxWidth(),

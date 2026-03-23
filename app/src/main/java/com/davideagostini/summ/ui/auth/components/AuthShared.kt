@@ -44,6 +44,7 @@ fun AuthHeader(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
             text = subtitle,
@@ -76,6 +77,7 @@ fun SignInBrand() {
             text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -121,6 +123,7 @@ fun AuthInfoBlock(
                 text = value,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -158,6 +161,7 @@ fun AuthAccountInfoBlock(
                     text = value,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -227,7 +231,7 @@ fun MessageCard(
     message: String,
 ) {
     AuthCard {
-        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.height(8.dp))
         Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }

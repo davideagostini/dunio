@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.RecurringTransaction
+import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.format.formatEuro
 import com.davideagostini.summ.ui.settings.recurring.components.RecurringSheet
@@ -150,7 +151,13 @@ private fun RecurringContent(
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         TopAppBar(
-            title = { Text(stringResource(R.string.settings_recurring_title), fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    stringResource(R.string.settings_recurring_title),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_desc_back))
@@ -210,6 +217,14 @@ private fun RecurringContent(
                 }
             }
 
+            if (uiState.operationErrorMessage != null && uiState.sheetMode == RecurringSheetMode.Hidden) {
+                item {
+                    // "Apply due" is triggered from the screen header, so reuse the same inline error card
+                    // outside of the sheet whenever that batch operation fails.
+                    AuthErrorCard(uiState.operationErrorMessage)
+                }
+            }
+
             if (filtered.isEmpty()) {
                 item {
                     Card(
@@ -218,7 +233,12 @@ private fun RecurringContent(
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     ) {
                         Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(stringResource(R.string.recurring_empty_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = stringResource(R.string.recurring_empty_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
                             Text(
                                 stringResource(R.string.recurring_empty_message),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -318,7 +338,7 @@ private fun RecurringContent(
         val desc = uiState.selectedRecurring?.description.orEmpty()
         AlertDialog(
             onDismissRequest = { onEvent(RecurringEvent.DismissDeleteDialog) },
-            title = { Text(stringResource(R.string.recurring_delete_title, desc)) },
+            title = { Text(stringResource(R.string.recurring_delete_title, desc), color = MaterialTheme.colorScheme.onSurface) },
             text = { Text(stringResource(R.string.recurring_delete_message)) },
             confirmButton = {
                 TextButton(

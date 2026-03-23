@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
+import com.davideagostini.summ.data.entity.MonthClose
+import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.EntryRepository
+import com.davideagostini.summ.data.repository.MonthCloseRepository
 import com.davideagostini.summ.domain.model.HomeState
 import com.davideagostini.summ.domain.usecase.GetHomeDataUseCase
 import com.davideagostini.summ.ui.format.formatAmount
@@ -31,9 +34,11 @@ class EntriesViewModel @Inject constructor(
     getHomeData: GetHomeDataUseCase,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
+    monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
     private val homeLoaded = MutableStateFlow(false)
     private val categoriesLoaded = MutableStateFlow(false)
+    private val monthClosesLoaded = MutableStateFlow(false)
 
     val homeState: StateFlow<HomeState> = getHomeData()
         .onEach { homeLoaded.value = true }
@@ -43,8 +48,12 @@ class EntriesViewModel @Inject constructor(
         .onEach { categoriesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val isLoading: StateFlow<Boolean> = combine(homeLoaded, categoriesLoaded) { homeReady, categoriesReady ->
-        !homeReady || !categoriesReady
+    val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
+        .onEach { monthClosesLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val isLoading: StateFlow<Boolean> = combine(homeLoaded, categoriesLoaded, monthClosesLoaded) { homeReady, categoriesReady, monthClosesReady ->
+        !homeReady || !categoriesReady || !monthClosesReady
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     private val _uiState = MutableStateFlow(EntriesUiState())
@@ -77,16 +86,17 @@ class EntriesViewModel @Inject constructor(
                         editCategory     = cat,
                         descriptionError = null,
                         priceError       = null,
+                        operationErrorMessage = null,
                     )
                 }
             }
-            EntriesEvent.RequestDelete     -> _uiState.update { it.copy(showDeleteDialog = true) }
+            EntriesEvent.RequestDelete     -> _uiState.update { it.copy(showDeleteDialog = true, operationErrorMessage = null) }
             EntriesEvent.DismissSheet      -> _uiState.update { it.clearTransientState() }
-            is EntriesEvent.UpdateType         -> _uiState.update { it.copy(editType = event.value) }
-            is EntriesEvent.UpdateDescription  -> _uiState.update { it.copy(editDescription = event.value, descriptionError = null) }
-            is EntriesEvent.UpdatePrice        -> _uiState.update { it.copy(editPrice = event.value, priceError = null) }
-            is EntriesEvent.UpdateDate         -> _uiState.update { it.copy(editDate = event.value) }
-            is EntriesEvent.UpdateCategory     -> _uiState.update { it.copy(editCategory = event.category) }
+            is EntriesEvent.UpdateType         -> _uiState.update { it.copy(editType = event.value, operationErrorMessage = null) }
+            is EntriesEvent.UpdateDescription  -> _uiState.update { it.copy(editDescription = event.value, descriptionError = null, operationErrorMessage = null) }
+            is EntriesEvent.UpdatePrice        -> _uiState.update { it.copy(editPrice = event.value, priceError = null, operationErrorMessage = null) }
+            is EntriesEvent.UpdateDate         -> _uiState.update { it.copy(editDate = event.value, operationErrorMessage = null) }
+            is EntriesEvent.UpdateCategory     -> _uiState.update { it.copy(editCategory = event.category, operationErrorMessage = null) }
             EntriesEvent.SaveEdit          -> saveEdit()
             EntriesEvent.ConfirmDelete     -> confirmDelete()
             EntriesEvent.DismissDeleteDialog -> _uiState.update { it.copy(showDeleteDialog = false) }
@@ -109,39 +119,55 @@ class EntriesViewModel @Inject constructor(
         }
         if (hasError) return
 
+        // Edit is a Firestore write, so we surface backend permission problems inline in the sheet.
         viewModelScope.launch {
-            entryRepository.update(
-                Entry(
-                    id          = entry.id,
-                    type        = state.editType,
-                    description = state.editDescription.trim(),
-                    price       = price!!,
-                    category    = state.editCategory?.name ?: entry.category,
-                    date        = state.editDate,
+            try {
+                entryRepository.update(
+                    Entry(
+                        id          = entry.id,
+                        type        = state.editType,
+                        description = state.editDescription.trim(),
+                        price       = price!!,
+                        category    = state.editCategory?.name ?: entry.category,
+                        date        = state.editDate,
+                    )
                 )
-            )
-            _uiState.update { it.copy(sheetMode = EntrySheetMode.Success) }
-            delay(1_500L)
-            _uiState.update { it.clearTransientState() }
+                _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, operationErrorMessage = null) }
+                delay(1_500L)
+                _uiState.update { it.clearTransientState() }
+            } catch (throwable: Throwable) {
+                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+            }
         }
     }
 
     private fun confirmDelete() {
         val entry = _uiState.value.selectedEntry ?: return
+
+        // Delete errors must stay in the entry action flow instead of crashing the coroutine on Main.
         viewModelScope.launch {
-            entryRepository.delete(
-                Entry(
-                    id          = entry.id,
-                    type        = entry.type,
-                    description = entry.description,
-                    price       = entry.price,
-                    category    = entry.category,
-                    date        = entry.date,
+            try {
+                entryRepository.delete(
+                    Entry(
+                        id          = entry.id,
+                        type        = entry.type,
+                        description = entry.description,
+                        price       = entry.price,
+                        category    = entry.category,
+                        date        = entry.date,
+                    )
                 )
-            )
-            _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, showDeleteDialog = false) }
-            delay(1_500L)
-            _uiState.update { it.clearTransientState() }
+                _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
+                delay(1_500L)
+                _uiState.update { it.clearTransientState() }
+            } catch (throwable: Throwable) {
+                _uiState.update {
+                    it.copy(
+                        showDeleteDialog = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
+            }
         }
     }
 
@@ -156,6 +182,7 @@ class EntriesViewModel @Inject constructor(
             editCategory = null,
             descriptionError = null,
             priceError = null,
+            operationErrorMessage = null,
             showDeleteDialog = false,
         )
 }

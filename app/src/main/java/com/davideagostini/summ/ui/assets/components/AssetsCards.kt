@@ -113,6 +113,7 @@ fun AssetCard(
     index: Int,
     count: Int,
     change: Double?,
+    readOnly: Boolean,
     onClick: () -> Unit,
 ) {
     val shape = listItemShape(index, count)
@@ -164,6 +165,14 @@ fun AssetCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (readOnly) {
+                    Spacer(Modifier.size(2.dp))
+                    Text(
+                        text = stringResource(R.string.month_close_read_only_short),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
 
             Column(horizontalAlignment = Alignment.End) {

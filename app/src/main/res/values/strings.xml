@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Summ</string>
+    <string name="widget_quick_access_name">Summ quick access</string>
+    <string name="widget_quick_entry_label">Quick entry</string>
+    <string name="widget_spending_name">Summ spending</string>
     <string name="tile_label">Add entry</string>
     <string name="tile_subtitle">Summ</string>
     <string name="content_desc_back">Back</string>
@@ -89,6 +92,21 @@
     <string name="entry_type_expense_plain">Expense</string>
 
     <string name="month_picker_title">Select month</string>
+    <string name="widget_quick_access_title">Quick access</string>
+    <string name="widget_quick_access_body">Add an entry without opening the full app flow.</string>
+    <string name="widget_quick_access_action">Add entry</string>
+    <string name="widget_spending_title">Spending</string>
+    <string name="widget_spending_this_month">Spent this month</string>
+    <string name="widget_spending_today">Today</string>
+    <string name="widget_spending_week">This week</string>
+    <string name="widget_spending_month">This month</string>
+    <string name="widget_spending_secondary">%1$s · %2$s</string>
+    <string name="widget_spending_vs_previous_month">vs previous month</string>
+    <string name="widget_open_app">Open app</string>
+    <string name="widget_sign_in_required">Sign in to load household data.</string>
+    <string name="widget_household_required">Create or join a household to use this widget.</string>
+    <string name="widget_loading_error">Unable to load widget data.</string>
+    <string name="widget_no_spending">No expenses recorded yet.</string>
 
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
@@ -205,6 +223,9 @@
     <string name="month_close_all_recurring_applied">All recurring entries are already applied.</string>
     <string name="month_close_action_close">Close month</string>
     <string name="month_close_action_reopen">Reopen month</string>
+    <string name="month_close_read_only_message">%1$s is closed, so this month is read-only.</string>
+    <string name="month_close_edit_disabled_message">%1$s is closed, so editing is disabled.</string>
+    <string name="month_close_read_only_short">Read-only</string>
     <string name="entries">Entries</string>
     <string name="dashboard_title">Overview</string>
     <string name="dashboard_assets_label">Assets</string>
@@ -243,6 +264,10 @@
     <string name="session_google_missing_token">Google sign-in did not return an ID token.</string>
     <string name="session_google_unsupported_credential">Google sign-in returned an unsupported credential.</string>
     <string name="session_generic_error">Something went wrong.</string>
+    <string name="firestore_permission_denied">You do not have permission to perform this action.</string>
+    <string name="firestore_unauthenticated">Sign in again and try one more time.</string>
+    <string name="firestore_unavailable">The connection is currently unavailable. Try again in a moment.</string>
+    <string name="firestore_generic_write_error">Something went wrong while saving your changes.</string>
     <string name="default_category_food">Food</string>
     <string name="default_category_transport">Transport</string>
     <string name="default_category_home">Home</string>

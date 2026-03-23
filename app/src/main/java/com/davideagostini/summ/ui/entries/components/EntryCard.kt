@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.davideagostini.summ.R
 import com.davideagostini.summ.domain.model.EntryDisplayItem
 import com.davideagostini.summ.ui.format.formatEuro
 import com.davideagostini.summ.ui.theme.ExpenseRed
@@ -30,6 +31,7 @@ internal fun EntryCard(
     item: EntryDisplayItem,
     index: Int,
     count: Int,
+    readOnly: Boolean,
     onClick: () -> Unit,
 ) {
     val shape = listItemShape(index, count)
@@ -75,6 +77,13 @@ internal fun EntryCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (readOnly) {
+                    Text(
+                        text = androidx.compose.ui.res.stringResource(R.string.month_close_read_only_short),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
 
             Text(

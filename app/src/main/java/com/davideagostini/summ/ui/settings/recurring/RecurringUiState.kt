@@ -21,5 +21,6 @@ data class RecurringUiState(
     val descriptionError: String? = null,
     val amountError: String? = null,
     val dayError: String? = null,
+    val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean = false,
 )

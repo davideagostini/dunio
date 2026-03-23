@@ -91,6 +91,7 @@ internal fun UnusualSpendingCard(
 @Composable
 internal fun DayGroupSection(
     group: EntryDayGroup,
+    readOnly: Boolean,
     onEntryClick: (EntryDisplayItem) -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
@@ -126,6 +127,7 @@ internal fun DayGroupSection(
                     item = entry,
                     index = index,
                     count = group.entries.size,
+                    readOnly = readOnly,
                     onClick = { onEntryClick(entry) },
                 )
             }

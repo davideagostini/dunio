@@ -12,5 +12,6 @@ data class CategoriesUiState(
     val editName: String              = "",
     val editEmoji: String             = "",
     val nameError: String?            = null,
+    val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean     = false,
 )

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
+import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.format.formatEuro
 import com.davideagostini.summ.ui.settings.recurring.RecurringEvent
 import com.davideagostini.summ.ui.settings.recurring.RecurringSheetMode
@@ -85,12 +87,14 @@ internal fun RecurringSheet(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .navigationBarsPadding()
+            .imePadding()
     } else {
         Modifier
             .fillMaxWidth()
             .then(if (uiState.sheetMode == RecurringSheetMode.Add || uiState.sheetMode == RecurringSheetMode.Edit) Modifier.fillMaxHeight(0.94f) else Modifier)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .navigationBarsPadding()
+            .imePadding()
     }
 
     val content: @Composable () -> Unit = {
@@ -108,6 +112,9 @@ internal fun RecurringSheet(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
+                            uiState.operationErrorMessage?.let { message ->
+                                AuthErrorCard(message)
+                            }
                             Surface(
                                 shape = CircleShape,
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -152,6 +159,7 @@ internal fun RecurringSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f),
+                            contentPadding = PaddingValues(bottom = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             item {
@@ -161,6 +169,12 @@ internal fun RecurringSheet(
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Spacer(Modifier.height(16.dp))
+                            }
+                            item {
+                                uiState.operationErrorMessage?.let { message ->
+                                    AuthErrorCard(message)
+                                    Spacer(Modifier.height(12.dp))
+                                }
                             }
                             item {
                                 TypeToggle(selectedType = uiState.type, onSelect = { onEvent(RecurringEvent.UpdateType(it)) })
@@ -252,8 +266,11 @@ internal fun RecurringSheet(
                             tonalElevation = 0.dp,
                             shadowElevation = 0.dp,
                             color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .imePadding(),
                         ) {
+                            // Keep the fixed footer above the keyboard instead of letting the IME cover it.
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier

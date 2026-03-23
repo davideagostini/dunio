@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -64,6 +65,8 @@ import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.domain.model.EntryDisplayItem
+import com.davideagostini.summ.ui.auth.components.AuthErrorCard
+import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.entries.EntriesEvent
 import com.davideagostini.summ.ui.entries.EntriesUiState
 import com.davideagostini.summ.ui.entries.EntrySheetMode
@@ -80,6 +83,8 @@ import java.util.Locale
 internal fun EntryActionSheet(
     uiState: EntriesUiState,
     categories: List<Category>,
+    readOnly: Boolean,
+    readOnlyMessage: String,
     onEvent: (EntriesEvent) -> Unit,
     onDismiss: () -> Unit,
     fullScreen: Boolean = false,
@@ -89,12 +94,26 @@ internal fun EntryActionSheet(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .navigationBarsPadding()
+            .imePadding()
     } else {
         Modifier
             .fillMaxWidth()
             .then(if (uiState.sheetMode == EntrySheetMode.Edit) Modifier.fillMaxHeight(0.94f) else Modifier)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .navigationBarsPadding()
+            .imePadding()
+    }
+
+    if (fullScreen && uiState.sheetMode == EntrySheetMode.Success) {
+        Surface(modifier = containerModifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+            // Fullscreen edit success should behave like a standalone screen, not like a form with a top action row.
+            EntrySuccessContent(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(),
+            )
+        }
+        return
     }
 
     val content: @Composable () -> Unit = {
@@ -122,12 +141,17 @@ internal fun EntryActionSheet(
                 when (mode) {
                     EntrySheetMode.Action  -> ActionContent(
                         entry   = uiState.selectedEntry ?: return@AnimatedContent,
+                        errorMessage = uiState.operationErrorMessage,
+                        readOnly = readOnly,
+                        readOnlyMessage = readOnlyMessage,
                         onEdit  = { onEvent(EntriesEvent.StartEdit) },
                         onDelete = { onEvent(EntriesEvent.RequestDelete) },
                     )
                     EntrySheetMode.Edit    -> EntryEditForm(
                         uiState    = uiState,
                         categories = categories,
+                        readOnly = readOnly,
+                        readOnlyMessage = readOnlyMessage,
                         onEvent    = onEvent,
                         onCancel   = onDismiss,
                     )
@@ -159,6 +183,9 @@ internal fun EntryActionSheet(
 @Composable
 private fun ActionContent(
     entry: EntryDisplayItem,
+    errorMessage: String?,
+    readOnly: Boolean,
+    readOnlyMessage: String,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -171,6 +198,16 @@ private fun ActionContent(
         modifier            = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        errorMessage?.let { message ->
+            AuthErrorCard(message)
+            Spacer(Modifier.height(12.dp))
+        }
+
+        if (readOnly) {
+            MonthCloseReadOnlyBanner(readOnlyMessage)
+            Spacer(Modifier.height(12.dp))
+        }
+
         Surface(
             shape    = RoundedCornerShape(16.dp),
             color    = MaterialTheme.colorScheme.primaryContainer,
@@ -187,6 +224,7 @@ private fun ActionContent(
             text       = entry.description,
             style      = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
+            color      = MaterialTheme.colorScheme.onSurface,
             textAlign  = TextAlign.Center,
         )
 
@@ -243,6 +281,7 @@ private fun ActionContent(
         ) {
             OutlinedButton(
                 onClick  = onDelete,
+                enabled = !readOnly,
                 shape    = AppButtonShape,
                 colors   = ButtonDefaults.outlinedButtonColors(contentColor = ExpenseRed),
                 modifier = Modifier.weight(1f),
@@ -254,6 +293,7 @@ private fun ActionContent(
 
             Button(
                 onClick  = onEdit,
+                enabled = !readOnly,
                 shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) {
@@ -272,6 +312,8 @@ private fun ActionContent(
 private fun EntryEditForm(
     uiState: EntriesUiState,
     categories: List<Category>,
+    readOnly: Boolean,
+    readOnlyMessage: String,
     onEvent: (EntriesEvent) -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -283,11 +325,29 @@ private fun EntryEditForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
+            contentPadding = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             item {
-                Text(stringResource(R.string.entries_edit_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.entries_edit_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
                 Spacer(Modifier.height(16.dp))
+            }
+            item {
+                uiState.operationErrorMessage?.let { message ->
+                    AuthErrorCard(message)
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
+            item {
+                if (readOnly) {
+                    MonthCloseReadOnlyBanner(readOnlyMessage)
+                    Spacer(Modifier.height(12.dp))
+                }
             }
             item {
                 Row(
@@ -390,8 +450,11 @@ private fun EntryEditForm(
             tonalElevation = 0.dp,
             shadowElevation = 0.dp,
             color = MaterialTheme.colorScheme.surfaceContainerLow,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding(),
         ) {
+            // The action row is fixed, but it still needs to clear the on-screen keyboard.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -406,6 +469,7 @@ private fun EntryEditForm(
 
                 Button(
                     onClick  = { onEvent(EntriesEvent.SaveEdit) },
+                    enabled = !readOnly,
                     shape    = AppButtonShape,
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(R.string.action_save)) }
@@ -486,16 +550,18 @@ private fun EditCategoryRow(
 // ── Success ───────────────────────────────────────────────────────────────────
 
 @Composable
-private fun EntrySuccessContent() {
+private fun EntrySuccessContent(
+    modifier: Modifier = Modifier,
+) {
     Column(
-        modifier            = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Box(
-            modifier         = Modifier
+            modifier = Modifier
                 .size(72.dp)
                 .background(IncomeGreen.copy(alpha = 0.15f), CircleShape),
             contentAlignment = Alignment.Center,
@@ -503,7 +569,12 @@ private fun EntrySuccessContent() {
             Text("✓", fontSize = 36.sp, color = IncomeGreen, fontWeight = FontWeight.Bold)
         }
 
-        Text(stringResource(R.string.done_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.done_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
 
         Text(
             text      = stringResource(R.string.entries_done_message),
@@ -511,8 +582,6 @@ private fun EntrySuccessContent() {
             color     = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-
-        Spacer(Modifier.height(8.dp))
     }
 }
 

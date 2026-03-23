@@ -76,7 +76,13 @@ fun SettingsScreen(
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         TopAppBar(
-            title = { Text(stringResource(R.string.settings_title), fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    stringResource(R.string.settings_title),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
             colors = SummColors.topBarColors,
         )
 
@@ -87,14 +93,14 @@ fun SettingsScreen(
             item { SettingsSectionLabel(stringResource(R.string.settings_account)) }
 
             item {
-            AccountCard(
-                userName = userName,
-                userPhotoUrl = userPhotoUrl,
-                householdName = householdName,
-                householdId = householdId,
-                onCopyHouseholdId = { clipboardManager.setText(AnnotatedString(householdId)) },
-                onSignOut = { showSignOutDialog = true },
-            )
+                AccountCard(
+                    userName = userName,
+                    userPhotoUrl = userPhotoUrl,
+                    householdName = householdName,
+                    householdId = householdId,
+                    onCopyHouseholdId = { clipboardManager.setText(AnnotatedString(householdId)) },
+                    onSignOut = { showSignOutDialog = true },
+                )
             }
 
             item { SettingsSectionLabel(stringResource(R.string.settings_data)) }
@@ -150,7 +156,7 @@ fun SettingsScreen(
     if (showSignOutDialog) {
         AlertDialog(
             onDismissRequest = { showSignOutDialog = false },
-            title = { Text(stringResource(R.string.settings_sign_out_title)) },
+            title = { Text(stringResource(R.string.settings_sign_out_title), color = MaterialTheme.colorScheme.onSurface) },
             text = { Text(stringResource(R.string.settings_sign_out_message)) },
             confirmButton = {
                 TextButton(

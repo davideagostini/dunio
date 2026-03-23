@@ -1,5 +1,11 @@
 package com.davideagostini.summ.ui.categories
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,10 +26,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,9 +47,9 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.categories.components.CategoryActionSheet
 import com.davideagostini.summ.ui.categories.components.CategoryCard
+import com.davideagostini.summ.ui.categories.components.CategoryEditorScreen
+import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
 import com.davideagostini.summ.ui.components.FullScreenLoading
-import com.davideagostini.summ.ui.theme.AppButtonShape
-import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.SummColors
 import kotlinx.coroutines.launch
 
@@ -80,11 +84,33 @@ private fun CategoriesContent(
     onBack: () -> Unit,
 ) {
     var allowSheetHide by remember { mutableStateOf(false) }
+    var showFullScreenEditor by remember { mutableStateOf(uiState.sheetMode == CategorySheetMode.Add || uiState.sheetMode == CategorySheetMode.Edit) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden || allowSheetHide },
     )
+
+    // Add/Edit own the fullscreen editor flow. Success remains there too, so save never snaps back to a sheet.
+    LaunchedEffect(uiState.sheetMode) {
+        if (uiState.sheetMode == CategorySheetMode.Add || uiState.sheetMode == CategorySheetMode.Edit) {
+            showFullScreenEditor = true
+        } else if (uiState.sheetMode == CategorySheetMode.Hidden) {
+            showFullScreenEditor = false
+        }
+    }
+
+    val dismissFullscreenEditor: () -> Unit = {
+        showFullScreenEditor = false
+        scope.launch {
+            kotlinx.coroutines.delay(220)
+            onEvent(CategoriesEvent.DismissSheet)
+        }
+    }
+
+    BackHandler(enabled = showFullScreenEditor) {
+        dismissFullscreenEditor()
+    }
 
     Box(
         modifier = Modifier
@@ -93,7 +119,13 @@ private fun CategoriesContent(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title          = { Text(stringResource(R.string.categories_title), fontWeight = FontWeight.Bold) },
+                title          = {
+                    Text(
+                        stringResource(R.string.categories_title),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_desc_back))
@@ -130,8 +162,8 @@ private fun CategoriesContent(
         }
     }
 
-    // ── Add / Action / Edit / Success sheet ───────────────────────────────────
-    if (uiState.sheetMode != CategorySheetMode.Hidden) {
+    // The action state keeps the compact sheet presentation. Fullscreen editor states never render here.
+    if ((uiState.sheetMode == CategorySheetMode.Action || uiState.sheetMode == CategorySheetMode.Success) && !showFullScreenEditor) {
         ModalBottomSheet(
             onDismissRequest = {},
             sheetState       = sheetState,
@@ -154,36 +186,33 @@ private fun CategoriesContent(
         }
     }
 
+    AnimatedVisibility(
+        visible = showFullScreenEditor,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)),
+        ) {
+            CategoryEditorScreen(
+                uiState = uiState,
+                onEvent = onEvent,
+                onDismiss = dismissFullscreenEditor,
+            )
+        }
+    }
+
     // ── Delete confirm dialog ─────────────────────────────────────────────────
     if (uiState.showDeleteDialog) {
         val catName = uiState.selectedCategory?.name.orEmpty()
-        AlertDialog(
-            onDismissRequest = { onEvent(CategoriesEvent.DismissDeleteDialog) },
-            shape            = RoundedCornerShape(20.dp),
-            title            = { Text(stringResource(R.string.category_delete_title, catName), fontWeight = FontWeight.SemiBold) },
-            text             = {
-                Text(
-                    stringResource(R.string.category_delete_message),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { onEvent(CategoriesEvent.ConfirmDelete) },
-                    shape = AppButtonShape,
-                    colors = ButtonDefaults.textButtonColors(contentColor = ExpenseRed),
-                ) {
-                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.SemiBold)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { onEvent(CategoriesEvent.DismissDeleteDialog) },
-                    shape = AppButtonShape,
-                ) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
+        DeleteConfirmationDialog(
+            title = stringResource(R.string.category_delete_title, catName),
+            message = stringResource(R.string.category_delete_message),
+            onConfirm = { onEvent(CategoriesEvent.ConfirmDelete) },
+            onDismiss = { onEvent(CategoriesEvent.DismissDeleteDialog) },
         )
     }
 }

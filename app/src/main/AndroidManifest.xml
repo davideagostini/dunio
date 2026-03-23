@@ -40,6 +40,32 @@
             </intent-filter>
         </service>
 
+        <receiver
+            android:name=".widget.QuickAccessWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_quick_access_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_access_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.SpendingSummaryWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_spending_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/spending_summary_widget_info" />
+        </receiver>
+
     </application>
 
 </manifest>

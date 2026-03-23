@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +55,7 @@ import java.util.Locale
 @Composable
 fun MonthCloseScreen(
     onBack: () -> Unit,
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
     viewModel: MonthCloseViewModel = hiltViewModel(),
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -64,7 +66,13 @@ fun MonthCloseScreen(
         return
     }
 
-    MonthCloseContent(uiState = uiState, onBack = onBack, onSelectMonth = viewModel::selectMonth, onSetStatus = viewModel::setStatus)
+    MonthCloseContent(
+        uiState = uiState,
+        onBack = onBack,
+        onSelectMonth = viewModel::selectMonth,
+        onSetStatus = viewModel::setStatus,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,8 +82,15 @@ private fun MonthCloseContent(
     onBack: () -> Unit,
     onSelectMonth: (String) -> Unit,
     onSetStatus: (String) -> Unit,
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
+
+    // Keep the shared bottom bar hidden while the month picker overlay is open.
+    LaunchedEffect(showMonthPicker) {
+        onMonthPickerVisibilityChanged(showMonthPicker)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -87,7 +102,13 @@ private fun MonthCloseContent(
                 .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_month_close_title), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.settings_month_close_title),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_desc_back))
@@ -142,6 +163,7 @@ private fun MonthCloseContent(
                             text = if (uiState.canClose) stringResource(R.string.month_close_ready) else stringResource(R.string.month_close_needs_review),
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
@@ -247,10 +269,24 @@ private fun ChecklistCard(title: String, subtitle: String, value: String) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }

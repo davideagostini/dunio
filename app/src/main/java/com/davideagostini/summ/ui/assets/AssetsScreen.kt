@@ -1,5 +1,11 @@
 package com.davideagostini.summ.ui.assets
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,15 +14,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,18 +37,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
+import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.ui.assets.components.AssetActionSheet
 import com.davideagostini.summ.ui.assets.components.AssetCard
+import com.davideagostini.summ.ui.assets.components.AssetEditorScreen
 import com.davideagostini.summ.ui.assets.components.AssetsSplitButton
 import com.davideagostini.summ.ui.assets.components.AssetsSummaryCard
 import com.davideagostini.summ.ui.assets.components.AssetsToolbar
 import com.davideagostini.summ.ui.assets.components.EmptyAssetsState
+import com.davideagostini.summ.ui.auth.components.AuthErrorCard
+import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
 import com.davideagostini.summ.ui.components.FullScreenLoading
+import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
-import com.davideagostini.summ.ui.theme.AppButtonShape
-import com.davideagostini.summ.ui.theme.ExpenseRed
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 import java.util.Locale
@@ -51,9 +59,12 @@ import java.util.Locale
 @Composable
 fun AssetsScreen(
     viewModel: AssetsViewModel = hiltViewModel(),
+    onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val assetHistory by viewModel.assetHistory.collectAsStateWithLifecycle()
+    val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (isLoading) {
@@ -63,19 +74,36 @@ fun AssetsScreen(
 
     AssetsContent(
         assetHistory = assetHistory,
+        monthCloses = monthCloses,
         uiState = uiState,
         onEvent = viewModel::handleEvent,
+        onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
     )
+
+    if (uiState.showDeleteDialog) {
+        val name = uiState.selectedAsset?.name.orEmpty()
+        DeleteConfirmationDialog(
+            title = stringResource(R.string.assets_delete_title, name),
+            message = stringResource(R.string.assets_delete_message),
+            onConfirm = { viewModel.handleEvent(AssetsEvent.ConfirmDelete) },
+            onDismiss = { viewModel.handleEvent(AssetsEvent.DismissDeleteDialog) },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AssetsContent(
     assetHistory: List<AssetHistoryEntry>,
+    monthCloses: List<MonthClose>,
     uiState: AssetsUiState,
     onEvent: (AssetsEvent) -> Unit,
+    onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var allowSheetHide by remember { mutableStateOf(false) }
+    var showFullScreenEditor by remember { mutableStateOf(uiState.sheetMode == AssetSheetMode.Add || uiState.sheetMode == AssetSheetMode.Edit) }
     var showMonthPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
@@ -84,6 +112,9 @@ private fun AssetsContent(
     )
     val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(monthOptions)
+    val isMonthClosed = remember(monthCloses, selectedMonth) {
+        monthCloses.any { it.period == selectedMonth && it.status == "closed" }
+    }
     val monthAssets = remember(assetHistory, selectedMonth) {
         buildAssetsSnapshotForMonth(assetHistory, selectedMonth)
     }
@@ -107,6 +138,37 @@ private fun AssetsContent(
         previousMonthAssets.any { it.name.trim().lowercase(Locale.getDefault()) !in currentNames }
     }
 
+    // Keep the shared bottom bar hidden while the month picker overlay is open.
+    LaunchedEffect(showMonthPicker) {
+        onMonthPickerVisibilityChanged(showMonthPicker)
+    }
+
+    // Add/Edit own the fullscreen editor flow. Save success stays there too, so the presentation never narrows.
+    LaunchedEffect(uiState.sheetMode) {
+        if (uiState.sheetMode == AssetSheetMode.Add || uiState.sheetMode == AssetSheetMode.Edit) {
+            showFullScreenEditor = true
+        } else if (uiState.sheetMode == AssetSheetMode.Hidden) {
+            showFullScreenEditor = false
+        }
+    }
+
+    // The nav host needs to know when the fullscreen editor is active so the shared bottom bar disappears.
+    LaunchedEffect(showFullScreenEditor) {
+        onFullscreenEditVisibilityChanged(showFullScreenEditor)
+    }
+
+    val dismissFullscreenEditor: () -> Unit = {
+        showFullScreenEditor = false
+        scope.launch {
+            kotlinx.coroutines.delay(220)
+            onEvent(AssetsEvent.DismissSheet)
+        }
+    }
+
+    BackHandler(enabled = showFullScreenEditor) {
+        dismissFullscreenEditor()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -119,14 +181,15 @@ private fun AssetsContent(
                 .navigationBarsPadding(),
             contentPadding = PaddingValues(bottom = 140.dp),
         ) {
-            item {
-                Text(
-                    text = stringResource(R.string.dashboard_assets_label),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                )
-            }
+                item {
+                    Text(
+                        text = stringResource(R.string.dashboard_assets_label),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    )
+                }
 
             item {
                 AssetsToolbar(
@@ -147,6 +210,29 @@ private fun AssetsContent(
                 )
             }
 
+            if (isMonthClosed) {
+                item {
+                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                        MonthCloseReadOnlyBanner(
+                            message = stringResource(
+                                R.string.month_close_read_only_message,
+                                formatMonthLabel(selectedMonth),
+                            ),
+                        )
+                    }
+                }
+            }
+
+            if (uiState.operationErrorMessage != null && uiState.sheetMode == AssetSheetMode.Hidden) {
+                item {
+                    // Top-level actions such as "Copy previous month" are not tied to a sheet, so show the same
+                    // error card directly in the screen content when a write fails.
+                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                        AuthErrorCard(uiState.operationErrorMessage)
+                    }
+                }
+            }
+
             if (filteredAssets.isEmpty()) {
                 item {
                     EmptyAssetsState(hasAssets = monthAssets.isNotEmpty() || assetHistory.isNotEmpty())
@@ -159,6 +245,7 @@ private fun AssetsContent(
                         index = index,
                         count = filteredAssets.size,
                         change = calculateAssetChange(assetHistory, asset.name, selectedMonth),
+                        readOnly = isMonthClosed,
                         onClick = { onEvent(AssetsEvent.Select(asset)) },
                     )
                 }
@@ -167,8 +254,9 @@ private fun AssetsContent(
 
         AssetsSplitButton(
             canCopyPreviousMonth = canCopyPreviousMonth,
-            onAddAsset = { onEvent(AssetsEvent.StartAdd) },
-            onCopyPreviousMonth = { onEvent(AssetsEvent.CopyPreviousMonth) },
+            readOnly = isMonthClosed,
+            onAddAsset = { if (!isMonthClosed) onEvent(AssetsEvent.StartAdd) },
+            onCopyPreviousMonth = { if (!isMonthClosed) onEvent(AssetsEvent.CopyPreviousMonth) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 94.dp),
@@ -184,7 +272,8 @@ private fun AssetsContent(
         )
     }
 
-    if (uiState.sheetMode != AssetSheetMode.Hidden) {
+    // The bottom sheet is now reserved for the compact action/success states only.
+    if ((uiState.sheetMode == AssetSheetMode.Action || uiState.sheetMode == AssetSheetMode.Success) && !showFullScreenEditor) {
         ModalBottomSheet(
             onDismissRequest = {},
             sheetState = sheetState,
@@ -194,6 +283,11 @@ private fun AssetsContent(
         ) {
             AssetActionSheet(
                 uiState = uiState,
+                readOnly = isMonthClosed,
+                readOnlyMessage = stringResource(
+                    R.string.month_close_edit_disabled_message,
+                    formatMonthLabel(selectedMonth),
+                ),
                 onEvent = onEvent,
                 onDismiss = {
                     scope.launch {
@@ -207,29 +301,38 @@ private fun AssetsContent(
         }
     }
 
+    AnimatedVisibility(
+        visible = showFullScreenEditor,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)),
+        ) {
+            AssetEditorScreen(
+                uiState = uiState,
+                readOnly = isMonthClosed,
+                readOnlyMessage = stringResource(
+                    R.string.month_close_edit_disabled_message,
+                    formatMonthLabel(selectedMonth),
+                ),
+                onEvent = onEvent,
+                onDismiss = dismissFullscreenEditor,
+            )
+        }
+    }
+
     if (uiState.showDeleteDialog) {
         val name = uiState.selectedAsset?.name.orEmpty()
-        AlertDialog(
-            onDismissRequest = { onEvent(AssetsEvent.DismissDeleteDialog) },
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-            title = { Text(stringResource(R.string.assets_delete_title, name), fontWeight = FontWeight.SemiBold) },
-            text = { Text(stringResource(R.string.assets_delete_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = { onEvent(AssetsEvent.ConfirmDelete) },
-                    shape = AppButtonShape,
-                ) {
-                    Text(stringResource(R.string.action_delete), color = ExpenseRed, fontWeight = FontWeight.SemiBold)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { onEvent(AssetsEvent.DismissDeleteDialog) },
-                    shape = AppButtonShape,
-                ) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
+        DeleteConfirmationDialog(
+            title = stringResource(R.string.assets_delete_title, name),
+            message = stringResource(R.string.assets_delete_message),
+            onConfirm = { onEvent(AssetsEvent.ConfirmDelete) },
+            onDismiss = { onEvent(AssetsEvent.DismissDeleteDialog) },
         )
     }
+
 }
