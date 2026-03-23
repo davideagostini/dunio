@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.settings
 
+import android.content.ClipData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,13 +36,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,7 @@ import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.settings.components.SettingsSectionLabel
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +71,8 @@ fun SettingsScreen(
     userPhotoUrl: String?,
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -98,7 +102,13 @@ fun SettingsScreen(
                     userPhotoUrl = userPhotoUrl,
                     householdName = householdName,
                     householdId = householdId,
-                    onCopyHouseholdId = { clipboardManager.setText(AnnotatedString(householdId)) },
+                    // The new clipboard API is suspend-based, so the copy action needs to run in a
+                    // local coroutine instead of calling the deprecated synchronous manager.
+                    onCopyHouseholdId = {
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipData.newPlainText("household_id", householdId).toClipEntry())
+                        }
+                    },
                     onSignOut = { showSignOutDialog = true },
                 )
             }

@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.settings.members
 
+import android.content.ClipData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,11 +37,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,7 @@ import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
 import com.davideagostini.summ.ui.theme.listItemShape
+import kotlinx.coroutines.launch
 
 @Composable
 fun MembersScreen(
@@ -97,7 +100,8 @@ private fun MembersContent(
     onUpdateInviteRole: (String) -> Unit,
     onSaveInvite: () -> Unit,
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     val signedInRole = members.firstOrNull { it.userId == currentUserId }?.role ?: "member"
 
     Column(
@@ -131,7 +135,13 @@ private fun MembersContent(
             item {
                 MembersHeaderCard(
                     householdId = householdId,
-                    onCopyHouseholdId = { clipboardManager.setText(AnnotatedString(householdId)) },
+                    // Copying the household id uses the new suspend clipboard API so we can avoid
+                    // the deprecated LocalClipboardManager path.
+                    onCopyHouseholdId = {
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipData.newPlainText("household_id", householdId).toClipEntry())
+                        }
+                    },
                 )
             }
 
