@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecurringViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     recurringRepository: RecurringTransactionRepository,
     categoryRepository: CategoryRepository,
     entryRepository: EntryRepository,

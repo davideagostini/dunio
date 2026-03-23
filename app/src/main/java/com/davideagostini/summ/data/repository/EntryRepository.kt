@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Singleton
 class EntryRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val entryDao: EntryDao,
 ) {
 

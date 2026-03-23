@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val repository: CategoryRepository,
 ) : ViewModel() {
     private val categoriesLoaded = MutableStateFlow(false)

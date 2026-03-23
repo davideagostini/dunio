@@ -32,7 +32,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EntriesViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     getHomeData: GetHomeDataUseCase,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,

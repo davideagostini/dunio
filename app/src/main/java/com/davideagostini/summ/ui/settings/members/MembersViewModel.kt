@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MembersViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val repository: MemberRepository,
 ) : ViewModel() {
     private val membersLoaded = MutableStateFlow(false)

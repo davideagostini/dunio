@@ -41,7 +41,7 @@ data class EntryUiState(
 
 @HiltViewModel
 class QuickEntryViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
