@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
@@ -112,83 +111,80 @@ private fun CategoryFormContent(
     onSave: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    // The form body scrolls independently so the bottom actions remain fixed and reachable.
+    // Let the emoji grid consume the leftover space so the form does not leave a dead area
+    // between the picker content and the fixed bottom actions.
     Column(modifier = Modifier.fillMaxSize()) {
-        Column(
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(Modifier.height(16.dp))
+
+        uiState.operationErrorMessage?.let { message ->
+            AuthErrorCard(message)
+            Spacer(Modifier.height(12.dp))
+        }
+
+        OutlinedTextField(
+            value = uiState.editName,
+            onValueChange = { onEvent(CategoriesEvent.UpdateFormName(it)) },
+            label = { Text(stringResource(R.string.category_name_label)) },
+            isError = uiState.nameError != null,
+            supportingText = uiState.nameError?.let { msg -> { Text(msg) } },
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = stringResource(R.string.category_emoji_label),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        // The current emoji stays visible while the user keeps scrolling through the picker grid.
+        if (uiState.editEmoji.isNotBlank()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 6.dp),
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Text(uiState.editEmoji, fontSize = 18.sp)
+                    }
+                }
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    text = stringResource(R.string.category_selected_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        Spacer(Modifier.height(4.dp))
+
+        EmojiPickerGrid(
+            selectedEmoji = uiState.editEmoji,
+            onEmojiSelected = { onEvent(CategoriesEvent.UpdateFormEmoji(it)) },
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(16.dp))
+                .weight(1f),
+        )
 
-            uiState.operationErrorMessage?.let { message ->
-                AuthErrorCard(message)
-                Spacer(Modifier.height(12.dp))
-            }
-
-            OutlinedTextField(
-                value = uiState.editName,
-                onValueChange = { onEvent(CategoriesEvent.UpdateFormName(it)) },
-                label = { Text(stringResource(R.string.category_name_label)) },
-                isError = uiState.nameError != null,
-                supportingText = uiState.nameError?.let { msg -> { Text(msg) } },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(R.string.category_emoji_label),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            // The current emoji stays visible while the user keeps scrolling through the picker grid.
-            if (uiState.editEmoji.isNotBlank()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 6.dp),
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(36.dp),
-                    ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Text(uiState.editEmoji, fontSize = 18.sp)
-                        }
-                    }
-                    Spacer(Modifier.size(8.dp))
-                    Text(
-                        text = stringResource(R.string.category_selected_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(Modifier.height(4.dp))
-
-            EmojiPickerGrid(
-                selectedEmoji = uiState.editEmoji,
-                onEmojiSelected = { onEvent(CategoriesEvent.UpdateFormEmoji(it)) },
-            )
-
-            Spacer(Modifier.height(16.dp))
-        }
+        Spacer(Modifier.height(16.dp))
 
         Surface(
             tonalElevation = 0.dp,
