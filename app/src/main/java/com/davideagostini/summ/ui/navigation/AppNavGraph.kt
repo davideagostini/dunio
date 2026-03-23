@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.navigation
 
+// Root navigation shell for the mobile app: owns auth gating, route wiring, and shared overlay visibility.
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,12 +74,14 @@ fun AppNavGraph(
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
 
+    // The app stays behind the auth gate until the session is restored and household access is known.
     val readyState = sessionState as? SessionState.Ready
     if (readyState == null) {
         AuthGateScreen(sessionViewModel)
         return
     }
 
+    // Shared overlay state lives here so dashboard, assets, entries, and month close can coordinate with the shell.
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -96,23 +99,27 @@ fun AppNavGraph(
     fun navigate(route: String) = navController.navigate(route) { launchSingleTop = true }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // The NavHost keeps feature routes isolated while the shell manages cross-screen overlays.
         NavHost(
             navController = navController,
             startDestination = "dashboard",
             modifier = Modifier.matchParentSize(),
         ) {
             composable("entries") {
+                // Entries reports overlay visibility so the shell can hide the bottom bar when needed.
                 EntriesScreenWithOverlayState(
                     onFullscreenEditVisibilityChanged = { showEntriesFullscreenEditor = it },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                 )
             }
             composable("dashboard") {
+                // Dashboard only needs to report month-picker visibility.
                 DashboardScreen(
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                 )
             }
             composable("assets") {
+                // Assets also participates in the shared overlay state because it uses fullscreen editing.
                 AssetsScreen(
                     onFullscreenEditVisibilityChanged = { showAssetsFullscreenEditor = it },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
@@ -145,6 +152,7 @@ fun AppNavGraph(
                 RecurringScreen(onBack = { navController.popBackStack() })
             }
             composable("month-close") {
+                // Month close uses the same shared month picker overlay as the other financial screens.
                 MonthCloseScreen(
                     onBack = { navController.popBackStack() },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
@@ -152,6 +160,7 @@ fun AppNavGraph(
             }
         }
 
+        // Hide the bottom bar whenever a modal or fullscreen flow would compete for attention.
         if (currentRoute != "categories" &&
             currentRoute != "members" &&
             currentRoute != "recurring" &&
@@ -176,6 +185,7 @@ fun AppNavGraph(
         }
     }
 
+    // Quick entry is a modal sheet above the shell, so dismissal must restore the sheet flag explicitly.
     if (showEntrySheet) {
         ModalBottomSheet(
             onDismissRequest = {},
@@ -205,6 +215,7 @@ private fun EntriesScreenWithOverlayState(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
     viewModel: com.davideagostini.summ.ui.entries.EntriesViewModel = hiltViewModel(),
 ) {
+    // The wrapper keeps navigation concerns out of the entries screen while still exposing overlay state to the shell.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()

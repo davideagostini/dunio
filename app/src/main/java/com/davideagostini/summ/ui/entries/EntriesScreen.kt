@@ -1,5 +1,7 @@
 package com.davideagostini.summ.ui.entries
 
+// EntriesScreen orchestrates the entries feature: it collects state, routes events to the ViewModel,
+// and decides which overlay is visible at any given time without holding business logic itself.
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -57,6 +59,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
+    // The screen stays thin: it only observes immutable state and forwards callbacks to the ViewModel.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -65,10 +68,12 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
     val onEvent = viewModel::handleEvent
 
     if (isLoading) {
+        // Keep the user on a single loading surface until all feature data streams are ready.
         FullScreenLoading()
         return
     }
 
+    // All feature overlays are rendered from the same screen scope so their z-order stays predictable.
     EntriesContent(
         homeState = homeState,
         categories = categories,
@@ -78,7 +83,6 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
         onFullscreenEditVisibilityChanged = {},
         onMonthPickerVisibilityChanged = {},
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +96,7 @@ internal fun EntriesContent(
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
+    // This local state only manages transient UI concerns such as sheet visibility and overlay behavior.
     var allowSheetHide by remember { mutableStateOf(false) }
     var showFullScreenEdit by remember { mutableStateOf(uiState.sheetMode == EntrySheetMode.Edit) }
     var isFullscreenEditFlow by remember { mutableStateOf(uiState.sheetMode == EntrySheetMode.Edit) }
@@ -130,6 +135,7 @@ internal fun EntriesContent(
         onMonthPickerVisibilityChanged(showMonthPicker)
     }
 
+    // Fullscreen edit is a separate presentation mode from the compact action sheet.
     LaunchedEffect(uiState.sheetMode) {
         if (uiState.sheetMode == EntrySheetMode.Edit) {
             // Once edit starts, the whole edit/success flow stays fullscreen until it is fully dismissed.
@@ -141,9 +147,11 @@ internal fun EntriesContent(
         }
     }
     LaunchedEffect(showFullScreenEdit) {
+        // Propagate the fullscreen state to the nav graph so the shared bottom bar can be hidden.
         onFullscreenEditVisibilityChanged(showFullScreenEdit)
     }
 
+    // Back should close the fullscreen editor before it clears the underlying ViewModel state.
     val dismissFullscreenEdit: () -> Unit = {
         showFullScreenEdit = false
         scope.launch {
@@ -161,6 +169,7 @@ internal fun EntriesContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
+        // The list is the primary content of the screen; all overlays are layered above it.
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -227,6 +236,7 @@ internal fun EntriesContent(
                 }
 
                 if (dayGroups.isEmpty()) {
+                    // Empty state changes its copy depending on whether the month has data at all or only filters hide it.
                     item {
                         EmptyState(
                             message = if (homeState.entries.isEmpty()) {
@@ -258,8 +268,10 @@ internal fun EntriesContent(
         )
     }
 
+    // The compact action sheet stays mounted for both action and success states, matching the assets flow.
     // Keep delete success in the compact bottom sheet, like assets. Fullscreen remains reserved for edit flow.
     if ((uiState.sheetMode == EntrySheetMode.Action || uiState.sheetMode == EntrySheetMode.Success) && !isFullscreenEditFlow) {
+        // The sheet is only responsible for the compact action surface; success remains within the same container.
         ModalBottomSheet(
             onDismissRequest = {},
             sheetState = sheetState,
@@ -294,6 +306,7 @@ internal fun EntriesContent(
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         modifier = Modifier.fillMaxSize(),
     ) {
+        // Fullscreen edit is rendered as a dedicated overlay so it reads like a separate screen.
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -315,6 +328,7 @@ internal fun EntriesContent(
     }
 
     if (uiState.showDeleteDialog) {
+        // Delete confirmation remains top-level so it can sit above the current sheet or fullscreen overlay.
         val desc = uiState.selectedEntry?.description.orEmpty()
         DeleteConfirmationDialog(
             title = stringResource(R.string.entries_delete_title, desc),

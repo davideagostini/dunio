@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.dashboard
 
+// Dashboard screen orchestration: it reads aggregated finance state, syncs the shared month picker, and renders the KPI stack.
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,6 +81,7 @@ private fun DashboardContent(
     var showMonthPicker by remember { mutableStateOf(false) }
     val currentMonth = YearMonth.now().toString()
     val monthOptions = remember { buildRecentMonthOptions() }
+    // When the stored month is invalid or missing, fall back to the most recent available month.
     val defaultMonth = remember(monthOptions, currentMonth) {
         preferredRecentMonth(monthOptions, currentMonth)
     }
@@ -87,10 +89,12 @@ private fun DashboardContent(
         ?.takeIf { it in monthOptions }
         ?: defaultMonth
 
+    // Seed the dashboard with a valid month once, then let the ViewModel own the selected month state.
     LaunchedEffect(Unit) {
         if (defaultMonth.isNotBlank()) onSelectMonth(defaultMonth)
     }
 
+    // The dashboard derives all visible metrics from the selected month and the aggregated finance lists.
     val assetsForMonth = remember(assetHistory, selectedMonth) {
         buildAssetsSnapshotForMonth(assetHistory, selectedMonth)
     }
@@ -183,6 +187,7 @@ private fun DashboardContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainer),
         ) {
+            // The dashboard remains a vertically stacked mobile layout so the KPI cards stay readable on small screens.
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

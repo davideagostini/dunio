@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.components
 
+// Shared month-picker UI used by multiple screens: a compact trigger field and a full-screen overlay selector.
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -45,6 +46,7 @@ fun MonthPickerField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Compact trigger surface reused in toolbars and settings screens.
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(999.dp),
@@ -87,6 +89,7 @@ fun MonthPickerOverlay(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Full-screen overlay keeps month selection consistent with the mobile-first app navigation.
     BackHandler(enabled = visible) {
         onDismiss()
     }
@@ -137,6 +140,7 @@ fun MonthPickerOverlay(
                 }
 
                 options.forEachIndexed { index, option ->
+                    // Top/bottom padding changes based on position so the list reads like a grouped sheet.
                     val verticalPadding = when {
                         options.size == 1 -> PaddingValues(horizontal = 16.dp, vertical = 4.dp)
                         index == 0 -> PaddingValues(top = 4.dp, bottom = 1.dp)

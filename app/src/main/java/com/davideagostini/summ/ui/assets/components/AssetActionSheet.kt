@@ -1,5 +1,7 @@
 package com.davideagostini.summ.ui.assets.components
 
+// Presentational sheet for the assets feature: this file renders the compact
+// action state, the transient success state, and the reusable action buttons.
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -58,6 +60,8 @@ fun AssetActionSheet(
     onEvent: (AssetsEvent) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // The card acts as the sheet surface and keeps the action flow visually
+    // separate from the rest of the screen content.
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -77,6 +81,8 @@ fun AssetActionSheet(
                 }
             }
 
+            // The sheet animates between action and success content so the delete
+            // confirmation feels like part of the same flow instead of a reset.
             AnimatedContent(
                 targetState = uiState.sheetMode,
                 transitionSpec = {
@@ -115,6 +121,8 @@ private fun AssetActionContent(
     onEvent: (AssetsEvent) -> Unit,
 ) {
     val asset = uiState.selectedAsset ?: return
+    // The action content focuses on the selected asset and exposes the two main
+    // actions in a compact, mobile-friendly row.
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -157,6 +165,8 @@ private fun AssetActionContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // The delete button inherits the red content color so icon and label
+            // stay consistent with the destructive action styling.
             OutlinedButton(
                 onClick = { onEvent(AssetsEvent.RequestDelete) },
                 enabled = !readOnly,
@@ -185,6 +195,8 @@ private fun AssetActionContent(
 
 @Composable
 private fun AssetSuccessContent() {
+    // Success mirrors the categories flow: a centered confirmation icon followed
+    // by the title and the short feedback message.
     Column(
         modifier = Modifier
             .fillMaxWidth()

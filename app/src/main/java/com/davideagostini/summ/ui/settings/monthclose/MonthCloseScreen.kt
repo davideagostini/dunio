@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.settings.monthclose
 
+// Month close screen orchestration: it exposes the selected period, checklist status, and the shared month picker overlay.
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -101,6 +102,7 @@ private fun MonthCloseContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
+            // The top app bar keeps navigation obvious while the month close screen stays focused on a single period.
             TopAppBar(
                 title = {
                     Text(
@@ -125,6 +127,7 @@ private fun MonthCloseContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 item {
+                    // The month picker and status chip share the same row to keep the selected period visually anchored.
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         MonthPickerField(
                             label = formatMonthOption(uiState.month),
@@ -146,8 +149,9 @@ private fun MonthCloseContent(
                     }
                 }
 
-            item {
-                Card(
+                item {
+                    // This overview card summarizes the current close state before the user inspects the checklist items.
+                    Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
@@ -175,9 +179,22 @@ private fun MonthCloseContent(
                 }
             }
 
-            item { ChecklistCard(title = stringResource(R.string.month_close_asset_snapshots), subtitle = stringResource(R.string.month_close_asset_snapshots_subtitle), value = uiState.assetSnapshotCount.toString()) }
-            item { ChecklistCard(title = stringResource(R.string.month_close_transactions), subtitle = stringResource(R.string.month_close_transactions_subtitle), value = uiState.transactionCount.toString()) }
             item {
+                ChecklistCard(
+                    title = stringResource(R.string.month_close_asset_snapshots),
+                    subtitle = stringResource(R.string.month_close_asset_snapshots_subtitle),
+                    value = uiState.assetSnapshotCount.toString(),
+                )
+            }
+            item {
+                ChecklistCard(
+                    title = stringResource(R.string.month_close_transactions),
+                    subtitle = stringResource(R.string.month_close_transactions_subtitle),
+                    value = uiState.transactionCount.toString(),
+                )
+            }
+            item {
+                // Recurring checks are handled separately because they can block closing even when the core counts are complete.
                 Card(
                     shape = RoundedCornerShape(28.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
@@ -225,6 +242,7 @@ private fun MonthCloseContent(
             }
 
             item {
+                // The action row is the final gate: it either closes the month or reopens it depending on readiness.
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = { onSetStatus("closed") },
@@ -257,6 +275,7 @@ private fun MonthCloseContent(
 
 @Composable
 private fun ChecklistCard(title: String, subtitle: String, value: String) {
+    // Reusable checklist row used for the month close counts and readiness indicators.
     Card(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
@@ -291,5 +310,6 @@ private fun ChecklistCard(title: String, subtitle: String, value: String) {
     }
 }
 
+// The selected month is shown in a human-friendly format so the screen reads like a lightweight checklist, not a raw data table.
 private fun formatMonthOption(monthValue: String): String =
     YearMonth.parse(monthValue).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))

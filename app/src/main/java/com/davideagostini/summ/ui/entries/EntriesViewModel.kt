@@ -1,5 +1,7 @@
 package com.davideagostini.summ.ui.entries
 
+// EntriesViewModel owns the data and mutation logic for the entries feature: it merges household data,
+// exposes a single immutable UI state, and translates UI events into repository operations.
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,31 +38,39 @@ class EntriesViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
+    // These flags are used only to decide when the initial loading screen can disappear.
     private val homeLoaded = MutableStateFlow(false)
     private val categoriesLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
 
+    // Household entries are provided by the shared home use case and marked as loaded as soon as the first value arrives.
     val homeState: StateFlow<HomeState> = getHomeData()
         .onEach { homeLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeState())
 
+    // Categories are needed for entry editing, so they load together with the main entries stream.
     val categories: StateFlow<List<Category>> = categoryRepository.allCategories
         .onEach { categoriesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    // Month close status determines read-only behavior for the current period.
     val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    // Loading ends only when every upstream source has emitted at least once.
     val isLoading: StateFlow<Boolean> = combine(homeLoaded, categoriesLoaded, monthClosesLoaded) { homeReady, categoriesReady, monthClosesReady ->
         !homeReady || !categoriesReady || !monthClosesReady
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
+    // The UI state stays as a single immutable snapshot so the screen can render deterministically.
     private val _uiState = MutableStateFlow(EntriesUiState())
     val uiState: StateFlow<EntriesUiState> = _uiState.asStateFlow()
 
+    // All UI intents are funneled through one handler to keep the state machine explicit.
     fun handleEvent(event: EntriesEvent) {
         when (event) {
+            // Filter and search updates are pure state mutations and do not hit the repository layer.
             is EntriesEvent.SelectMonth    -> _uiState.update { it.copy(selectedMonth = event.monthKey) }
             is EntriesEvent.SelectFilter   -> _uiState.update { it.copy(filterType = event.filter) }
             EntriesEvent.ToggleSearch      -> _uiState.update {
@@ -74,6 +84,7 @@ class EntriesViewModel @Inject constructor(
                 it.copy(sheetMode = EntrySheetMode.Action, selectedEntry = event.entry)
             }
             EntriesEvent.StartEdit         -> {
+                // Editing pre-fills the form from the currently selected entry and resolves the category object.
                 val entry = _uiState.value.selectedEntry ?: return
                 val cat   = categories.value.firstOrNull { it.name == entry.category }
                 _uiState.update {
@@ -90,6 +101,7 @@ class EntriesViewModel @Inject constructor(
                     )
                 }
             }
+            // Delete opens a separate confirmation dialog before any repository write happens.
             EntriesEvent.RequestDelete     -> _uiState.update { it.copy(showDeleteDialog = true, operationErrorMessage = null) }
             EntriesEvent.DismissSheet      -> _uiState.update { it.clearTransientState() }
             is EntriesEvent.UpdateType         -> _uiState.update { it.copy(editType = event.value, operationErrorMessage = null) }
@@ -104,6 +116,7 @@ class EntriesViewModel @Inject constructor(
     }
 
     private fun saveEdit() {
+        // Validation runs before the Firestore write so the screen can show field-level feedback immediately.
         val state = _uiState.value
         val entry = state.selectedEntry ?: return
         var hasError = false
@@ -133,7 +146,9 @@ class EntriesViewModel @Inject constructor(
                     )
                 )
                 _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, operationErrorMessage = null) }
+                // Keep the success state visible long enough for the user to confirm the write completed.
                 delay(1_500L)
+                // After the success toast-equivalent window, return to the neutral screen state.
                 _uiState.update { it.clearTransientState() }
             } catch (throwable: Throwable) {
                 _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
@@ -142,6 +157,7 @@ class EntriesViewModel @Inject constructor(
     }
 
     private fun confirmDelete() {
+        // Keep a stable snapshot of the entry to delete so the repository call is immune to later UI changes.
         val entry = _uiState.value.selectedEntry ?: return
 
         // Delete errors must stay in the entry action flow instead of crashing the coroutine on Main.
@@ -158,9 +174,12 @@ class EntriesViewModel @Inject constructor(
                     )
                 )
                 _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
+                // Keep the delete success state visible for the same duration as the edit success path.
                 delay(1_500L)
+                // Delete success also resets the transient flow back to the neutral screen state.
                 _uiState.update { it.clearTransientState() }
             } catch (throwable: Throwable) {
+                // Failed deletes return to the action flow and surface the translated backend message.
                 _uiState.update {
                     it.copy(
                         showDeleteDialog = false,
@@ -172,6 +191,7 @@ class EntriesViewModel @Inject constructor(
     }
 
     private fun EntriesUiState.clearTransientState(): EntriesUiState =
+        // Reset everything that belongs to the transient sheet flow while preserving the month/search context.
         copy(
             sheetMode = EntrySheetMode.Hidden,
             selectedEntry = null,

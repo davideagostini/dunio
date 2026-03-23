@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.entries.components
 
+// EntryActionSheet renders the compact entries sheet, the edit form, and the success state used by the feature.
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -89,6 +90,7 @@ internal fun EntryActionSheet(
     onDismiss: () -> Unit,
     fullScreen: Boolean = false,
 ) {
+    // Fullscreen edit reuses the same content tree, but it needs a different container and inset handling.
     val containerModifier = if (fullScreen) {
         Modifier
             .fillMaxSize()
@@ -104,6 +106,7 @@ internal fun EntryActionSheet(
             .imePadding()
     }
 
+    // Success is rendered immediately as a standalone fullscreen surface when edit mode completes.
     if (fullScreen && uiState.sheetMode == EntrySheetMode.Success) {
         Surface(modifier = containerModifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
             // Fullscreen edit success should behave like a standalone screen, not like a form with a top action row.
@@ -116,8 +119,10 @@ internal fun EntryActionSheet(
         return
     }
 
+    // The inner content swaps between action, edit, and success without changing the outer sheet container.
     val content: @Composable () -> Unit = {
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp).systemBarsPadding()) {
+            // Keep the close action in the top-right corner so the sheet matches the rest of the app patterns.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -126,9 +131,11 @@ internal fun EntryActionSheet(
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }
+            // AnimatedContent preserves the previous state long enough to animate between sheet modes.
             AnimatedContent(
                 targetState    = uiState.sheetMode,
                 transitionSpec = {
+                    // Direction-aware horizontal motion makes the sheet feel like a small state machine instead of a hard swap.
                     val forward = targetState.ordinal > initialState.ordinal
                     if (forward) {
                         (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
@@ -139,6 +146,7 @@ internal fun EntryActionSheet(
                 label = "entry_sheet_mode",
             ) { mode ->
                 when (mode) {
+                    // Action mode shows the summary plus the delete/edit buttons for the selected entry.
                     EntrySheetMode.Action  -> ActionContent(
                         entry   = uiState.selectedEntry ?: return@AnimatedContent,
                         errorMessage = uiState.operationErrorMessage,
@@ -147,6 +155,7 @@ internal fun EntryActionSheet(
                         onEdit  = { onEvent(EntriesEvent.StartEdit) },
                         onDelete = { onEvent(EntriesEvent.RequestDelete) },
                     )
+                    // Edit mode expands into the full form with validation, category picking, and date selection.
                     EntrySheetMode.Edit    -> EntryEditForm(
                         uiState    = uiState,
                         categories = categories,
@@ -155,6 +164,7 @@ internal fun EntryActionSheet(
                         onEvent    = onEvent,
                         onCancel   = onDismiss,
                     )
+                    // Success stays in the same container so the user gets a stable completion state.
                     EntrySheetMode.Success -> EntrySuccessContent()
                     EntrySheetMode.Hidden  -> Unit
                 }
@@ -163,6 +173,7 @@ internal fun EntryActionSheet(
     }
 
     if (fullScreen) {
+        // Fullscreen edit uses a surface instead of a card because it behaves like a standalone screen.
         Surface(modifier = containerModifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
             content()
         }
@@ -189,6 +200,7 @@ private fun ActionContent(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    // The action summary stays centered and compact so the main decision buttons remain the visual focus.
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     val isIncome   = entry.type == "income"
     val amountColor = if (isIncome) IncomeGreen else ExpenseRed
@@ -199,11 +211,13 @@ private fun ActionContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         errorMessage?.let { message ->
+            // Backend or validation errors are shown inline above the entry summary.
             AuthErrorCard(message)
             Spacer(Modifier.height(12.dp))
         }
 
         if (readOnly) {
+            // Read-only months still allow inspection, but the banner explains why edits are disabled.
             MonthCloseReadOnlyBanner(readOnlyMessage)
             Spacer(Modifier.height(12.dp))
         }
@@ -279,6 +293,7 @@ private fun ActionContent(
             modifier              = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Delete is intentionally destructive and uses the shared red palette with the other features.
             OutlinedButton(
                 onClick  = onDelete,
                 enabled = !readOnly,
@@ -317,10 +332,12 @@ private fun EntryEditForm(
     onEvent: (EntriesEvent) -> Unit,
     onCancel: () -> Unit,
 ) {
+    // The edit form keeps its own local date picker visibility because that state is purely presentational.
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.editDate)
 
     Column(modifier = Modifier.fillMaxSize()) {
+        // The scrollable area holds the actual form fields and category list.
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -338,6 +355,7 @@ private fun EntryEditForm(
                 Spacer(Modifier.height(16.dp))
             }
             item {
+                // Validation and backend errors stay near the form fields that can trigger them.
                 uiState.operationErrorMessage?.let { message ->
                     AuthErrorCard(message)
                     Spacer(Modifier.height(12.dp))
@@ -350,6 +368,7 @@ private fun EntryEditForm(
                 }
             }
             item {
+                // Toggle buttons make the entry type explicit and easy to hit on mobile.
                 Row(
                     modifier              = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -378,6 +397,7 @@ private fun EntryEditForm(
                 Spacer(Modifier.height(12.dp))
             }
             item {
+                // Description is the primary free-text field for an entry.
                 OutlinedTextField(
                     value          = uiState.editDescription,
                     onValueChange  = { onEvent(EntriesEvent.UpdateDescription(it)) },
@@ -391,6 +411,7 @@ private fun EntryEditForm(
                 Spacer(Modifier.height(8.dp))
             }
             item {
+                // Amount uses a numeric keyboard and a currency prefix so typing stays fast on mobile.
                 OutlinedTextField(
                     value          = uiState.editPrice,
                     onValueChange  = { onEvent(EntriesEvent.UpdatePrice(it)) },
@@ -406,6 +427,7 @@ private fun EntryEditForm(
                 Spacer(Modifier.height(8.dp))
             }
             item {
+                // The date button opens a modal picker; the selected date is written back through the ViewModel.
                 OutlinedButton(
                     onClick = { showDatePicker = true },
                     shape = AppButtonShape,
@@ -424,6 +446,7 @@ private fun EntryEditForm(
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 Spacer(Modifier.height(8.dp))
+                // The review section starts with the category label, followed by the selectable category rows.
                 Text(
                     text  = stringResource(R.string.entry_review_category),
                     style = MaterialTheme.typography.labelLarge,
@@ -442,6 +465,7 @@ private fun EntryEditForm(
                 )
             }
             item {
+                // Bottom padding keeps the final category row from touching the fixed action bar.
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -454,6 +478,7 @@ private fun EntryEditForm(
                 .fillMaxWidth()
                 .imePadding(),
         ) {
+            // The fixed action row stays visible above the keyboard so cancel/save always remain reachable.
             // The action row is fixed, but it still needs to clear the on-screen keyboard.
             Row(
                 modifier = Modifier
@@ -478,6 +503,7 @@ private fun EntryEditForm(
     }
 
     if (showDatePicker) {
+        // Date selection is modal so the user can update the transaction date without leaving the form.
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
@@ -506,6 +532,7 @@ private fun EditCategoryRow(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    // Category rows share the same rounded shape logic used elsewhere in the app's list surfaces.
     val shape = listItemShape(index, count)
     val verticalPadding = when {
         count == 1         -> PaddingValues(horizontal = 0.dp, vertical = 4.dp)
@@ -529,6 +556,7 @@ private fun EditCategoryRow(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // The emoji acts as a quick visual anchor while the name handles the actual selection target.
             Text(
                 text = category.emoji,
                 fontSize = 20.sp,
@@ -553,6 +581,7 @@ private fun EditCategoryRow(
 private fun EntrySuccessContent(
     modifier: Modifier = Modifier,
 ) {
+    // Success mirrors the assets layout so the confirm state feels consistent across feature flows.
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -560,6 +589,7 @@ private fun EntrySuccessContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        // The icon, title, and message are intentionally simple so the success state reads instantly.
         Box(
             modifier = Modifier
                 .size(72.dp)

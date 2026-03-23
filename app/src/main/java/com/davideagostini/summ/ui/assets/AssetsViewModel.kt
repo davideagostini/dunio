@@ -1,5 +1,7 @@
 package com.davideagostini.summ.ui.assets
 
+// ViewModel for the assets feature: it owns the UI state, routes events, and
+// turns repository calls into screen-visible transitions.
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,6 +32,8 @@ class AssetsViewModel @Inject constructor(
     private val repository: AssetRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
+    // These flags gate the initial loading state until each data source has
+    // emitted at least once.
     private val historyLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
 
@@ -41,6 +45,8 @@ class AssetsViewModel @Inject constructor(
         .onEach { monthClosesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    // Loading remains true until both streams have emitted at least once so the
+    // screen can initialize with complete data.
     val isLoading: StateFlow<Boolean> = combine(historyLoaded, monthClosesLoaded) { historyReady, monthClosesReady ->
         !historyReady || !monthClosesReady
     }
@@ -51,6 +57,7 @@ class AssetsViewModel @Inject constructor(
 
     fun handleEvent(event: AssetsEvent) {
         when (event) {
+            // Add starts from a clean form and clears stale validation state.
             AssetsEvent.StartAdd -> _uiState.update {
                 it.copy(
                     sheetMode = AssetSheetMode.Add,
@@ -65,12 +72,16 @@ class AssetsViewModel @Inject constructor(
                     operationErrorMessage = null,
                 )
             }
+            // Copy previous month is a standalone bulk action, not a form action.
             AssetsEvent.CopyPreviousMonth -> copyPreviousMonth()
 
+            // Selecting an asset opens the compact action sheet around that item.
             is AssetsEvent.Select -> _uiState.update {
                 it.copy(sheetMode = AssetSheetMode.Action, selectedAsset = event.asset, operationErrorMessage = null)
             }
 
+            // Edit pre-fills the form with the current asset so the user edits a
+            // snapshot instead of reconstructing the asset from scratch.
             AssetsEvent.StartEdit -> {
                 val asset = _uiState.value.selectedAsset ?: return
                 _uiState.update {
@@ -88,9 +99,13 @@ class AssetsViewModel @Inject constructor(
                 }
             }
 
+            // Delete uses a confirmation dialog so the destructive action requires
+            // an explicit second tap.
             AssetsEvent.RequestDelete -> _uiState.update { it.copy(showDeleteDialog = true, operationErrorMessage = null) }
             AssetsEvent.ConfirmDelete -> confirmDelete()
             AssetsEvent.DismissDeleteDialog -> _uiState.update { it.copy(showDeleteDialog = false) }
+            // DismissSheet clears transient form state but preserves month/search
+            // filters that belong to the screen, not the sheet.
             AssetsEvent.DismissSheet -> _uiState.update {
                 AssetsUiState(
                     selectedMonth = it.selectedMonth,
@@ -117,6 +132,7 @@ class AssetsViewModel @Inject constructor(
         val state = _uiState.value
         val value = validateValue(state) ?: return
         if (state.editName.isBlank()) {
+            // Validation is surfaced inline instead of failing the write silently.
             _uiState.update { it.copy(nameError = appContext.getString(R.string.asset_validation_name_required)) }
             return
         }
@@ -147,6 +163,7 @@ class AssetsViewModel @Inject constructor(
         val current = state.selectedAsset ?: return
         val value = validateValue(state) ?: return
         if (state.editName.isBlank()) {
+            // Edit validation mirrors the add flow so the user sees the same rules.
             _uiState.update { it.copy(nameError = appContext.getString(R.string.asset_validation_name_required)) }
             return
         }
@@ -174,9 +191,13 @@ class AssetsViewModel @Inject constructor(
         val current = _uiState.value.selectedAsset ?: return
         viewModelScope.launch {
             try {
+                // Delete is executed through the repository, then the success state
+                // is shown so the user gets the same feedback as add/edit.
                 repository.delete(current)
                 showSuccess()
             } catch (throwable: Throwable) {
+                // On failure we close the confirmation dialog and surface the backend
+                // message inline in the sheet instead.
                 _uiState.update {
                     it.copy(
                         showDeleteDialog = false,
@@ -188,6 +209,8 @@ class AssetsViewModel @Inject constructor(
     }
 
     private suspend fun showSuccess() {
+        // Success is transient: show the confirmation state, keep it visible for a
+        // short interval, then reset the screen back to its initial filters.
         _uiState.update { it.copy(sheetMode = AssetSheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
         delay(1_500L)
         _uiState.update {
@@ -202,6 +225,8 @@ class AssetsViewModel @Inject constructor(
     private fun validateValue(state: AssetsUiState): Double? {
         val value = state.editValue.replace(',', '.').toDoubleOrNull()
         if (value == null) {
+            // Localized decimals are normalized before validation so comma input is
+            // accepted where appropriate.
             _uiState.update { it.copy(valueError = appContext.getString(R.string.asset_validation_value_required)) }
             return null
         }
@@ -212,6 +237,8 @@ class AssetsViewModel @Inject constructor(
         if (this % 1.0 == 0.0) toInt().toString() else toString()
 
     private fun monthToSnapshotDate(month: String?): String =
+        // A monthly asset snapshot always points to the end of the selected month,
+        // even when the caller only passes a `YearMonth` string.
         java.time.YearMonth.parse(month ?: java.time.YearMonth.now().toString())
             .atEndOfMonth()
             .toString()
@@ -222,6 +249,7 @@ class AssetsViewModel @Inject constructor(
         val currentAssets = buildAssetsSnapshotForMonth(assetHistory.value, selectedMonth)
         val previousAssets = buildAssetsSnapshotForMonth(assetHistory.value, previousMonth)
 
+        // Nothing to copy means there is no useful user-visible action to run.
         if (previousAssets.isEmpty()) return
 
         val currentNames = currentAssets.mapTo(mutableSetOf()) { normalizeAssetName(it.name) }
@@ -229,6 +257,8 @@ class AssetsViewModel @Inject constructor(
             normalizeAssetName(asset.name) !in currentNames
         }
 
+        // If all previous assets already exist in the current month, skip the bulk
+        // write entirely.
         if (assetsToCopy.isEmpty()) return
 
         // Bulk copy performs multiple writes, so handle the whole operation as a single user-visible failure.
@@ -253,9 +283,12 @@ class AssetsViewModel @Inject constructor(
         entries: List<AssetHistoryEntry>,
         month: String,
     ): List<Asset> = entries
+        // History can contain multiple actions for the same asset, so we scope by
+        // month first and then collapse by normalized name.
         .filter { it.period == month }
         .associateBy { normalizeAssetName(it.name) }
         .values
+        // Deleted rows are filtered out from the current snapshot.
         .filter { it.action != "deleted" }
         .map { entry ->
             Asset(
@@ -272,5 +305,7 @@ class AssetsViewModel @Inject constructor(
             )
         }
 
+    // Normalize names before comparisons so copy/dedup logic is resilient to
+    // casing and surrounding whitespace.
     private fun normalizeAssetName(value: String): String = value.trim().lowercase()
 }

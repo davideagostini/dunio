@@ -1,5 +1,7 @@
 package com.davideagostini.summ.ui.assets
 
+// Screen orchestration for the assets feature: this file wires state collection,
+// sheet/fullscreen layering, and top-level overlays without owning business logic.
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -62,6 +64,8 @@ fun AssetsScreen(
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
     onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
 ) {
+    // Collect the feature state with lifecycle awareness so the UI only observes
+    // active screens and avoids leaking recompositions in the background.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val assetHistory by viewModel.assetHistory.collectAsStateWithLifecycle()
     val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
@@ -81,6 +85,8 @@ fun AssetsScreen(
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
     )
 
+    // Keep the delete confirmation outside the content tree so it can overlay the
+    // action sheet consistently, matching the categories flow.
     if (uiState.showDeleteDialog) {
         val name = uiState.selectedAsset?.name.orEmpty()
         DeleteConfirmationDialog(
@@ -102,6 +108,8 @@ private fun AssetsContent(
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
+    // Local UI flags stay inside the composable because they only describe how the
+    // current screen is presented, not app data that must survive process death.
     var allowSheetHide by remember { mutableStateOf(false) }
     var showFullScreenEditor by remember { mutableStateOf(uiState.sheetMode == AssetSheetMode.Add || uiState.sheetMode == AssetSheetMode.Edit) }
     var showMonthPicker by remember { mutableStateOf(false) }
@@ -134,6 +142,8 @@ private fun AssetsContent(
         buildAssetsSnapshotForMonth(assetHistory, YearMonth.parse(selectedMonth).minusMonths(1).toString())
     }
     val canCopyPreviousMonth = remember(monthAssets, previousMonthAssets) {
+        // The copy action is only enabled when the previous month contains at least
+        // one asset that is not already present in the selected month.
         val currentNames = monthAssets.map { it.name.trim().lowercase(Locale.getDefault()) }.toSet()
         previousMonthAssets.any { it.name.trim().lowercase(Locale.getDefault()) !in currentNames }
     }
@@ -143,7 +153,8 @@ private fun AssetsContent(
         onMonthPickerVisibilityChanged(showMonthPicker)
     }
 
-    // Add/Edit own the fullscreen editor flow. Save success stays there too, so the presentation never narrows.
+    // Add/Edit own the fullscreen editor flow. Save success stays there too, so
+    // the presentation never snaps back to the compact sheet after a write.
     LaunchedEffect(uiState.sheetMode) {
         if (uiState.sheetMode == AssetSheetMode.Add || uiState.sheetMode == AssetSheetMode.Edit) {
             showFullScreenEditor = true
@@ -157,6 +168,8 @@ private fun AssetsContent(
         onFullscreenEditVisibilityChanged(showFullScreenEditor)
     }
 
+    // Dismissing the fullscreen editor waits for the exit animation before resetting
+    // the ViewModel state, so the UI never cuts off mid-transition.
     val dismissFullscreenEditor: () -> Unit = {
         showFullScreenEditor = false
         scope.launch {
@@ -166,6 +179,7 @@ private fun AssetsContent(
     }
 
     BackHandler(enabled = showFullScreenEditor) {
+        // Preserve the same exit path for both the back button and the close action.
         dismissFullscreenEditor()
     }
 
@@ -174,6 +188,8 @@ private fun AssetsContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
+        // The main content stays in the background while overlays and sheets are
+        // layered above it in the order defined below.
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -181,15 +197,15 @@ private fun AssetsContent(
                 .navigationBarsPadding(),
             contentPadding = PaddingValues(bottom = 140.dp),
         ) {
-                item {
-                    Text(
-                        text = stringResource(R.string.dashboard_assets_label),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                    )
-                }
+            item {
+                Text(
+                    text = stringResource(R.string.dashboard_assets_label),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                )
+            }
 
             item {
                 AssetsToolbar(
@@ -273,6 +289,8 @@ private fun AssetsContent(
     }
 
     // The bottom sheet is now reserved for the compact action/success states only.
+    // Fullscreen editor flows stay in their own overlay so the two presentations do
+    // not compete for the same container.
     if ((uiState.sheetMode == AssetSheetMode.Action || uiState.sheetMode == AssetSheetMode.Success) && !showFullScreenEditor) {
         ModalBottomSheet(
             onDismissRequest = {},
@@ -307,6 +325,8 @@ private fun AssetsContent(
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         modifier = Modifier.fillMaxSize(),
     ) {
+        // The fullscreen editor uses an explicit scrim so it feels like a dedicated
+        // screen, not a nested sheet state.
         Box(
             modifier = Modifier
                 .fillMaxSize()

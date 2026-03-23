@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.theme
 
+// Central color tokens for the mobile app: raw palette values plus semantic helpers used by shared components.
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.TopAppBarColors
@@ -7,7 +8,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// ── Light scheme ────────────────────────────────────────────────────────────
+// Light scheme tokens are kept explicit so the app can map each Material color role predictably.
 val primaryLight                  = Color(0xFF006B5E)
 val onPrimaryLight                = Color(0xFFFFFFFF)
 val primaryContainerLight         = Color(0xFF9EF2E8)
@@ -44,7 +45,7 @@ val surfaceContainerLight         = Color(0xFFE8F0EE)
 val surfaceContainerHighLight     = Color(0xFFE2EAE8)
 val surfaceContainerHighestLight  = Color(0xFFDCE4E2)
 
-// ── Dark scheme ─────────────────────────────────────────────────────────────
+// Dark scheme mirrors the light palette with contrast-safe values for the mobile-first surface system.
 val primaryDark                   = Color(0xFF81D5C7)
 val onPrimaryDark                 = Color(0xFF003731)
 val primaryContainerDark          = Color(0xFF005148)
@@ -81,11 +82,11 @@ val surfaceContainerDark          = Color(0xFF1A2120)
 val surfaceContainerHighDark      = Color(0xFF252C2A)
 val surfaceContainerHighestDark   = Color(0xFF2F3735)
 
-// ── Semantic ─────────────────────────────────────────────────────────────────
+// Semantic colors are reused for financial concepts so screens stay visually consistent.
 val IncomeGreen = Color(0xFF006B5E)
 val ExpenseRed  = Color(0xFFBA1A1A)
 
-// ── Reusable composable color helpers (same pattern as Tomato CustomColors) ──
+// Shared top app bar colors keep titles and navigation icons consistent across screens.
 object SummColors {
     @OptIn(ExperimentalMaterial3Api::class)
     val topBarColors: TopAppBarColors
