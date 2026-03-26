@@ -8,11 +8,26 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+val appVersionName = "0.0.5"
+
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
+
+val hasEnvReleaseSigning =
+    listOf(
+        "ANDROID_KEYSTORE_PATH",
+        "ANDROID_KEYSTORE_PASSWORD",
+        "ANDROID_KEY_ALIAS",
+        "ANDROID_KEY_PASSWORD",
+    ).all { !System.getenv(it).isNullOrBlank() }
+
+val hasLocalReleaseSigning =
+    keystorePropertiesFile.exists() &&
+        listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+            .all { !keystoreProperties.getProperty(it).isNullOrBlank() }
 
 android {
     namespace = "com.davideagostini.summ"
@@ -23,16 +38,23 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 3
-        versionName = "0.0.5"
+        versionName = appVersionName
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
+        if (hasEnvReleaseSigning || hasLocalReleaseSigning) {
             create("release") {
-                storeFile = file(keystoreProperties.getProperty("storeFile"))
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+                if (hasEnvReleaseSigning) {
+                    storeFile = file(System.getenv("ANDROID_KEYSTORE_PATH"))
+                    storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                    keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                    keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+                } else {
+                    storeFile = file(keystoreProperties.getProperty("storeFile"))
+                    storePassword = keystoreProperties.getProperty("storePassword")
+                    keyAlias = keystoreProperties.getProperty("keyAlias")
+                    keyPassword = keystoreProperties.getProperty("keyPassword")
+                }
             }
         }
     }
@@ -40,7 +62,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            if (keystorePropertiesFile.exists()) {
+            if (hasEnvReleaseSigning || hasLocalReleaseSigning) {
                 signingConfig = signingConfigs.getByName("release")
             }
             proguardFiles(
@@ -59,6 +81,48 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+val renameReleaseApk by tasks.registering {
+    dependsOn("assembleRelease")
+
+    doLast {
+        val releaseDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
+        val sourceApk = releaseDir.resolve("app-release.apk")
+        val targetApk = releaseDir.resolve("summ-$appVersionName.apk")
+
+        if (sourceApk.exists()) {
+            if (targetApk.exists()) {
+                targetApk.delete()
+            }
+            sourceApk.renameTo(targetApk)
+        }
+    }
+}
+
+val renameReleaseBundle by tasks.registering {
+    dependsOn("bundleRelease")
+
+    doLast {
+        val releaseDir = layout.buildDirectory.dir("outputs/bundle/release").get().asFile
+        val sourceBundle = releaseDir.resolve("app-release.aab")
+        val targetBundle = releaseDir.resolve("summ-$appVersionName.aab")
+
+        if (sourceBundle.exists()) {
+            if (targetBundle.exists()) {
+                targetBundle.delete()
+            }
+            sourceBundle.renameTo(targetBundle)
+        }
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" }.configureEach {
+    finalizedBy(renameReleaseApk)
+}
+
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    finalizedBy(renameReleaseBundle)
 }
 
 dependencies {

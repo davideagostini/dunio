@@ -1,4 +1,14 @@
-# Summ
+<div id="user-content-toc">
+  <ul style="list-style: none;">
+    <summary>
+      <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="Summ Logo" width="120" align="left" hspace="20"><h1>Summ</h1>
+      <p>
+      <a href="https://github.com/davideagostini/summ/releases/latest"><img src="https://img.shields.io/github/v/release/davideagostini/summ?logo=github&labelColor=1a1a1a"></a>
+      <a href="https://opensource.org/license/mit"><img src="https://img.shields.io/badge/License-Mit%202.0-blue.svg" alt="License"></a>
+      <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.0%2B-blue" alt="Kotlin"></a>
+    </summary>
+  </ul>
+</div>
 
 Summ is a mobile-first Android app for shared household finance tracking.
 
@@ -268,6 +278,35 @@ The output bundle will be generated under:
 ```text
 app/build/outputs/bundle/release/app-release.aab
 ```
+
+## GitHub release automation
+
+This repository is set up so that pushing a tag like `v0.0.5` can:
+
+- build a signed release APK
+- build a signed release AAB
+- publish both files to a GitHub Release
+
+Required GitHub Actions secrets:
+
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+How it works:
+
+1. Convert your keystore to base64 locally
+2. Store the value in `ANDROID_KEYSTORE_BASE64`
+3. Add the other signing values as repository secrets
+4. Push a tag such as:
+
+```bash
+git tag v0.0.5
+git push origin v0.0.5
+```
+
+The workflow will decode the keystore, sign the release build, generate both `APK` and `AAB`, and attach them to the GitHub Release.
 
 ## Security and publishing notes
 
