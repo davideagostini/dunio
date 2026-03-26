@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible bug in the Android app
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken?
+      placeholder: When I open the Assets screen and edit an item, the save action...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide exact steps so someone else can reproduce it.
+      placeholder: |
+        1. Sign in
+        2. Open Assets
+        3. Tap an existing asset
+        4. Tap Edit
+        5. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: android_version
+    attributes:
+      label: Android version
+      placeholder: Android 14
+  - type: input
+    id: app_version
+    attributes:
+      label: App version
+      placeholder: 0.0.4
+  - type: textarea
+    id: notes
+    attributes:
+      label: Extra context
+      description: Screenshots, logs, device model, or anything else useful.

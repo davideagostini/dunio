@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.dashboard
 
+import androidx.compose.runtime.Immutable
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.data.entity.Entry
@@ -11,6 +12,7 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+@Immutable
 data class DashboardMetrics(
     val netWorth: Double,
     val totalAssets: Double,
@@ -20,10 +22,25 @@ data class DashboardMetrics(
     val financialRunway: Double?,
 )
 
+@Immutable
 data class ChartPoint(
     val month: String,
     val label: String,
     val value: Double,
+)
+
+@Immutable
+data class DashboardRenderState(
+    val selectedMonth: String,
+    val selectedRange: DashboardRange,
+    val metrics: DashboardMetrics,
+    val chartPoints: List<ChartPoint>,
+    val monthlyChangePercent: Double?,
+    val cashFlowChangePercent: Double?,
+    val savingsRateDelta: Double?,
+    val monthlyExpenses: Double,
+    val monthlyExpensesChangePercent: Double?,
+    val runwayChangePercent: Double?,
 )
 
 fun buildAssetsSnapshotForMonth(entries: List<AssetHistoryEntry>, month: String): List<Asset> =

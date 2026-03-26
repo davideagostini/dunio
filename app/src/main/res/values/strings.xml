@@ -55,11 +55,11 @@
     <string name="auth_create_household_action">Create household</string>
     <string name="auth_create_short">Create</string>
     <string name="auth_join_household_title">Join an existing household</string>
-    <string name="auth_join_household_message">Enter the household ID shared with you.</string>
+    <string name="auth_join_household_message">Enter the household ID linked to your pending invite.</string>
     <string name="auth_household_id_label">Household ID</string>
     <string name="auth_join_household_action">Join household</string>
     <string name="auth_join_short">Join</string>
-    <string name="auth_join_household_helper">Ask your partner to share the household ID.</string>
+    <string name="auth_join_household_helper">Ask your partner to invite your email and share the household ID.</string>
 
     <string name="quick_entry_signed_out_message">Sign in to add a quick entry.</string>
     <string name="quick_entry_needs_household_message">Create or join a household before adding entries.</string>
@@ -178,6 +178,8 @@
     <string name="members_no_email">No email stored</string>
     <string name="members_invite_title">Invite members</string>
     <string name="members_invite_subtitle">Create a pending invite. The invited email can then join with the household ID.</string>
+    <string name="members_access_title">Invite access</string>
+    <string name="members_access_message">Only household owners can create and review invites. Ask an owner to invite your email before joining another device.</string>
     <string name="members_invite_email_label">Invite email</string>
     <string name="members_role_label">Role</string>
     <string name="members_role_member">Member</string>
@@ -256,6 +258,7 @@
     <string name="session_default_member_name">Member</string>
     <string name="session_household_id_required">Enter a household ID.</string>
     <string name="session_household_not_found">Household not found.</string>
+    <string name="session_household_invite_required">No pending invite was found for this Google account.</string>
     <string name="session_household_required">Create or join a household first.</string>
     <string name="session_load_error">Could not load session.</string>
     <string name="session_household_load_error">Could not load household.</string>

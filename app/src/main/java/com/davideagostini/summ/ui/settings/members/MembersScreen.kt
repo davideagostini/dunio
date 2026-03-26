@@ -103,6 +103,7 @@ private fun MembersContent(
     val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val signedInRole = members.firstOrNull { it.userId == currentUserId }?.role ?: "member"
+    val isOwner = signedInRole == "owner"
 
     Column(
         modifier = Modifier
@@ -156,26 +157,62 @@ private fun MembersContent(
             }
 
             item {
-                InviteCard(
-                    uiState = uiState,
-                    signedInRole = signedInRole,
-                    onUpdateInviteEmail = onUpdateInviteEmail,
-                    onUpdateInviteRole = onUpdateInviteRole,
-                    onSaveInvite = onSaveInvite,
-                )
+                if (isOwner) {
+                    InviteCard(
+                        uiState = uiState,
+                        signedInRole = signedInRole,
+                        onUpdateInviteEmail = onUpdateInviteEmail,
+                        onUpdateInviteRole = onUpdateInviteRole,
+                        onSaveInvite = onSaveInvite,
+                    )
+                } else {
+                    ReadOnlyAccessCard(
+                        signedInRole = signedInRole,
+                    )
+                }
             }
 
-            item { SectionLabel(stringResource(R.string.members_pending_invites_title)) }
+            if (isOwner) {
+                item { SectionLabel(stringResource(R.string.members_pending_invites_title)) }
+            }
 
-            if (invites.isEmpty()) {
+            if (isOwner && invites.isEmpty()) {
                 item {
                     EmptyInfoCard(stringResource(R.string.members_no_invites))
                 }
-            } else {
+            } else if (isOwner) {
                 itemsIndexed(invites, key = { _, invite -> invite.id }) { index, invite ->
                     InviteRow(invite = invite, index = index, count = invites.size)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ReadOnlyAccessCard(
+    signedInRole: String,
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.members_access_title),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+            )
+            Text(
+                text = stringResource(R.string.members_access_message),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            SignedInRoleBadge(signedInRole = signedInRole)
         }
     }
 }
@@ -365,18 +402,7 @@ private fun InviteCard(
                 }
             }
 
-            Surface(
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = stringResource(R.string.members_signed_in_role, signedInRole),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            SignedInRoleBadge(signedInRole = signedInRole)
 
             Button(
                 onClick = onSaveInvite,
@@ -386,6 +412,24 @@ private fun InviteCard(
                 Text(stringResource(R.string.members_save_invite))
             }
         }
+    }
+}
+
+@Composable
+private fun SignedInRoleBadge(
+    signedInRole: String,
+) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = stringResource(R.string.members_signed_in_role, signedInRole),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

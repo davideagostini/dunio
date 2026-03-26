@@ -5,11 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
-import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
-import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -32,22 +30,16 @@ class RecurringViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     recurringRepository: RecurringTransactionRepository,
     categoryRepository: CategoryRepository,
-    entryRepository: EntryRepository,
 ) : ViewModel() {
     private val recurringLoaded = MutableStateFlow(false)
     private val categoriesLoaded = MutableStateFlow(false)
-    private val entriesLoaded = MutableStateFlow(false)
 
-    val recurringTransactions: StateFlow<List<RecurringTransaction>> = recurringRepository.allRecurringTransactions
+    private val recurringTransactions: StateFlow<List<RecurringTransaction>> = recurringRepository.allRecurringTransactions
         .onEach { recurringLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val categories: StateFlow<List<Category>> = categoryRepository.allCategories
         .onEach { categoriesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    private val entries: StateFlow<List<Entry>> = entryRepository.allEntries
-        .onEach { entriesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val isLoading: StateFlow<Boolean> = combine(recurringLoaded, categoriesLoaded) { recurringReady, categoriesReady ->
@@ -56,6 +48,21 @@ class RecurringViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(RecurringUiState())
     val uiState: StateFlow<RecurringUiState> = _uiState.asStateFlow()
+
+    val renderState: StateFlow<RecurringRenderState> = combine(recurringTransactions, uiState) { recurring, uiState ->
+        val query = uiState.searchQuery.trim()
+        RecurringRenderState(
+            filteredRecurring = recurring.filter {
+                query.isBlank() ||
+                    listOf(it.description, it.category, it.type).joinToString(" ")
+                        .contains(query, ignoreCase = true)
+            },
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        RecurringRenderState(filteredRecurring = emptyList()),
+    )
 
     private val recurringRepositoryRef = recurringRepository
 
@@ -173,7 +180,7 @@ class RecurringViewModel @Inject constructor(
         // Applying due transactions may generate many writes, so treat the whole batch as one recoverable action.
         viewModelScope.launch {
             try {
-                recurringRepositoryRef.applyDueRecurringTransactions(recurringTransactions.value, entries.value)
+                recurringRepositoryRef.applyDueRecurringTransactions(recurringTransactions.value)
                 _uiState.update { it.copy(operationErrorMessage = null) }
             } catch (throwable: Throwable) {
                 _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(context)) }

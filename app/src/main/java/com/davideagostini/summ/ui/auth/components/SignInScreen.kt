@@ -1,18 +1,21 @@
 package com.davideagostini.summ.ui.auth.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,10 +28,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.IncomeGreen
+import com.davideagostini.summ.ui.theme.SummTheme
 
 @Composable
 fun SignInScreen(
@@ -49,9 +54,13 @@ fun SignInScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 SignInBrand()
                 SignInHeroSection()
                 if (!errorMessage.isNullOrBlank()) {
@@ -67,7 +76,7 @@ fun SignInScreen(
                 enabled = !isSubmitting,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .defaultMinSize(minHeight = 80.dp)
                     .navigationBarsPadding(),
                 shape = AppButtonShape,
                 contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
@@ -86,18 +95,42 @@ fun SignInScreen(
     }
 }
 
+@Preview(
+    name = "Samsung Galaxy S25",
+    showSystemUi = true,
+    device = "spec:width=1080px,height=2340px,dpi=416"
+)
+@Preview(
+    name = "Samsung Galaxy S25",
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES, // <--- Change this line
+    device = "spec:width=1080px,height=2340px,dpi=416"
+)
+@Composable
+private fun SignInScreenPreview() {
+    SummTheme {
+        SignInScreen(
+            isSubmitting = false,
+            errorMessage = null,
+            onDismissError = {},
+            onGoogleSignIn = {}
+        )
+    }
+}
+
 @Composable
 private fun SignInHeroSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 144.dp),
+            .padding(top = 60.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             text = stringResource(R.string.auth_sign_in_headline),
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = stringResource(R.string.auth_sign_in_body),

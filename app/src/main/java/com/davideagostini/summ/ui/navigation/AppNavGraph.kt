@@ -217,9 +217,8 @@ private fun EntriesScreenWithOverlayState(
 ) {
     // The wrapper keeps navigation concerns out of the entries screen while still exposing overlay state to the shell.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
+    val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (isLoading) {
@@ -228,9 +227,8 @@ private fun EntriesScreenWithOverlayState(
     }
 
     com.davideagostini.summ.ui.entries.EntriesContent(
-        homeState = homeState,
+        renderState = renderState,
         categories = categories,
-        monthCloses = monthCloses,
         uiState = uiState,
         onEvent = viewModel::handleEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,

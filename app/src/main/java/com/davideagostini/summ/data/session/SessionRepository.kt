@@ -167,6 +167,8 @@ class SessionRepository @Inject constructor(
         val firebaseUser = requireNotNull(auth?.currentUser) { appContext.getString(R.string.session_sign_in_required) }
         val db = requireNotNull(firestore) { appContext.getString(R.string.session_firestore_unavailable) }
         val trimmedId = householdId.trim()
+        val userEmail = firebaseUser.email?.trim()?.lowercase()
+            ?: error(appContext.getString(R.string.session_household_invite_required))
         require(trimmedId.isNotEmpty()) { appContext.getString(R.string.session_household_id_required) }
         val householdSnapshot = db.document(FirestorePaths.household(trimmedId)).get().await()
 
@@ -174,13 +176,27 @@ class SessionRepository @Inject constructor(
             error(appContext.getString(R.string.session_household_not_found))
         }
 
+        val inviteRef = db.document(FirestorePaths.invite(trimmedId, userEmail))
+        val inviteSnapshot = inviteRef.get().await()
+        if (!inviteSnapshot.exists() || inviteSnapshot.getString("status") != "pending") {
+            error(appContext.getString(R.string.session_household_invite_required))
+        }
+        val invitedRole = inviteSnapshot.getString("role")?.ifBlank { null } ?: "member"
+
         val batch = db.batch()
         batch.set(
             db.document(FirestorePaths.member(trimmedId, firebaseUser.uid)),
             mapOf(
                 "userId" to firebaseUser.uid,
-                "role" to "member",
+                "role" to invitedRole,
                 "joinedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+            )
+        )
+        batch.update(
+            inviteRef,
+            mapOf(
+                "status" to "accepted",
+                "acceptedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
             )
         )
         batch.set(

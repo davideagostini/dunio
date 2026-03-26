@@ -15,6 +15,8 @@ import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
 import com.davideagostini.summ.domain.model.HomeState
 import com.davideagostini.summ.domain.usecase.GetHomeDataUseCase
+import com.davideagostini.summ.ui.components.buildRecentMonthOptions
+import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.format.formatAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -44,7 +46,7 @@ class EntriesViewModel @Inject constructor(
     private val monthClosesLoaded = MutableStateFlow(false)
 
     // Household entries are provided by the shared home use case and marked as loaded as soon as the first value arrives.
-    val homeState: StateFlow<HomeState> = getHomeData()
+    private val homeState: StateFlow<HomeState> = getHomeData()
         .onEach { homeLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeState())
 
@@ -54,7 +56,7 @@ class EntriesViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     // Month close status determines read-only behavior for the current period.
-    val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
+    private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -66,6 +68,43 @@ class EntriesViewModel @Inject constructor(
     // The UI state stays as a single immutable snapshot so the screen can render deterministically.
     private val _uiState = MutableStateFlow(EntriesUiState())
     val uiState: StateFlow<EntriesUiState> = _uiState.asStateFlow()
+
+    val renderState: StateFlow<EntriesRenderState> = combine(homeState, monthCloses, uiState) { home, closes, state ->
+        val monthOptions = buildRecentMonthOptions()
+        val selectedMonth = state.selectedMonth ?: preferredRecentMonth(monthOptions)
+        val monthEntries = home.entries.filter { entry -> monthKey(entry.date) == selectedMonth }
+        val visibleEntries = monthEntries.filter { entry ->
+            matchesFilter(entry, state.filterType) && matchesSearch(entry, state.searchQuery)
+        }
+
+        EntriesRenderState(
+            selectedMonth = selectedMonth,
+            isMonthClosed = closes.any { it.period == selectedMonth && it.status == "closed" },
+            monthEntries = monthEntries,
+            visibleEntries = visibleEntries,
+            dayGroups = buildDayGroups(visibleEntries),
+            unusualSpendingInsights = buildUnusualSpendingInsights(home.entries, selectedMonth),
+            totalExpenses = monthEntries.sumOf { entry -> if (entry.type == "expense") entry.price else 0.0 },
+            totalIncome = monthEntries.sumOf { entry -> if (entry.type == "income") entry.price else 0.0 },
+            monthLabel = formatMonthLabel(selectedMonth),
+            hasAnyEntries = home.entries.isNotEmpty(),
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        EntriesRenderState(
+            selectedMonth = preferredRecentMonth(buildRecentMonthOptions()),
+            isMonthClosed = false,
+            monthEntries = emptyList(),
+            visibleEntries = emptyList(),
+            dayGroups = emptyList(),
+            unusualSpendingInsights = emptyList(),
+            totalExpenses = 0.0,
+            totalIncome = 0.0,
+            monthLabel = formatMonthLabel(preferredRecentMonth(buildRecentMonthOptions())),
+            hasAnyEntries = false,
+        ),
+    )
 
     // All UI intents are funneled through one handler to keep the state machine explicit.
     fun handleEvent(event: EntriesEvent) {

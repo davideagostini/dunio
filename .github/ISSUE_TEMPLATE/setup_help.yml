@@ -1,0 +1,26 @@
+name: Setup or self-hosting help
+description: Ask for help configuring Firebase or running the app locally
+title: "[Setup]: "
+labels:
+  - documentation
+  - setup
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: What are you trying to set up?
+      placeholder: I am trying to run the Android app with my own Firebase project...
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is failing?
+      placeholder: Google sign-in works but household creation fails with...
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Relevant details
+      description: Include Firebase steps completed, Gradle command used, and any error message.

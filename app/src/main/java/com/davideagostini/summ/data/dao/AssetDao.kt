@@ -8,6 +8,7 @@ import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -48,6 +49,10 @@ class AssetDao @Inject constructor(
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,
 ) {
+    companion object {
+        private const val ASSET_HISTORY_SYNC_BATCH_SIZE = 12L
+    }
+
 
     suspend fun insert(asset: Asset) {
         val db = requireNotNull(firestore) { "Firestore is not available." }
@@ -163,14 +168,7 @@ class AssetDao @Inject constructor(
         householdId: String,
         assetId: String,
     ) {
-        val historySnapshot = db.collection(FirestorePaths.assetHistory(householdId, assetId))
-            .orderBy("period", Query.Direction.DESCENDING)
-            .get()
-            .await()
-
-        val latestActiveSnapshot = historySnapshot.documents
-            .mapNotNull { it.toObject(AssetHistoryDocument::class.java) }
-            .find { it.action != "deleted" }
+        val latestActiveSnapshot = findLatestActiveSnapshot(db, householdId, assetId)
 
         val assetRef = db.document(FirestorePaths.asset(householdId, assetId))
         if (latestActiveSnapshot == null) {
@@ -192,6 +190,39 @@ class AssetDao @Inject constructor(
             ),
             com.google.firebase.firestore.SetOptions.merge(),
         ).await()
+    }
+
+    private suspend fun findLatestActiveSnapshot(
+        db: FirebaseFirestore,
+        householdId: String,
+        assetId: String,
+    ): AssetHistoryDocument? {
+        var lastDocument: QueryDocumentSnapshot? = null
+
+        while (true) {
+            var query = db.collection(FirestorePaths.assetHistory(householdId, assetId))
+                .orderBy("period", Query.Direction.DESCENDING)
+                .limit(ASSET_HISTORY_SYNC_BATCH_SIZE)
+
+            if (lastDocument != null) {
+                query = query.startAfter(lastDocument)
+            }
+
+            val snapshot = query.get().await()
+            if (snapshot.isEmpty) {
+                return null
+            }
+
+            val activeSnapshot = snapshot.documents
+                .mapNotNull { it.toObject(AssetHistoryDocument::class.java) }
+                .firstOrNull { it.action != "deleted" }
+
+            if (activeSnapshot != null) {
+                return activeSnapshot
+            }
+
+            lastDocument = snapshot.documents.last() as? QueryDocumentSnapshot ?: return null
+        }
     }
 
     private fun AssetHistoryDocument.toHistoryEntry(documentId: String): AssetHistoryEntry =

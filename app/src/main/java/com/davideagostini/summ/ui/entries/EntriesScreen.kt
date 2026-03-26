@@ -41,14 +41,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
-import com.davideagostini.summ.data.entity.MonthClose
-import com.davideagostini.summ.domain.model.HomeState
 import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
 import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
-import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.entries.components.BalanceCard
 import com.davideagostini.summ.ui.entries.components.DayGroupSection
 import com.davideagostini.summ.ui.entries.components.EmptyState
@@ -61,9 +58,8 @@ import kotlinx.coroutines.launch
 fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
     // The screen stays thin: it only observes immutable state and forwards callbacks to the ViewModel.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val homeState by viewModel.homeState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
+    val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onEvent = viewModel::handleEvent
 
@@ -75,9 +71,8 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
 
     // All feature overlays are rendered from the same screen scope so their z-order stays predictable.
     EntriesContent(
-        homeState = homeState,
+        renderState = renderState,
         categories = categories,
-        monthCloses = monthCloses,
         uiState = uiState,
         onEvent = onEvent,
         onFullscreenEditVisibilityChanged = {},
@@ -88,9 +83,8 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EntriesContent(
-    homeState: HomeState,
+    renderState: EntriesRenderState,
     categories: List<Category>,
-    monthCloses: List<MonthClose>,
     uiState: EntriesUiState,
     onEvent: (EntriesEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
@@ -107,28 +101,11 @@ internal fun EntriesContent(
         confirmValueChange = { it != SheetValue.Hidden || allowSheetHide },
     )
     val monthOptions = remember { buildRecentMonthOptions() }
-    val selectedMonth = uiState.selectedMonth
-        ?: preferredRecentMonth(monthOptions)
-    val isMonthClosed = remember(monthCloses, selectedMonth) {
-        monthCloses.any { it.period == selectedMonth && it.status == "closed" }
-    }
-
-    val monthEntries = remember(homeState.entries, selectedMonth) {
-        homeState.entries.filter { entry -> monthKey(entry.date) == selectedMonth }
-    }
-    val visibleEntries = remember(monthEntries, uiState.filterType, uiState.searchQuery) {
-        monthEntries.filter { entry ->
-            matchesFilter(entry, uiState.filterType) && matchesSearch(entry, uiState.searchQuery)
-        }
-    }
-    val dayGroups = remember(visibleEntries) { buildDayGroups(visibleEntries) }
-    val unusualSpendingInsights = remember(homeState.entries, selectedMonth) {
-        buildUnusualSpendingInsights(homeState.entries, selectedMonth)
-    }
-
-    val totalExpenses = monthEntries.sumOf { entry -> if (entry.type == "expense") entry.price else 0.0 }
-    val totalIncome = monthEntries.sumOf { entry -> if (entry.type == "income") entry.price else 0.0 }
-    val monthLabel = formatMonthLabel(selectedMonth)
+    val selectedMonth = renderState.selectedMonth
+    val isMonthClosed = renderState.isMonthClosed
+    val dayGroups = renderState.dayGroups
+    val unusualSpendingInsights = renderState.unusualSpendingInsights
+    val monthLabel = renderState.monthLabel
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
@@ -219,9 +196,9 @@ internal fun EntriesContent(
                 item {
                     BalanceCard(
                         monthLabel = monthLabel,
-                        expenses = totalExpenses,
-                        income = totalIncome,
-                        netCashFlow = totalIncome - totalExpenses,
+                        expenses = renderState.totalExpenses,
+                        income = renderState.totalIncome,
+                        netCashFlow = renderState.totalIncome - renderState.totalExpenses,
                         filterType = uiState.filterType,
                         onFilterSelected = { onEvent(EntriesEvent.SelectFilter(it)) },
                     )
@@ -239,7 +216,7 @@ internal fun EntriesContent(
                     // Empty state changes its copy depending on whether the month has data at all or only filters hide it.
                     item {
                         EmptyState(
-                            message = if (homeState.entries.isEmpty()) {
+                            message = if (!renderState.hasAnyEntries) {
                                 stringResource(R.string.entries_empty_message)
                             } else {
                                 stringResource(R.string.entries_empty_filtered_message)

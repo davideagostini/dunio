@@ -1,28 +1,96 @@
-# Summ Android
+# Summ
 
-`Summ` is an Android personal finance app for shared household money tracking.
+Summ is a mobile-first Android app for shared household finance tracking.
 
-This public setup is focused on:
+It is designed for small shared workspaces such as couples or families who want a simple way to track:
 
-- Android app
-- Firebase Authentication
-- Cloud Firestore
+- net worth
+- assets and liabilities
+- income and expenses
+- recurring transactions
+- monthly household progress
 
+The app is intentionally not an accounting suite. The focus is fast daily use, clear numbers, and a simple shared-household model backed by Firebase.
 
-## What the app does
+## What this repository contains
 
-- Google sign-in with Firebase Auth
-- household-based shared data
-- dashboard / overview
-- assets with monthly snapshots
-- entries / transactions
+- Android app source code
+- Gradle project files
+- GitHub CI workflow
+- contribution and release documentation
+
+## Core product model
+
+All financial data belongs to a `household`.
+
+Supported roles:
+
+- `owner`
+- `member`
+
+Both users share the same data inside a household:
+
+- dashboard
+- assets
+- transactions
 - categories
 - recurring transactions
-- month close
-- household members and invites
-- quick entry flow and Quick Settings tile
+- month close state
 
-All finance data is scoped to a `household`.
+## Current feature set
+
+### Authentication and household
+
+- Google sign-in with Firebase Authentication
+- persistent session restore
+- create household
+- join household with invite + household ID
+- owner/member household model
+
+### Dashboard
+
+- net worth
+- total assets
+- total liabilities
+- monthly cash flow
+- savings rate
+- financial runway
+- 3 / 6 / 12 month net worth chart
+- month selector
+
+### Entries
+
+- monthly transaction list
+- grouped by day
+- search
+- `All / Expenses / Income` filter
+- unusual spending insights
+- entry edit and delete flow
+- quick-entry flow
+
+### Assets
+
+- monthly asset snapshots
+- assets and liabilities in one feature
+- search
+- edit and delete flow
+- copy previous month snapshot
+- monthly net worth summary
+
+### Settings
+
+- category management
+- recurring transactions
+- month close
+- household members
+- invite management
+- household details
+
+### Quick access
+
+- Quick Settings tile
+- home-screen quick-entry widget
+- home-screen spending summary widget
 
 ## Tech stack
 
@@ -30,25 +98,73 @@ All finance data is scoped to a `household`.
 - Jetpack Compose
 - Material 3
 - Hilt
+- Coroutines + Flow
 - Firebase Authentication
 - Cloud Firestore
 - Navigation Compose
+- Glance widgets
+
+## Project structure
+
+Main source root:
+
+```text
+app/src/main/java/com/davideagostini/summ
+```
+
+Top-level packages:
+
+```text
+summ/
+├── data/       # Firebase access, repositories, entities, session state, DI
+├── domain/     # Shared models and lightweight use cases
+├── tile/       # Quick Settings tile integration
+├── ui/         # Compose screens, ViewModels, state, feature components
+└── widget/     # Home-screen widgets and widget data sources
+```
+
+The current app pattern is:
+
+```text
+Screen composable
+  -> collects immutable state with collectAsStateWithLifecycle()
+ViewModel
+  -> exposes uiState + renderState
+Repository / Use Case
+  -> reads and writes Firebase-backed data
+```
+
+Composable screens should stay focused on rendering and screen orchestration. Derived business data such as totals, grouped lists, chart models, and filtered lists should be prepared in `ViewModel` or shared model/use-case code.
 
 ## Requirements
 
 - Android Studio
 - JDK 17
-- Android SDK installed
+- Android SDK
 - Firebase project
 
-## Firebase setup
+## Backend setup required
+
+To actually run the app, you need your own Firebase project.
+
+Minimum backend setup:
+
+- Firebase Authentication with Google sign-in enabled
+- Cloud Firestore created
+- `app/google-services.json` added locally
+- `firebase/firestore.rules` deployed
+- `firebase/firestore.indexes.json` deployed
+
+This repository is app-first, but the Android client depends on that Firebase setup to work correctly.
+
+## Local setup
 
 ### 1. Create a Firebase project
 
 - Open [Firebase Console](https://console.firebase.google.com/)
 - Create a new project
 
-### 2. Register an Android app
+### 2. Register the Android app
 
 Use this package name:
 
@@ -56,45 +172,63 @@ Use this package name:
 com.davideagostini.summ
 ```
 
-### 3. Enable Authentication
+### 3. Enable Google sign-in
 
-- Go to `Authentication`
+- Open `Authentication`
 - Enable `Google`
-- Set project support email
-- Complete project branding if Firebase asks for it
+- Set the support email if requested
 
 ### 4. Create Firestore
 
-- Go to `Firestore Database`
+- Open `Firestore Database`
 - Create a database
-- Start in the mode you prefer
-- Add your own security rules before using real data
+- Choose the mode you prefer for local development
 
-### 5. Add SHA fingerprints
+### 5. Add Android SHA fingerprints
 
-From the Android project root:
+From the repository root:
 
 ```bash
 cd mobile-app
 ./gradlew signingReport
 ```
 
-Add the debug `SHA-1` and `SHA-256` to the Android app entry in Firebase.
+Add the debug `SHA-1` and `SHA-256` fingerprints to the Android app in Firebase.
 
-### 6. Download `google-services.json`
+### 6. Add `google-services.json`
 
-- Download the file from Firebase
-- Place it here:
+Download the file from Firebase and place it here:
 
 ```text
-mobile-app/app/google-services.json
+app/google-services.json
 ```
 
-This file is intentionally ignored by Git and is not included in the public repo.
+This file is intentionally ignored by Git.
 
-## Firestore structure
+### 7. Deploy Firestore rules and indexes
 
-The app expects a household-scoped Firestore model like this:
+From the `mobile-app/firebase` folder:
+
+```bash
+cd mobile-app/firebase
+firebase use --add
+firebase deploy --only firestore:rules
+firebase deploy --only firestore:indexes
+```
+
+If you prefer, you can deploy with `--project <your-project-id>` instead of setting an active project first.
+
+### 8. Build and install
+
+```bash
+cd mobile-app
+./gradlew assembleDebug
+./gradlew installDebug
+```
+
+## Firestore data model
+
+Expected structure:
 
 ```text
 users/{uid}
@@ -109,97 +243,57 @@ households/{householdId}/monthCloses/{period}
 households/{householdId}/invites/{inviteId}
 ```
 
-## Run locally
+## Release signing
 
-```bash
-cd mobile-app
-./gradlew assembleDebug
-./gradlew installDebug
-```
+Create a local `keystore.properties` file by copying [`keystore.properties.example`](./keystore.properties.example) and filling in your local values.
 
-## Create a Play Console release
-
-Google Play expects an Android App Bundle (`.aab`), not an APK, for a normal release flow.
-
-### 1. Generate an upload key
-
-```bash
-keytool -genkeypair -v \
-  -keystore summ-upload-key.jks \
-  -keyalg RSA \
-  -keysize 2048 \
-  -validity 10000 \
-  -alias summ
-```
-
-### 2. Create `keystore.properties`
-
-Copy [keystore.properties.example](./keystore.properties.example) to `keystore.properties` and fill in your values:
+Example:
 
 ```properties
-storeFile=/absolute/path/to/summ-upload-key.jks
-storePassword=your-store-password
-keyAlias=summ
-keyPassword=your-key-password
+storeFile=/absolute/path/to/your-upload-key.jks
+storePassword=change-me
+keyAlias=upload
+keyPassword=change-me
 ```
 
-`keystore.properties` and keystore files are ignored by Git.
-
-### 3. Build the release bundle
+Build a release bundle with:
 
 ```bash
 cd mobile-app
 ./gradlew bundleRelease
 ```
 
-Output:
+The output bundle will be generated under:
 
 ```text
-mobile-app/app/build/outputs/bundle/release/app-release.aab
+app/build/outputs/bundle/release/app-release.aab
 ```
 
-### 4. Upload to Google Play Console
-
-- Create the app in Play Console
-- Go to a testing or production track
-- Upload the `.aab`
-- Follow Play App Signing instructions when prompted
-
-## First-run checklist
-
-1. Sign in with Google.
-2. Create a household or join one.
-3. Add categories if needed.
-4. Add entries and assets.
-5. Verify Firestore writes are happening in your Firebase project.
-
-## Important Git safety notes
+## Security and publishing notes
 
 Do not commit:
 
-- `google-services.json`
+- `app/google-services.json`
 - `local.properties`
-- Firebase admin/service account JSON files
-- signing keys / keystores
+- `keystore.properties`
+- `.jks` / `.keystore` files
+- service account JSON files
 
-If `google-services.json` was already added to Git locally, remove it from the index before publishing:
+If a local Firebase file was added to Git by mistake:
 
 ```bash
-git rm --cached mobile-app/app/google-services.json
+git rm --cached app/google-services.json
 ```
 
-## Current status
+## Documentation
 
-The Android app is actively used as:
-
-- a personal/shared finance app
-- a playground for studying Android features, libraries, and product ideas
-
-Some areas are still evolving and should be treated as work in progress.
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- [`project_overview.md`](./project_overview.md)
+- [`FIRST_RELEASE_CHECKLIST.md`](./FIRST_RELEASE_CHECKLIST.md)
 
 ## Roadmap ideas
 
-- widgets
+- improved home-screen widgets
 - Wear OS support
 - AI-powered finance features
 - import / export data
@@ -208,4 +302,4 @@ Some areas are still evolving and should be treated as work in progress.
 
 ## License
 
-See [LICENSE](./LICENSE).
+This repository uses the MIT license. See [`LICENSE`](./LICENSE).

@@ -50,10 +50,11 @@ class InviteDao(
     suspend fun createInvite(email: String, role: String) {
         val firestore = db ?: return
         val householdId = sessionRepository.requireHouseholdId()
-        firestore.collection(FirestorePaths.invites(householdId))
-            .add(
+        val normalizedEmail = normalizeInviteEmail(email)
+        firestore.document(FirestorePaths.invite(householdId, normalizedEmail))
+            .set(
                 mapOf(
-                    "email" to email.trim().lowercase(),
+                    "email" to normalizedEmail,
                     "role" to role,
                     "status" to "pending",
                     "createdAt" to FieldValue.serverTimestamp(),
@@ -62,6 +63,8 @@ class InviteDao(
             .await()
     }
 }
+
+private fun normalizeInviteEmail(email: String): String = email.trim().lowercase()
 
 private data class InviteDocument(
     val email: String = "",

@@ -24,3 +24,8 @@ data class RecurringUiState(
     val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean = false,
 )
+
+@Immutable
+data class RecurringRenderState(
+    val filteredRecurring: List<RecurringTransaction>,
+)

@@ -38,8 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
-import com.davideagostini.summ.data.entity.AssetHistoryEntry
-import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.ui.assets.components.AssetActionSheet
 import com.davideagostini.summ.ui.assets.components.AssetCard
 import com.davideagostini.summ.ui.assets.components.AssetEditorScreen
@@ -55,8 +53,6 @@ import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import kotlinx.coroutines.launch
-import java.time.YearMonth
-import java.util.Locale
 
 @Composable
 fun AssetsScreen(
@@ -67,8 +63,7 @@ fun AssetsScreen(
     // Collect the feature state with lifecycle awareness so the UI only observes
     // active screens and avoids leaking recompositions in the background.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val assetHistory by viewModel.assetHistory.collectAsStateWithLifecycle()
-    val monthCloses by viewModel.monthCloses.collectAsStateWithLifecycle()
+    val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (isLoading) {
@@ -77,8 +72,7 @@ fun AssetsScreen(
     }
 
     AssetsContent(
-        assetHistory = assetHistory,
-        monthCloses = monthCloses,
+        renderState = renderState,
         uiState = uiState,
         onEvent = viewModel::handleEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
@@ -101,8 +95,7 @@ fun AssetsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AssetsContent(
-    assetHistory: List<AssetHistoryEntry>,
-    monthCloses: List<MonthClose>,
+    renderState: AssetsRenderState,
     uiState: AssetsUiState,
     onEvent: (AssetsEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
@@ -119,34 +112,8 @@ private fun AssetsContent(
         confirmValueChange = { it != SheetValue.Hidden || allowSheetHide },
     )
     val monthOptions = remember { buildRecentMonthOptions() }
-    val selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(monthOptions)
-    val isMonthClosed = remember(monthCloses, selectedMonth) {
-        monthCloses.any { it.period == selectedMonth && it.status == "closed" }
-    }
-    val monthAssets = remember(assetHistory, selectedMonth) {
-        buildAssetsSnapshotForMonth(assetHistory, selectedMonth)
-    }
-    val filteredAssets = remember(monthAssets, uiState.searchQuery) {
-        monthAssets.filter { asset ->
-            val query = uiState.searchQuery.trim()
-            query.isBlank() ||
-                asset.name.contains(query, ignoreCase = true) ||
-                asset.category.contains(query, ignoreCase = true) ||
-                asset.currency.contains(query, ignoreCase = true)
-        }
-    }
-    val totalAssets = monthAssets.filter { it.type == "asset" }.sumOf { it.value }
-    val totalLiabilities = monthAssets.filter { it.type == "liability" }.sumOf { it.value }
-    val netWorth = totalAssets - totalLiabilities
-    val previousMonthAssets = remember(assetHistory, selectedMonth) {
-        buildAssetsSnapshotForMonth(assetHistory, YearMonth.parse(selectedMonth).minusMonths(1).toString())
-    }
-    val canCopyPreviousMonth = remember(monthAssets, previousMonthAssets) {
-        // The copy action is only enabled when the previous month contains at least
-        // one asset that is not already present in the selected month.
-        val currentNames = monthAssets.map { it.name.trim().lowercase(Locale.getDefault()) }.toSet()
-        previousMonthAssets.any { it.name.trim().lowercase(Locale.getDefault()) !in currentNames }
-    }
+    val selectedMonth = renderState.selectedMonth.ifBlank { preferredRecentMonth(monthOptions) }
+    val isMonthClosed = renderState.isMonthClosed
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
@@ -220,9 +187,9 @@ private fun AssetsContent(
 
             item {
                 AssetsSummaryCard(
-                    totalAssets = totalAssets,
-                    totalLiabilities = totalLiabilities,
-                    netWorth = netWorth,
+                    totalAssets = renderState.totalAssets,
+                    totalLiabilities = renderState.totalLiabilities,
+                    netWorth = renderState.netWorth,
                 )
             }
 
@@ -249,27 +216,27 @@ private fun AssetsContent(
                 }
             }
 
-            if (filteredAssets.isEmpty()) {
+            if (renderState.filteredAssets.isEmpty()) {
                 item {
-                    EmptyAssetsState(hasAssets = monthAssets.isNotEmpty() || assetHistory.isNotEmpty())
+                    EmptyAssetsState(hasAssets = renderState.hasAnyAssets)
                 }
             } else {
-                items(filteredAssets.size, key = { index -> filteredAssets[index].id }) { index ->
-                    val asset = filteredAssets[index]
+                items(renderState.filteredAssets.size, key = { index -> renderState.filteredAssets[index].asset.id }) { index ->
+                    val item = renderState.filteredAssets[index]
                     AssetCard(
-                        asset = asset,
+                        asset = item.asset,
                         index = index,
-                        count = filteredAssets.size,
-                        change = calculateAssetChange(assetHistory, asset.name, selectedMonth),
+                        count = renderState.filteredAssets.size,
+                        change = item.change,
                         readOnly = isMonthClosed,
-                        onClick = { onEvent(AssetsEvent.Select(asset)) },
+                        onClick = { onEvent(AssetsEvent.Select(item.asset)) },
                     )
                 }
             }
         }
 
         AssetsSplitButton(
-            canCopyPreviousMonth = canCopyPreviousMonth,
+            canCopyPreviousMonth = renderState.canCopyPreviousMonth,
             readOnly = isMonthClosed,
             onAddAsset = { if (!isMonthClosed) onEvent(AssetsEvent.StartAdd) },
             onCopyPreviousMonth = { if (!isMonthClosed) onEvent(AssetsEvent.CopyPreviousMonth) },
@@ -343,16 +310,6 @@ private fun AssetsContent(
                 onDismiss = dismissFullscreenEditor,
             )
         }
-    }
-
-    if (uiState.showDeleteDialog) {
-        val name = uiState.selectedAsset?.name.orEmpty()
-        DeleteConfirmationDialog(
-            title = stringResource(R.string.assets_delete_title, name),
-            message = stringResource(R.string.assets_delete_message),
-            onConfirm = { onEvent(AssetsEvent.ConfirmDelete) },
-            onDismiss = { onEvent(AssetsEvent.DismissDeleteDialog) },
-        )
     }
 
 }

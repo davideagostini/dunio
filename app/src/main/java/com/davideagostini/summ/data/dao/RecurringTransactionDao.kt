@@ -1,6 +1,5 @@
 package com.davideagostini.summ.data.dao
 
-import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
@@ -113,12 +112,27 @@ class RecurringTransactionDao @Inject constructor(
         db.document(FirestorePaths.recurringTransaction(householdId, recurringId)).delete().await()
     }
 
-    suspend fun applyDueRecurringTransactions(recurringTransactions: List<RecurringTransaction>, entries: List<Entry>): Int {
+    suspend fun applyDueRecurringTransactions(recurringTransactions: List<RecurringTransaction>): Int {
         val db = requireNotNull(firestore) { "Firestore is not available." }
         val householdId = sessionRepository.requireHouseholdId()
         val today = LocalDate.now()
         val currentMonthKey = today.toString().take(7)
         var createdCount = 0
+        val existingTransactionsSnapshot = db.collection(FirestorePaths.transactions(householdId))
+            .whereEqualTo("period", currentMonthKey)
+            .get()
+            .await()
+        val existingRecurringDates = existingTransactionsSnapshot.documents
+            .mapNotNull { document ->
+                val recurringId = document.getString("recurringTransactionId")?.takeIf(String::isNotBlank)
+                val date = document.getString("date")?.takeIf(String::isNotBlank)
+                if (recurringId == null || date == null) {
+                    null
+                } else {
+                    recurringId to date
+                }
+            }
+            .toMutableSet()
 
         recurringTransactions.forEach { recurring ->
             if (!recurring.active) return@forEach
@@ -126,11 +140,7 @@ class RecurringTransactionDao @Inject constructor(
             val dueDate = getDueDateForMonth(currentMonthKey, recurring.dayOfMonth)
             if (dueDate > today.toString() || recurring.startDate > dueDate) return@forEach
 
-            val exists = entries.any { entry ->
-                entry.recurringTransactionId == recurring.id &&
-                    epochToDate(entry.date) == dueDate
-            }
-            if (exists) return@forEach
+            if ((recurring.id to dueDate) in existingRecurringDates) return@forEach
 
             db.collection(FirestorePaths.transactions(householdId))
                 .add(
@@ -147,6 +157,7 @@ class RecurringTransactionDao @Inject constructor(
                     )
                 )
                 .await()
+            existingRecurringDates += recurring.id to dueDate
 
             db.document(FirestorePaths.recurringTransaction(householdId, recurring.id))
                 .update(
@@ -181,10 +192,4 @@ class RecurringTransactionDao @Inject constructor(
         val safeDay = dayOfMonth.coerceAtMost(yearMonth.lengthOfMonth())
         return yearMonth.atDay(safeDay).toString()
     }
-
-    private fun epochToDate(epochMillis: Long): String =
-        java.time.Instant.ofEpochMilli(epochMillis)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-            .toString()
 }

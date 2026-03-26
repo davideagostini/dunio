@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.assets
 
+import androidx.compose.runtime.Immutable
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.ui.format.formatAmount
@@ -8,6 +9,24 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
+
+@Immutable
+data class AssetListItem(
+    val asset: Asset,
+    val change: Double?,
+)
+
+@Immutable
+data class AssetsRenderState(
+    val selectedMonth: String,
+    val isMonthClosed: Boolean,
+    val filteredAssets: List<AssetListItem>,
+    val totalAssets: Double,
+    val totalLiabilities: Double,
+    val netWorth: Double,
+    val canCopyPreviousMonth: Boolean,
+    val hasAnyAssets: Boolean,
+)
 
 fun formatCurrency(value: Double, currency: String = "EUR"): String =
     when (currency.uppercase()) {
@@ -80,3 +99,5 @@ fun buildChangeLabel(change: Double): String =
         abs(change) < 0.0005 -> "0.0%"
         else -> "${if (change > 0) "+" else ""}${"%.1f".format(change * 100)}%"
     }
+
+internal fun normalizeAssetName(value: String): String = value.trim().lowercase(Locale.getDefault())

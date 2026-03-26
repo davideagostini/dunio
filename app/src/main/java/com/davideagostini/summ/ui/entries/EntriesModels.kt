@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.entries
 
+import androidx.compose.runtime.Immutable
 import com.davideagostini.summ.domain.model.EntryDisplayItem
 import java.time.Instant
 import java.time.LocalDate
@@ -9,17 +10,33 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-internal data class EntryDayGroup(
+@Immutable
+data class EntryDayGroup(
     val key: LocalDate,
     val expenseTotal: Double,
     val entries: List<EntryDisplayItem>,
 )
 
-internal data class UnusualSpendingInsight(
+@Immutable
+data class UnusualSpendingInsight(
     val category: String,
     val currentAmount: Double,
     val averageAmount: Double,
     val percentChange: Int,
+)
+
+@Immutable
+data class EntriesRenderState(
+    val selectedMonth: String,
+    val isMonthClosed: Boolean,
+    val monthEntries: List<EntryDisplayItem>,
+    val visibleEntries: List<EntryDisplayItem>,
+    val dayGroups: List<EntryDayGroup>,
+    val unusualSpendingInsights: List<UnusualSpendingInsight>,
+    val totalExpenses: Double,
+    val totalIncome: Double,
+    val monthLabel: String,
+    val hasAnyEntries: Boolean,
 )
 
 internal fun matchesFilter(entry: EntryDisplayItem, filterType: EntriesFilterType): Boolean =

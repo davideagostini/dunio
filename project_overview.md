@@ -4,6 +4,8 @@ Summ is the Android mobile app for the shared-household finance product in this 
 
 This document describes the structure that exists today in `mobile-app`, including the quick-entry activity, Android tile integration, and home-screen widgets.
 
+The current public positioning is open source and app-first. The app is maintained in public as a real shared-finance Android app and as an Android/Firebase learning project, not as a commercial monetization-first product.
+
 ---
 
 ## Tech Stack
@@ -20,6 +22,7 @@ This document describes the structure that exists today in `mobile-app`, includi
 | Widgets | Glance App Widgets |
 | Tile | Android Quick Settings Tile |
 | Build | Gradle + Android Gradle Plugin |
+| Public hosting model | Self-hosted Firebase project per user |
 
 All dependency versions are managed centrally in `gradle/libs.versions.toml`.
 
@@ -403,9 +406,11 @@ Important conventions used across the app:
 - each feature keeps screen orchestration in `XxxScreen.kt`
 - screen-local state is handled with Compose `remember`
 - business state is owned by a `ViewModel` via `MutableStateFlow`
+- heavy derived UI data is exposed as immutable `renderState` from the `ViewModel`
 - UI reads state with `collectAsStateWithLifecycle()`
 - feature-specific presentational pieces live under `components/`
 - delete confirmation and success states are rendered in the same flow pattern across features where possible
+- composables should avoid recomputing filtered lists, totals, chart series, or grouped display models when that work can be prepared upstream
 
 ---
 

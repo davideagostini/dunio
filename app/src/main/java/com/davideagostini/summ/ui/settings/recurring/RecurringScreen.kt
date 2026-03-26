@@ -80,7 +80,7 @@ fun RecurringScreen(
     viewModel: RecurringViewModel = hiltViewModel(),
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val recurring by viewModel.recurringTransactions.collectAsStateWithLifecycle()
+    val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -90,7 +90,7 @@ fun RecurringScreen(
     }
 
     RecurringContent(
-        recurring = recurring,
+        renderState = renderState,
         categories = categories,
         uiState = uiState,
         onBack = onBack,
@@ -101,7 +101,7 @@ fun RecurringScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RecurringContent(
-    recurring: List<RecurringTransaction>,
+    renderState: RecurringRenderState,
     categories: List<Category>,
     uiState: RecurringUiState,
     onBack: () -> Unit,
@@ -118,12 +118,6 @@ private fun RecurringContent(
         skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden || allowHide },
     )
-    val filtered = remember(recurring, uiState.searchQuery) {
-        recurring.filter {
-            listOf(it.description, it.category, it.type).joinToString(" ")
-                .contains(uiState.searchQuery, ignoreCase = true)
-        }
-    }
 
     LaunchedEffect(uiState.sheetMode) {
         if (uiState.sheetMode == RecurringSheetMode.Add || uiState.sheetMode == RecurringSheetMode.Edit) {
@@ -225,7 +219,7 @@ private fun RecurringContent(
                 }
             }
 
-            if (filtered.isEmpty()) {
+            if (renderState.filteredRecurring.isEmpty()) {
                 item {
                     Card(
                         shape = RoundedCornerShape(28.dp),
@@ -248,8 +242,8 @@ private fun RecurringContent(
                     }
                 }
             } else {
-                items(filtered.size, key = { filtered[it].id }) { index ->
-                    val item = filtered[index]
+                items(renderState.filteredRecurring.size, key = { renderState.filteredRecurring[it].id }) { index ->
+                    val item = renderState.filteredRecurring[index]
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

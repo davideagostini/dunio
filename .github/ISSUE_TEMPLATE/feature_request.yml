@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a focused improvement for the Android app
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem are you trying to solve?
+      placeholder: It is hard to...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Keep it focused and user-facing.
+      placeholder: Add a way to...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Notes on scope
+      description: Mention tradeoffs, constraints, or why this fits the product.

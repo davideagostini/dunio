@@ -1,0 +1,137 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function currentUserEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    function isHouseholdMember(householdId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/households/$(householdId))
+        && exists(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid));
+    }
+
+    function isHouseholdOwner(householdId) {
+      return isHouseholdMember(householdId)
+        && get(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid)).data.role == "owner";
+    }
+
+    function isMonthClosed(householdId, period) {
+      return exists(/databases/$(database)/documents/households/$(householdId)/monthCloses/$(period))
+        && get(/databases/$(database)/documents/households/$(householdId)/monthCloses/$(period)).data.status == "closed";
+    }
+
+    function isOpenPeriod(householdId, period) {
+      return period is string
+        && period.size() == 7
+        && !isMonthClosed(householdId, period);
+    }
+
+    function canReadHistoryByField() {
+      return resource.data.householdId is string
+        && isHouseholdMember(resource.data.householdId);
+    }
+
+    function isInviteRecipient() {
+      return request.auth.token.email != null
+        && resource.data.email == currentUserEmail();
+    }
+
+    function hasPendingInviteForCurrentUser(householdId) {
+      return request.auth.token.email != null
+        && exists(/databases/$(database)/documents/households/$(householdId)/invites/$(currentUserEmail()))
+        && get(/databases/$(database)/documents/households/$(householdId)/invites/$(currentUserEmail())).data.status == "pending";
+    }
+
+    function currentInviteRole(householdId) {
+      return get(/databases/$(database)/documents/households/$(householdId)/invites/$(currentUserEmail())).data.role;
+    }
+
+    function isAcceptingOwnInvite() {
+      return isInviteRecipient()
+        && resource.data.status == "pending"
+        && request.resource.data.status == "accepted"
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.role == resource.data.role;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /households/{householdId} {
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow read: if isHouseholdMember(householdId);
+      allow update, delete: if isHouseholdOwner(householdId);
+
+      match /members/{userId} {
+        allow read: if isHouseholdMember(householdId);
+        allow create: if request.resource.data.userId == userId
+          && (
+            (
+              request.auth.uid == userId
+              && hasPendingInviteForCurrentUser(householdId)
+              && request.resource.data.role == currentInviteRole(householdId)
+            )
+            || isHouseholdOwner(householdId)
+          );
+        allow update, delete: if isHouseholdOwner(householdId);
+      }
+
+      match /assets/{assetId} {
+        allow read: if isHouseholdMember(householdId);
+        allow create, update: if isHouseholdMember(householdId)
+          && request.resource.data.period is string
+          && isOpenPeriod(householdId, request.resource.data.period);
+        allow delete: if isHouseholdMember(householdId)
+          && (resource.data.period == null || isOpenPeriod(householdId, resource.data.period));
+
+        match /history/{entryId} {
+          allow read: if isHouseholdMember(householdId);
+          allow create, update, delete: if isHouseholdMember(householdId)
+            && isOpenPeriod(householdId, entryId);
+        }
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isHouseholdMember(householdId);
+        allow create: if isHouseholdMember(householdId)
+          && request.resource.data.period is string
+          && isOpenPeriod(householdId, request.resource.data.period);
+        allow update: if isHouseholdMember(householdId)
+          && request.resource.data.period is string
+          && (resource.data.period == null || isOpenPeriod(householdId, resource.data.period))
+          && isOpenPeriod(householdId, request.resource.data.period);
+        allow delete: if isHouseholdMember(householdId)
+          && (resource.data.period == null || isOpenPeriod(householdId, resource.data.period));
+      }
+
+      match /recurringTransactions/{recurringTransactionId} {
+        allow read, create, update, delete: if isHouseholdMember(householdId);
+      }
+
+      match /monthCloses/{period} {
+        allow read, create, update, delete: if isHouseholdMember(householdId);
+      }
+
+      match /categories/{categoryId} {
+        allow read, create, update, delete: if isHouseholdMember(householdId);
+      }
+
+      match /invites/{inviteId} {
+        allow read: if isHouseholdOwner(householdId) || isInviteRecipient();
+        allow create, delete: if isHouseholdOwner(householdId);
+        allow update: if isHouseholdOwner(householdId) || isAcceptingOwnInvite();
+      }
+    }
+
+    match /{path=**}/history/{entryId} {
+      allow read: if canReadHistoryByField();
+    }
+  }
+}

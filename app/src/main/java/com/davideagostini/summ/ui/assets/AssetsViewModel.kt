@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,16 +33,18 @@ class AssetsViewModel @Inject constructor(
     private val repository: AssetRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
+    private val defaultSelectedMonth = YearMonth.now().toString()
+
     // These flags gate the initial loading state until each data source has
     // emitted at least once.
     private val historyLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
 
-    val assetHistory: StateFlow<List<AssetHistoryEntry>> = repository.allAssetHistory
+    private val assetHistory: StateFlow<List<AssetHistoryEntry>> = repository.allAssetHistory
         .onEach { historyLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
+    private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -54,6 +57,54 @@ class AssetsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(AssetsUiState())
     val uiState: StateFlow<AssetsUiState> = _uiState.asStateFlow()
+
+    val renderState: StateFlow<AssetsRenderState> = combine(assetHistory, monthCloses, uiState) { history, monthCloses, uiState ->
+        val selectedMonth = uiState.selectedMonth ?: defaultSelectedMonth
+        val isMonthClosed = monthCloses.any { it.period == selectedMonth && it.status == "closed" }
+        val monthAssets = buildAssetsSnapshotForMonth(history, selectedMonth)
+        val filteredAssets = monthAssets
+            .filter { asset ->
+                val query = uiState.searchQuery.trim()
+                query.isBlank() ||
+                    asset.name.contains(query, ignoreCase = true) ||
+                    asset.category.contains(query, ignoreCase = true) ||
+                    asset.currency.contains(query, ignoreCase = true)
+            }
+            .map { asset ->
+                AssetListItem(
+                    asset = asset,
+                    change = calculateAssetChange(history, asset.name, selectedMonth),
+                )
+            }
+        val totalAssets = monthAssets.filter { it.type == "asset" }.sumOf { it.value }
+        val totalLiabilities = monthAssets.filter { it.type == "liability" }.sumOf { it.value }
+        val previousMonthAssets = buildAssetsSnapshotForMonth(history, YearMonth.parse(selectedMonth).minusMonths(1).toString())
+        val currentNames = monthAssets.mapTo(mutableSetOf()) { normalizeAssetName(it.name) }
+
+        AssetsRenderState(
+            selectedMonth = selectedMonth,
+            isMonthClosed = isMonthClosed,
+            filteredAssets = filteredAssets,
+            totalAssets = totalAssets,
+            totalLiabilities = totalLiabilities,
+            netWorth = totalAssets - totalLiabilities,
+            canCopyPreviousMonth = previousMonthAssets.any { normalizeAssetName(it.name) !in currentNames },
+            hasAnyAssets = monthAssets.isNotEmpty() || history.isNotEmpty(),
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        AssetsRenderState(
+            selectedMonth = defaultSelectedMonth,
+            isMonthClosed = false,
+            filteredAssets = emptyList(),
+            totalAssets = 0.0,
+            totalLiabilities = 0.0,
+            netWorth = 0.0,
+            canCopyPreviousMonth = false,
+            hasAnyAssets = false,
+        ),
+    )
 
     fun handleEvent(event: AssetsEvent) {
         when (event) {
@@ -147,8 +198,8 @@ class AssetsViewModel @Inject constructor(
                         value = value,
                         currency = state.editCurrency.ifBlank { "EUR" },
                         type = state.editType,
-                        period = state.selectedMonth.orEmpty(),
-                        snapshotDate = monthToSnapshotDate(state.selectedMonth),
+                        period = selectedMonthOrDefault(state),
+                        snapshotDate = monthToSnapshotDate(selectedMonthOrDefault(state)),
                     )
                 )
                 showSuccess()
@@ -176,8 +227,8 @@ class AssetsViewModel @Inject constructor(
                         value = value,
                         currency = state.editCurrency.ifBlank { "EUR" },
                         type = state.editType,
-                        period = state.selectedMonth.orEmpty(),
-                        snapshotDate = monthToSnapshotDate(state.selectedMonth),
+                        period = selectedMonthOrDefault(state),
+                        snapshotDate = monthToSnapshotDate(selectedMonthOrDefault(state)),
                     )
                 )
                 showSuccess()
@@ -239,12 +290,12 @@ class AssetsViewModel @Inject constructor(
     private fun monthToSnapshotDate(month: String?): String =
         // A monthly asset snapshot always points to the end of the selected month,
         // even when the caller only passes a `YearMonth` string.
-        java.time.YearMonth.parse(month ?: java.time.YearMonth.now().toString())
+        java.time.YearMonth.parse(month ?: defaultSelectedMonth)
             .atEndOfMonth()
             .toString()
 
     private fun copyPreviousMonth() {
-        val selectedMonth = _uiState.value.selectedMonth ?: java.time.YearMonth.now().toString()
+        val selectedMonth = selectedMonthOrDefault(_uiState.value)
         val previousMonth = java.time.YearMonth.parse(selectedMonth).minusMonths(1).toString()
         val currentAssets = buildAssetsSnapshotForMonth(assetHistory.value, selectedMonth)
         val previousAssets = buildAssetsSnapshotForMonth(assetHistory.value, previousMonth)
@@ -279,33 +330,6 @@ class AssetsViewModel @Inject constructor(
         }
     }
 
-    private fun buildAssetsSnapshotForMonth(
-        entries: List<AssetHistoryEntry>,
-        month: String,
-    ): List<Asset> = entries
-        // History can contain multiple actions for the same asset, so we scope by
-        // month first and then collapse by normalized name.
-        .filter { it.period == month }
-        .associateBy { normalizeAssetName(it.name) }
-        .values
-        // Deleted rows are filtered out from the current snapshot.
-        .filter { it.action != "deleted" }
-        .map { entry ->
-            Asset(
-                id = entry.assetId,
-                householdId = entry.householdId,
-                name = entry.name,
-                type = entry.type,
-                category = entry.category,
-                value = entry.value,
-                currency = entry.currency,
-                liquid = entry.liquid,
-                period = entry.period,
-                snapshotDate = entry.snapshotDate,
-            )
-        }
+    private fun selectedMonthOrDefault(state: AssetsUiState): String = state.selectedMonth ?: defaultSelectedMonth
 
-    // Normalize names before comparisons so copy/dedup logic is resilient to
-    // casing and surrounding whitespace.
-    private fun normalizeAssetName(value: String): String = value.trim().lowercase()
 }
