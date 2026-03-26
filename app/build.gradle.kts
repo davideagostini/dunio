@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-val appVersionName = "0.0.11"
+val appVersionName = "0.0.12"
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
