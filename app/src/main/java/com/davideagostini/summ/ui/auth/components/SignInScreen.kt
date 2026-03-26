@@ -105,7 +105,7 @@ fun SignInScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(
-                    onClick = { uriHandler.openUri("https://google.com") },
+                    onClick = { uriHandler.openUri("https://getsumm.app/privacy-policy") },
                 ) {
                     Text(text = stringResource(R.string.auth_privacy_policy))
                 }
@@ -114,7 +114,7 @@ fun SignInScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 TextButton(
-                    onClick = { uriHandler.openUri("https://google.com") },
+                    onClick = { uriHandler.openUri("https://getsumm.app/terms-of-service") },
                 ) {
                     Text(text = stringResource(R.string.auth_terms_of_service))
                 }
