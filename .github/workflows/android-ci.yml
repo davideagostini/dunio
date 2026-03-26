@@ -171,6 +171,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: summ-release-native-debug-metadata
+          # AGP may leave this output empty depending on the build/environment.
           path: app/build/intermediates/native_debug_metadata/release/extractReleaseNativeDebugMetadata/out/**
           if-no-files-found: warn
 
@@ -178,6 +179,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: summ-release-native-symbol-tables
+          # Symbol tables are useful when produced, but should not fail the release when absent.
           path: app/build/intermediates/native_symbol_tables/release/extractReleaseNativeSymbolTables/out/**
           if-no-files-found: warn
 
