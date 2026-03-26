@@ -285,6 +285,7 @@ This repository is set up so that pushing a tag like `v0.0.5` can:
 
 - build a signed release APK
 - build a signed release AAB
+- generate a release mapping file for deobfuscation
 - publish both files to a GitHub Release
 
 Required GitHub Actions secrets:
@@ -307,6 +308,8 @@ git push origin v0.0.5
 ```
 
 The workflow will decode the keystore, sign the release build, generate both `APK` and `AAB`, and attach them to the GitHub Release.
+
+Release builds use minification and resource shrinking. The generated `mapping.txt` is uploaded as a GitHub Actions artifact so you can keep the deobfuscation file for Play Console or post-release analysis without exposing it in the public GitHub Release.
 
 ## Security and publishing notes
 

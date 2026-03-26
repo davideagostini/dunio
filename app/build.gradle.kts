@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-val appVersionName = "0.0.6"
+val appVersionName = "0.0.7"
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -39,6 +39,10 @@ android {
         targetSdk = 36
         versionCode = 3
         versionName = appVersionName
+
+        ndk {
+            debugSymbolLevel = "FULL"
+        }
     }
 
     signingConfigs {
@@ -61,7 +65,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             if (hasEnvReleaseSigning || hasLocalReleaseSigning) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -117,12 +122,27 @@ val renameReleaseBundle by tasks.registering {
     }
 }
 
+val renameReleaseMapping by tasks.registering {
+    doLast {
+        val mappingDir = layout.buildDirectory.dir("outputs/mapping/release").get().asFile
+        val sourceMapping = mappingDir.resolve("mapping.txt")
+        val targetMapping = mappingDir.resolve("summ-$appVersionName-mapping.txt")
+
+        if (sourceMapping.exists()) {
+            if (targetMapping.exists()) {
+                targetMapping.delete()
+            }
+            sourceMapping.copyTo(targetMapping)
+        }
+    }
+}
+
 tasks.matching { it.name == "assembleRelease" }.configureEach {
-    finalizedBy(renameReleaseApk)
+    finalizedBy(renameReleaseApk, renameReleaseMapping)
 }
 
 tasks.matching { it.name == "bundleRelease" }.configureEach {
-    finalizedBy(renameReleaseBundle)
+    finalizedBy(renameReleaseBundle, renameReleaseMapping)
 }
 
 dependencies {

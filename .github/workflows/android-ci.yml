@@ -160,6 +160,13 @@ jobs:
           path: app/build/outputs/bundle/release/summ-*.aab
           if-no-files-found: error
 
+      - name: Upload mapping artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: summ-release-mapping
+          path: app/build/outputs/mapping/release/summ-*-mapping.txt
+          if-no-files-found: error
+
   publish-tagged-release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
