@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.EventAvailable
@@ -60,6 +61,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onNavigateCurrency: () -> Unit,
     onNavigateCategories: () -> Unit,
     onNavigateMembers: () -> Unit,
     onNavigateRecurring: () -> Unit,
@@ -67,6 +69,7 @@ fun SettingsScreen(
     onSignOut: () -> Unit,
     householdName: String,
     householdId: String,
+    householdCurrency: String,
     userName: String,
     userPhotoUrl: String?,
 ) {
@@ -114,6 +117,15 @@ fun SettingsScreen(
             }
 
             item { SettingsSectionLabel(stringResource(R.string.settings_data)) }
+
+            item {
+                SettingsNavItem(
+                    icon = Icons.Default.AttachMoney,
+                    title = stringResource(R.string.settings_currency_title),
+                    subtitle = stringResource(R.string.settings_currency_subtitle, householdCurrency),
+                    onClick = onNavigateCurrency,
+                )
+            }
 
             item {
                 SettingsNavItem(

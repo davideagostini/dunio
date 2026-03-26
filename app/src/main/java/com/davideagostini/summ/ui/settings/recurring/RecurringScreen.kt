@@ -62,7 +62,7 @@ import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.components.FullScreenLoading
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.settings.recurring.components.RecurringSheet
 import com.davideagostini.summ.ui.settings.recurring.components.RecurringSplitButton
 import com.davideagostini.summ.ui.theme.AppButtonShape
@@ -267,7 +267,7 @@ private fun RecurringContent(
                                 )
                             }
                             Text(
-                                formatEuro(item.amount),
+                                formatCurrency(item.amount, renderState.householdCurrency),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = if (item.type == "expense") ExpenseRed else IncomeGreen,
@@ -294,6 +294,7 @@ private fun RecurringContent(
             RecurringSheet(
                 uiState = uiState,
                 categories = categories,
+                currency = renderState.householdCurrency,
                 onEvent = onEvent,
                 onDismiss = {
                     scope.launch {
@@ -321,6 +322,7 @@ private fun RecurringContent(
             RecurringSheet(
                 uiState = uiState,
                 categories = categories,
+                currency = renderState.householdCurrency,
                 onEvent = onEvent,
                 onDismiss = dismissFullscreenForm,
                 fullScreen = true,

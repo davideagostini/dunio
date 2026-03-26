@@ -12,6 +12,9 @@ import com.davideagostini.summ.data.entity.AppUser
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Household
 import com.davideagostini.summ.data.firebase.FirestorePaths
+import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
+import com.davideagostini.summ.ui.format.isSupportedCurrencyCode
+import com.davideagostini.summ.ui.format.normalizeCurrencyCode
 import com.davideagostini.summ.widget.SummWidgetsUpdater
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -28,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -46,6 +50,7 @@ private data class UserDocument(
 private data class HouseholdDocument(
     val name: String = "",
     val ownerId: String = "",
+    val currency: String = DEFAULT_CURRENCY,
     val createdAt: Timestamp? = null,
 )
 
@@ -80,6 +85,11 @@ class SessionRepository @Inject constructor(
                 }
             }
         }
+
+    val householdCurrency: Flow<String> = sessionState.map { sessionState ->
+        val readyState = sessionState as? SessionState.Ready
+        readyState?.household?.currency ?: DEFAULT_CURRENCY
+    }
 
     suspend fun signInWithGoogle(context: Context) {
         val credentialManager = CredentialManager.create(context)
@@ -119,6 +129,7 @@ class SessionRepository @Inject constructor(
             mapOf(
                 "name" to name.trim(),
                 "ownerId" to firebaseUser.uid,
+                "currency" to DEFAULT_CURRENCY,
                 "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
             )
         )
@@ -228,6 +239,19 @@ class SessionRepository @Inject constructor(
             ?: error(appContext.getString(R.string.session_household_required))
     }
 
+    suspend fun updateHouseholdCurrency(currency: String) {
+        val householdId = requireHouseholdId()
+        val normalizedCurrency = normalizeCurrencyCode(currency)
+        require(isSupportedCurrencyCode(normalizedCurrency)) {
+            appContext.getString(R.string.settings_currency_invalid_code)
+        }
+        requireNotNull(firestore)
+            .document(FirestorePaths.household(householdId))
+            .update("currency", normalizedCurrency)
+            .await()
+        SummWidgetsUpdater.refreshAll(appContext)
+    }
+
     fun requireFirebaseUser(): FirebaseUser =
         requireNotNull(auth?.currentUser) { appContext.getString(R.string.session_sign_in_required) }
 
@@ -318,6 +342,7 @@ class SessionRepository @Inject constructor(
                                             id = householdSnapshot.id,
                                             name = household.name,
                                             ownerId = household.ownerId,
+                                            currency = normalizeCurrencyCode(household.currency),
                                         )
                                     )
                                 )

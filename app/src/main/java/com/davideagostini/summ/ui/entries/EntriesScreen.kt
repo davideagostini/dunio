@@ -195,6 +195,7 @@ internal fun EntriesContent(
 
                 item {
                     BalanceCard(
+                        currency = renderState.householdCurrency,
                         monthLabel = monthLabel,
                         expenses = renderState.totalExpenses,
                         income = renderState.totalIncome,
@@ -207,6 +208,7 @@ internal fun EntriesContent(
                 item {
                     if (unusualSpendingInsights.isNotEmpty()) {
                         UnusualSpendingCard(
+                            currency = renderState.householdCurrency,
                             insights = unusualSpendingInsights,
                         )
                     }
@@ -226,6 +228,7 @@ internal fun EntriesContent(
                 } else {
                     items(dayGroups, key = { it.key.toString() }) { group ->
                         DayGroupSection(
+                            currency = renderState.householdCurrency,
                             group = group,
                             readOnly = isMonthClosed,
                             onEntryClick = { onEvent(EntriesEvent.Select(it)) },
@@ -259,6 +262,7 @@ internal fun EntriesContent(
             EntryActionSheet(
                 uiState = uiState,
                 categories = categories,
+                currency = renderState.householdCurrency,
                 readOnly = isMonthClosed,
                 readOnlyMessage = stringResource(
                     R.string.month_close_edit_disabled_message,
@@ -292,6 +296,7 @@ internal fun EntriesContent(
             EntryActionSheet(
                 uiState = uiState,
                 categories = categories,
+                currency = renderState.householdCurrency,
                 readOnly = isMonthClosed,
                 readOnlyMessage = stringResource(
                     R.string.month_close_edit_disabled_message,

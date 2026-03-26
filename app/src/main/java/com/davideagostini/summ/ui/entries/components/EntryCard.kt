@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.domain.model.EntryDisplayItem
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.listItemShape
@@ -29,6 +29,7 @@ import com.davideagostini.summ.ui.theme.listItemShape
 @Composable
 internal fun EntryCard(
     item: EntryDisplayItem,
+    currency: String,
     index: Int,
     count: Int,
     readOnly: Boolean,
@@ -87,7 +88,7 @@ internal fun EntryCard(
             }
 
             Text(
-                text = if (item.type == "income") "+${formatEuro(item.price)}" else "-${formatEuro(item.price)}",
+                text = if (item.type == "income") "+${formatCurrency(item.price, currency)}" else "-${formatCurrency(item.price, currency)}",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = if (item.type == "income") IncomeGreen else ExpenseRed,

@@ -187,6 +187,7 @@ private fun AssetsContent(
 
             item {
                 AssetsSummaryCard(
+                    currency = renderState.householdCurrency,
                     totalAssets = renderState.totalAssets,
                     totalLiabilities = renderState.totalLiabilities,
                     netWorth = renderState.netWorth,
@@ -225,6 +226,7 @@ private fun AssetsContent(
                     val item = renderState.filteredAssets[index]
                     AssetCard(
                         asset = item.asset,
+                        currency = renderState.householdCurrency,
                         index = index,
                         count = renderState.filteredAssets.size,
                         change = item.change,
@@ -268,6 +270,7 @@ private fun AssetsContent(
         ) {
             AssetActionSheet(
                 uiState = uiState,
+                currency = renderState.householdCurrency,
                 readOnly = isMonthClosed,
                 readOnlyMessage = stringResource(
                     R.string.month_close_edit_disabled_message,

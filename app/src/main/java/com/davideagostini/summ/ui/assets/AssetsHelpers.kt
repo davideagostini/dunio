@@ -3,8 +3,6 @@ package com.davideagostini.summ.ui.assets
 import androidx.compose.runtime.Immutable
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
-import com.davideagostini.summ.ui.format.formatAmount
-import com.davideagostini.summ.ui.format.formatEuro
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -19,6 +17,7 @@ data class AssetListItem(
 @Immutable
 data class AssetsRenderState(
     val selectedMonth: String,
+    val householdCurrency: String,
     val isMonthClosed: Boolean,
     val filteredAssets: List<AssetListItem>,
     val totalAssets: Double,
@@ -27,12 +26,6 @@ data class AssetsRenderState(
     val canCopyPreviousMonth: Boolean,
     val hasAnyAssets: Boolean,
 )
-
-fun formatCurrency(value: Double, currency: String = "EUR"): String =
-    when (currency.uppercase()) {
-        "EUR" -> formatEuro(value)
-        else -> "$currency ${formatAmount(value)}"
-    }
 
 fun buildAssetsSnapshotForMonth(entries: List<AssetHistoryEntry>, month: String): List<Asset> =
     entries

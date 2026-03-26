@@ -34,7 +34,7 @@ import com.davideagostini.summ.ui.dashboard.ChartPoint
 import com.davideagostini.summ.ui.dashboard.DashboardRange
 import com.davideagostini.summ.ui.dashboard.formatMonthOption
 import com.davideagostini.summ.ui.dashboard.formatPercent
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -54,6 +54,7 @@ import kotlin.math.abs
 @Composable
 fun NetWorthCard(
     month: String,
+    currency: String,
     netWorth: Double,
     monthlyChangePercent: Double?,
     chartPoints: List<ChartPoint>,
@@ -79,7 +80,7 @@ fun NetWorthCard(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = formatEuro(netWorth),
+                text = formatCurrency(netWorth, currency),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
             )

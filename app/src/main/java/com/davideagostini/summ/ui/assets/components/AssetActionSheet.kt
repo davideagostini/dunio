@@ -45,9 +45,9 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.assets.AssetSheetMode
 import com.davideagostini.summ.ui.assets.AssetsEvent
 import com.davideagostini.summ.ui.assets.AssetsUiState
-import com.davideagostini.summ.ui.assets.formatCurrency
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -55,6 +55,7 @@ import com.davideagostini.summ.ui.theme.IncomeGreen
 @Composable
 fun AssetActionSheet(
     uiState: AssetsUiState,
+    currency: String,
     readOnly: Boolean,
     readOnlyMessage: String,
     onEvent: (AssetsEvent) -> Unit,
@@ -98,6 +99,7 @@ fun AssetActionSheet(
                 when (mode) {
                     AssetSheetMode.Action -> AssetActionContent(
                         uiState = uiState,
+                        currency = currency,
                         readOnly = readOnly,
                         readOnlyMessage = readOnlyMessage,
                         onEvent = onEvent,
@@ -116,6 +118,7 @@ fun AssetActionSheet(
 @Composable
 private fun AssetActionContent(
     uiState: AssetsUiState,
+    currency: String,
     readOnly: Boolean,
     readOnlyMessage: String,
     onEvent: (AssetsEvent) -> Unit,
@@ -155,7 +158,7 @@ private fun AssetActionContent(
         )
         Spacer(Modifier.size(6.dp))
         Text(
-            text = formatCurrency(asset.value, asset.currency),
+            text = formatCurrency(asset.value, currency),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Bold,
         )

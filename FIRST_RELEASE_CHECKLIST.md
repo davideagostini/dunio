@@ -36,6 +36,9 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] dashboard loads
 - [ ] entries CRUD works
 - [ ] assets CRUD works
+- [ ] household currency can be changed from Settings
+- [ ] currency search works and keeps the selected currency at the top
+- [ ] dashboard, entries, assets, recurring, and widgets reflect the selected household currency
 - [ ] recurring apply due works without duplicates
 - [ ] month close read-only mode works
 - [ ] member vs owner invite visibility works as expected

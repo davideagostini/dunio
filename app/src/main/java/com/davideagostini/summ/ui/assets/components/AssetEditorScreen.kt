@@ -173,19 +173,11 @@ private fun AssetFormContent(
                 OutlinedTextField(
                     value = uiState.editValue,
                     onValueChange = { onEvent(AssetsEvent.UpdateValue(it)) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.asset_value_label)) },
                     singleLine = true,
                     isError = uiState.valueError != null,
                     supportingText = uiState.valueError?.let { msg -> { Text(msg) } },
-                    shape = RoundedCornerShape(12.dp),
-                )
-                OutlinedTextField(
-                    value = uiState.editCurrency,
-                    onValueChange = { onEvent(AssetsEvent.UpdateCurrency(it)) },
-                    modifier = Modifier.weight(0.42f),
-                    label = { Text(stringResource(R.string.asset_currency_label)) },
-                    singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                 )
             }

@@ -177,6 +177,7 @@ Responsibility:
 - gate the app on auth + household membership
 - handle Google sign-in flow
 - handle create/join household onboarding
+- expose household-level settings updates such as the shared currency
 
 ### `ui/dashboard`
 
@@ -193,7 +194,7 @@ Responsibility:
 
 - summarize financial health
 - show high-level household metrics
-- coordinate month filtering and dashboard-specific presentation
+- coordinate month filtering, household currency formatting, and dashboard-specific presentation
 
 ### `ui/assets`
 
@@ -214,6 +215,7 @@ Responsibility:
 - asset/liability CRUD
 - copy previous month snapshot
 - action sheet, editor flow, delete confirmation, and success states
+- inherit the household currency instead of asking for per-asset currency input
 
 ### `ui/entries`
 
@@ -234,6 +236,18 @@ Responsibility:
 - search/filter by month and entry type
 - view/edit/delete existing entries
 - show unusual spending insights and monthly balance summary
+- render amounts using the household currency from session state
+
+### `ui/settings/currency`
+
+Dedicated currency selection screen inside Settings.
+
+Responsibility:
+
+- list supported currencies using the same list-item language as the rest of Settings
+- keep the current household currency pinned to the top
+- provide inline search for faster selection
+- update the shared household currency without introducing per-feature currency settings
 
 ### `ui/entry`
 

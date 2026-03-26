@@ -47,6 +47,8 @@ Both users share the same data inside a household:
 - recurring transactions
 - month close state
 
+Each household uses one shared currency configured from Settings. The app does not support per-asset currencies or mixed-currency totals.
+
 ## Current feature set
 
 ### Authentication and household
@@ -86,15 +88,19 @@ Both users share the same data inside a household:
 - edit and delete flow
 - copy previous month snapshot
 - monthly net worth summary
+- household currency applied automatically to new asset snapshots
 
 ### Settings
 
+- household currency
 - category management
 - recurring transactions
 - month close
 - household members
 - invite management
 - household details
+
+The household currency is changed from a dedicated searchable settings screen, and the selected currency is surfaced at the top of the list.
 
 ### Quick access
 

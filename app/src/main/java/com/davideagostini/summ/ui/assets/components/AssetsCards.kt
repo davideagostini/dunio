@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.ui.assets.buildChangeLabel
-import com.davideagostini.summ.ui.assets.formatCurrency
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.listItemShape
@@ -41,6 +41,7 @@ import kotlin.math.abs
 
 @Composable
 fun AssetsSummaryCard(
+    currency: String,
     totalAssets: Double,
     totalLiabilities: Double,
     netWorth: Double,
@@ -64,7 +65,7 @@ fun AssetsSummaryCard(
             )
             Spacer(Modifier.size(4.dp))
             Text(
-                text = formatCurrency(netWorth),
+                text = formatCurrency(netWorth, currency),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
             )
@@ -82,7 +83,7 @@ fun AssetsSummaryCard(
                     )
                     Spacer(Modifier.size(2.dp))
                     Text(
-                        text = formatCurrency(totalAssets),
+                        text = formatCurrency(totalAssets, currency),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = IncomeGreen,
@@ -96,7 +97,7 @@ fun AssetsSummaryCard(
                     )
                     Spacer(Modifier.size(2.dp))
                     Text(
-                        text = formatCurrency(totalLiabilities),
+                        text = formatCurrency(totalLiabilities, currency),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = ExpenseRed,
@@ -110,6 +111,7 @@ fun AssetsSummaryCard(
 @Composable
 fun AssetCard(
     asset: Asset,
+    currency: String,
     index: Int,
     count: Int,
     change: Double?,
@@ -177,7 +179,7 @@ fun AssetCard(
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = formatCurrency(asset.value, asset.currency),
+                    text = formatCurrency(asset.value, currency),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (asset.type == "asset") IncomeGreen else ExpenseRed,

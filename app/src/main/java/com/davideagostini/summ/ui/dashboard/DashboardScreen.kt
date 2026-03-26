@@ -32,7 +32,7 @@ import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.dashboard.components.DashboardToolbar
 import com.davideagostini.summ.ui.dashboard.components.MetricCard
 import com.davideagostini.summ.ui.dashboard.components.NetWorthCard
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import java.time.YearMonth
@@ -130,6 +130,7 @@ private fun DashboardContent(
                 item {
                     NetWorthCard(
                         month = selectedMonth,
+                        currency = renderState.householdCurrency,
                         netWorth = metrics.netWorth,
                         monthlyChangePercent = renderState.monthlyChangePercent,
                         chartPoints = renderState.chartPoints,
@@ -141,7 +142,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_assets_label),
-                        value = formatEuro(metrics.totalAssets),
+                        value = formatCurrency(metrics.totalAssets, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_current_value),
                     )
                 }
@@ -149,7 +150,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_liabilities_label),
-                        value = formatEuro(metrics.totalLiabilities),
+                        value = formatCurrency(metrics.totalLiabilities, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_outstanding),
                     )
                 }
@@ -157,7 +158,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_cash_flow_label),
-                        value = formatEuro(metrics.monthlyCashFlow),
+                        value = formatCurrency(metrics.monthlyCashFlow, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_cash_flow_note),
                         trendLabel = renderState.cashFlowChangePercent?.let {
                             stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
@@ -212,7 +213,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_monthly_expenses_label),
-                        value = formatEuro(renderState.monthlyExpenses),
+                        value = formatCurrency(renderState.monthlyExpenses, renderState.householdCurrency),
                         trendLabel = renderState.monthlyExpensesChangePercent?.let {
                             stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
                         },

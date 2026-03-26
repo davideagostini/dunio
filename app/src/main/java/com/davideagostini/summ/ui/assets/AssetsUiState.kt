@@ -15,7 +15,6 @@ data class AssetsUiState(
     val editName: String = "",
     val editCategory: String = "",
     val editValue: String = "",
-    val editCurrency: String = "EUR",
     val editType: String = "asset",
     val nameError: String? = null,
     val valueError: String? = null,

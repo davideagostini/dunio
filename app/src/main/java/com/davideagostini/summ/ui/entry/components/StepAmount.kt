@@ -22,9 +22,14 @@ import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
+import com.davideagostini.summ.ui.format.currencySymbol
 
 @Composable
-internal fun StepAmount(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
+internal fun StepAmount(
+    uiState: EntryUiState,
+    currency: String,
+    onEvent: (EntryEvent) -> Unit,
+) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
@@ -36,7 +41,7 @@ internal fun StepAmount(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
             value           = uiState.price,
             onValueChange   = { onEvent(EntryEvent.UpdatePrice(it)) },
             label           = { Text(stringResource(R.string.entry_amount_label)) },
-            prefix          = { Text(stringResource(R.string.entry_currency_symbol)) },
+            prefix          = { Text(currencySymbol(currency)) },
             isError         = uiState.priceError != null,
             supportingText  = uiState.priceError?.let { msg -> { Text(msg) } },
             singleLine      = true,

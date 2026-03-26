@@ -71,7 +71,8 @@ import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.entries.EntriesEvent
 import com.davideagostini.summ.ui.entries.EntriesUiState
 import com.davideagostini.summ.ui.entries.EntrySheetMode
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.currencySymbol
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -84,6 +85,7 @@ import java.util.Locale
 internal fun EntryActionSheet(
     uiState: EntriesUiState,
     categories: List<Category>,
+    currency: String,
     readOnly: Boolean,
     readOnlyMessage: String,
     onEvent: (EntriesEvent) -> Unit,
@@ -149,6 +151,7 @@ internal fun EntryActionSheet(
                     // Action mode shows the summary plus the delete/edit buttons for the selected entry.
                     EntrySheetMode.Action  -> ActionContent(
                         entry   = uiState.selectedEntry ?: return@AnimatedContent,
+                        currency = currency,
                         errorMessage = uiState.operationErrorMessage,
                         readOnly = readOnly,
                         readOnlyMessage = readOnlyMessage,
@@ -159,6 +162,7 @@ internal fun EntryActionSheet(
                     EntrySheetMode.Edit    -> EntryEditForm(
                         uiState    = uiState,
                         categories = categories,
+                        currency = currency,
                         readOnly = readOnly,
                         readOnlyMessage = readOnlyMessage,
                         onEvent    = onEvent,
@@ -194,6 +198,7 @@ internal fun EntryActionSheet(
 @Composable
 private fun ActionContent(
     entry: EntryDisplayItem,
+    currency: String,
     errorMessage: String?,
     readOnly: Boolean,
     readOnlyMessage: String,
@@ -245,7 +250,7 @@ private fun ActionContent(
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text  = "$sign${formatEuro(entry.price)}",
+            text  = "$sign${formatCurrency(entry.price, currency)}",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = amountColor,
@@ -327,6 +332,7 @@ private fun ActionContent(
 private fun EntryEditForm(
     uiState: EntriesUiState,
     categories: List<Category>,
+    currency: String,
     readOnly: Boolean,
     readOnlyMessage: String,
     onEvent: (EntriesEvent) -> Unit,
@@ -421,7 +427,7 @@ private fun EntryEditForm(
                     singleLine     = true,
                     shape          = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    prefix         = { Text(stringResource(R.string.entry_currency_symbol)) },
+                    prefix         = { Text(currencySymbol(currency)) },
                     modifier       = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(8.dp))

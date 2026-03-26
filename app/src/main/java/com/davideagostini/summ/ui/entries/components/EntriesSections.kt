@@ -22,11 +22,12 @@ import com.davideagostini.summ.domain.model.EntryDisplayItem
 import com.davideagostini.summ.ui.entries.EntryDayGroup
 import com.davideagostini.summ.ui.entries.UnusualSpendingInsight
 import com.davideagostini.summ.ui.entries.formatDayLabel
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import java.util.Locale
 
 @Composable
 internal fun UnusualSpendingCard(
+    currency: String,
     insights: List<UnusualSpendingInsight>,
 ) {
     Card(
@@ -75,8 +76,8 @@ internal fun UnusualSpendingCard(
                                 R.string.entries_unusual_spending_message,
                                 insight.category,
                                 insight.percentChange,
-                                formatEuro(insight.currentAmount),
-                                formatEuro(insight.averageAmount),
+                                formatCurrency(insight.currentAmount, currency),
+                                formatCurrency(insight.averageAmount, currency),
                             ),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
@@ -90,6 +91,7 @@ internal fun UnusualSpendingCard(
 
 @Composable
 internal fun DayGroupSection(
+    currency: String,
     group: EntryDayGroup,
     readOnly: Boolean,
     onEntryClick: (EntryDisplayItem) -> Unit,
@@ -114,7 +116,7 @@ internal fun DayGroupSection(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = formatEuro(group.expenseTotal),
+                text = formatCurrency(group.expenseTotal, currency),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 fontWeight = FontWeight.Medium,
@@ -125,6 +127,7 @@ internal fun DayGroupSection(
             group.entries.forEachIndexed { index, entry ->
                 EntryCard(
                     item = entry,
+                    currency = currency,
                     index = index,
                     count = group.entries.size,
                     readOnly = readOnly,

@@ -19,7 +19,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.davideagostini.summ.R
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.errorDark
 import com.davideagostini.summ.ui.theme.errorLight
 import com.davideagostini.summ.ui.theme.onSurfaceDark
@@ -90,8 +90,8 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                         )
                         val secondaryLine = context.getString(
                             R.string.widget_spending_secondary,
-                            "${context.getString(R.string.widget_spending_today)} ${formatEuro(state.todayAmount)}",
-                            "${context.getString(R.string.widget_spending_week)} ${formatEuro(state.weekAmount)}",
+                            "${context.getString(R.string.widget_spending_today)} ${formatCurrency(state.todayAmount, state.currency)}",
+                            "${context.getString(R.string.widget_spending_week)} ${formatCurrency(state.weekAmount, state.currency)}",
                         )
                         val widgetSize = LocalSize.current
                         // The runtime variant is derived from the actual launcher-reported
@@ -114,7 +114,7 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                             )
                             Spacer(modifier = GlanceModifier.height(6.dp))
                             Text(
-                                text = formatEuro(state.monthAmount),
+                                text = formatCurrency(state.monthAmount, state.currency),
                                 style = TextStyle(
                                     color = neutralTextColor,
                                     fontSize = if (isSmall) 26.sp else 28.sp,

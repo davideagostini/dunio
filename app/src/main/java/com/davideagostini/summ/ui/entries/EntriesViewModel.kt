@@ -13,10 +13,12 @@ import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
+import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.domain.model.HomeState
 import com.davideagostini.summ.domain.usecase.GetHomeDataUseCase
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
+import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import com.davideagostini.summ.ui.format.formatAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -38,6 +40,7 @@ class EntriesViewModel @Inject constructor(
     getHomeData: GetHomeDataUseCase,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
+    sessionRepository: SessionRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
     // These flags are used only to decide when the initial loading screen can disappear.
@@ -60,6 +63,9 @@ class EntriesViewModel @Inject constructor(
         .onEach { monthClosesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+
     // Loading ends only when every upstream source has emitted at least once.
     val isLoading: StateFlow<Boolean> = combine(homeLoaded, categoriesLoaded, monthClosesLoaded) { homeReady, categoriesReady, monthClosesReady ->
         !homeReady || !categoriesReady || !monthClosesReady
@@ -69,7 +75,7 @@ class EntriesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EntriesUiState())
     val uiState: StateFlow<EntriesUiState> = _uiState.asStateFlow()
 
-    val renderState: StateFlow<EntriesRenderState> = combine(homeState, monthCloses, uiState) { home, closes, state ->
+    val renderState: StateFlow<EntriesRenderState> = combine(homeState, monthCloses, householdCurrency, uiState) { home, closes, householdCurrency, state ->
         val monthOptions = buildRecentMonthOptions()
         val selectedMonth = state.selectedMonth ?: preferredRecentMonth(monthOptions)
         val monthEntries = home.entries.filter { entry -> monthKey(entry.date) == selectedMonth }
@@ -79,6 +85,7 @@ class EntriesViewModel @Inject constructor(
 
         EntriesRenderState(
             selectedMonth = selectedMonth,
+            householdCurrency = householdCurrency,
             isMonthClosed = closes.any { it.period == selectedMonth && it.status == "closed" },
             monthEntries = monthEntries,
             visibleEntries = visibleEntries,
@@ -94,6 +101,7 @@ class EntriesViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         EntriesRenderState(
             selectedMonth = preferredRecentMonth(buildRecentMonthOptions()),
+            householdCurrency = DEFAULT_CURRENCY,
             isMonthClosed = false,
             monthEntries = emptyList(),
             visibleEntries = emptyList(),

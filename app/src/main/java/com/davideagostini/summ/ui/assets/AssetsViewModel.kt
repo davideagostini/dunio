@@ -12,6 +12,8 @@ import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.AssetRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
+import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -31,6 +33,7 @@ import javax.inject.Inject
 class AssetsViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val repository: AssetRepository,
+    sessionRepository: SessionRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
     private val defaultSelectedMonth = YearMonth.now().toString()
@@ -48,6 +51,9 @@ class AssetsViewModel @Inject constructor(
         .onEach { monthClosesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+
     // Loading remains true until both streams have emitted at least once so the
     // screen can initialize with complete data.
     val isLoading: StateFlow<Boolean> = combine(historyLoaded, monthClosesLoaded) { historyReady, monthClosesReady ->
@@ -58,7 +64,7 @@ class AssetsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AssetsUiState())
     val uiState: StateFlow<AssetsUiState> = _uiState.asStateFlow()
 
-    val renderState: StateFlow<AssetsRenderState> = combine(assetHistory, monthCloses, uiState) { history, monthCloses, uiState ->
+    val renderState: StateFlow<AssetsRenderState> = combine(assetHistory, monthCloses, householdCurrency, uiState) { history, monthCloses, householdCurrency, uiState ->
         val selectedMonth = uiState.selectedMonth ?: defaultSelectedMonth
         val isMonthClosed = monthCloses.any { it.period == selectedMonth && it.status == "closed" }
         val monthAssets = buildAssetsSnapshotForMonth(history, selectedMonth)
@@ -67,8 +73,7 @@ class AssetsViewModel @Inject constructor(
                 val query = uiState.searchQuery.trim()
                 query.isBlank() ||
                     asset.name.contains(query, ignoreCase = true) ||
-                    asset.category.contains(query, ignoreCase = true) ||
-                    asset.currency.contains(query, ignoreCase = true)
+                    asset.category.contains(query, ignoreCase = true)
             }
             .map { asset ->
                 AssetListItem(
@@ -83,6 +88,7 @@ class AssetsViewModel @Inject constructor(
 
         AssetsRenderState(
             selectedMonth = selectedMonth,
+            householdCurrency = householdCurrency,
             isMonthClosed = isMonthClosed,
             filteredAssets = filteredAssets,
             totalAssets = totalAssets,
@@ -96,6 +102,7 @@ class AssetsViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         AssetsRenderState(
             selectedMonth = defaultSelectedMonth,
+            householdCurrency = DEFAULT_CURRENCY,
             isMonthClosed = false,
             filteredAssets = emptyList(),
             totalAssets = 0.0,
@@ -116,7 +123,6 @@ class AssetsViewModel @Inject constructor(
                     editName = "",
                     editCategory = "",
                     editValue = "",
-                    editCurrency = "EUR",
                     editType = "asset",
                     nameError = null,
                     valueError = null,
@@ -141,7 +147,6 @@ class AssetsViewModel @Inject constructor(
                         editName = asset.name,
                         editCategory = asset.category,
                         editValue = if (asset.value == 0.0) "" else asset.value.toPlainString(),
-                        editCurrency = asset.currency,
                         editType = asset.type,
                         nameError = null,
                         valueError = null,
@@ -172,7 +177,6 @@ class AssetsViewModel @Inject constructor(
             is AssetsEvent.UpdateName -> _uiState.update { it.copy(editName = event.value, nameError = null, operationErrorMessage = null) }
             is AssetsEvent.UpdateCategory -> _uiState.update { it.copy(editCategory = event.value, operationErrorMessage = null) }
             is AssetsEvent.UpdateValue -> _uiState.update { it.copy(editValue = event.value, valueError = null, operationErrorMessage = null) }
-            is AssetsEvent.UpdateCurrency -> _uiState.update { it.copy(editCurrency = event.value.uppercase(), operationErrorMessage = null) }
             is AssetsEvent.UpdateType -> _uiState.update { it.copy(editType = event.value, operationErrorMessage = null) }
             AssetsEvent.SaveAdd -> saveAdd()
             AssetsEvent.SaveEdit -> saveEdit()
@@ -196,7 +200,7 @@ class AssetsViewModel @Inject constructor(
                         name = state.editName.trim(),
                         category = state.editCategory.trim(),
                         value = value,
-                        currency = state.editCurrency.ifBlank { "EUR" },
+                        currency = renderState.value.householdCurrency,
                         type = state.editType,
                         period = selectedMonthOrDefault(state),
                         snapshotDate = monthToSnapshotDate(selectedMonthOrDefault(state)),
@@ -225,7 +229,7 @@ class AssetsViewModel @Inject constructor(
                         name = state.editName.trim(),
                         category = state.editCategory.trim(),
                         value = value,
-                        currency = state.editCurrency.ifBlank { "EUR" },
+                        currency = renderState.value.householdCurrency,
                         type = state.editType,
                         period = selectedMonthOrDefault(state),
                         snapshotDate = monthToSnapshotDate(selectedMonthOrDefault(state)),

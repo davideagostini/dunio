@@ -78,7 +78,6 @@
     <string name="entry_step_amount_title">How much?</string>
     <string name="entry_step_description_title">What was it for?</string>
     <string name="entry_amount_label">Amount</string>
-    <string name="entry_currency_symbol">€</string>
     <string name="entry_description_label">Description</string>
     <string name="entry_review_title">Review your entry</string>
     <string name="entry_review_type">Type</string>
@@ -125,7 +124,6 @@
     <string name="asset_name_label">Name</string>
     <string name="asset_category_label">Category</string>
     <string name="asset_value_label">Value</string>
-    <string name="asset_currency_label">Cur.</string>
     <string name="asset_type_asset">Asset</string>
     <string name="asset_type_liability">Liability</string>
     <string name="asset_done_message">Asset updated successfully.</string>
@@ -156,6 +154,11 @@
     <string name="settings_signed_in_as">Signed in as</string>
     <string name="settings_current_household">Current household</string>
     <string name="settings_data">Data</string>
+    <string name="settings_currency_title">Currency</string>
+    <string name="settings_currency_subtitle">Household currency: %1$s</string>
+    <string name="settings_currency_screen_message">Choose one currency for the whole household. Assets, entries, dashboard, recurring amounts, and widgets all use this selection.</string>
+    <string name="settings_currency_search_placeholder">Search currency</string>
+    <string name="settings_currency_invalid_code">Enter a valid ISO currency code, for example EUR or USD.</string>
     <string name="settings_members_title">Household members</string>
     <string name="settings_members_subtitle">Share household access and manage invites</string>
     <string name="settings_categories_title">Categories</string>

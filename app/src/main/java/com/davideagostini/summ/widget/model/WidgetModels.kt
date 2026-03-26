@@ -17,6 +17,7 @@ sealed interface SpendingSummaryWidgetState {
         val weekAmount: Double,
         val monthAmount: Double,
         val previousMonthAmount: Double,
+        val currency: String,
     ) : SpendingSummaryWidgetState
 
     // Any Firestore/parsing failure falls back to a safe generic error state.

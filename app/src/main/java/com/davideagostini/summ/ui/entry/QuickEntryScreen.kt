@@ -127,9 +127,18 @@ fun QuickEntryScreen(
                 0 -> StepType(uiState = uiState, onEvent = viewModel::handleEvent)
                 1 -> StepDate(uiState = uiState, onEvent = viewModel::handleEvent)
                 2 -> StepDescription(uiState = uiState, onEvent = viewModel::handleEvent)
-                3 -> StepAmount(uiState = uiState, onEvent = viewModel::handleEvent)
+                3 -> StepAmount(
+                    uiState = uiState,
+                    currency = sessionState.household.currency,
+                    onEvent = viewModel::handleEvent,
+                )
                 4 -> StepCategory(categories = categories, uiState = uiState, onEvent = viewModel::handleEvent)
-                5 -> StepReview(uiState = uiState, onEvent = viewModel::handleEvent, onCancel = onDismiss)
+                5 -> StepReview(
+                    uiState = uiState,
+                    currency = sessionState.household.currency,
+                    onEvent = viewModel::handleEvent,
+                    onCancel = onDismiss,
+                )
                 6 -> StepSuccess()
             }
         }

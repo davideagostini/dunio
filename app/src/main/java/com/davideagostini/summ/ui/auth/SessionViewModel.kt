@@ -67,6 +67,12 @@ class SessionViewModel @Inject constructor(
         }
     }
 
+    fun updateHouseholdCurrency(currency: String) {
+        launchAction {
+            sessionRepository.updateHouseholdCurrency(currency)
+        }
+    }
+
     private fun launchAction(action: suspend () -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, errorMessage = null) }

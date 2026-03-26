@@ -9,6 +9,8 @@ import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
+import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +32,7 @@ class RecurringViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     recurringRepository: RecurringTransactionRepository,
     categoryRepository: CategoryRepository,
+    sessionRepository: SessionRepository,
 ) : ViewModel() {
     private val recurringLoaded = MutableStateFlow(false)
     private val categoriesLoaded = MutableStateFlow(false)
@@ -42,6 +45,9 @@ class RecurringViewModel @Inject constructor(
         .onEach { categoriesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+
     val isLoading: StateFlow<Boolean> = combine(recurringLoaded, categoriesLoaded) { recurringReady, categoriesReady ->
         !recurringReady || !categoriesReady
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
@@ -49,7 +55,7 @@ class RecurringViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RecurringUiState())
     val uiState: StateFlow<RecurringUiState> = _uiState.asStateFlow()
 
-    val renderState: StateFlow<RecurringRenderState> = combine(recurringTransactions, uiState) { recurring, uiState ->
+    val renderState: StateFlow<RecurringRenderState> = combine(recurringTransactions, householdCurrency, uiState) { recurring, householdCurrency, uiState ->
         val query = uiState.searchQuery.trim()
         RecurringRenderState(
             filteredRecurring = recurring.filter {
@@ -57,11 +63,12 @@ class RecurringViewModel @Inject constructor(
                     listOf(it.description, it.category, it.type).joinToString(" ")
                         .contains(query, ignoreCase = true)
             },
+            householdCurrency = householdCurrency,
         )
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        RecurringRenderState(filteredRecurring = emptyList()),
+        RecurringRenderState(filteredRecurring = emptyList(), householdCurrency = DEFAULT_CURRENCY),
     )
 
     private val recurringRepositoryRef = recurringRepository

@@ -32,6 +32,7 @@ data class ChartPoint(
 @Immutable
 data class DashboardRenderState(
     val selectedMonth: String,
+    val householdCurrency: String,
     val selectedRange: DashboardRange,
     val metrics: DashboardMetrics,
     val chartPoints: List<ChartPoint>,

@@ -1,6 +1,8 @@
 package com.davideagostini.summ.widget.data
 
 import com.davideagostini.summ.data.firebase.FirestorePaths
+import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
+import com.davideagostini.summ.ui.format.normalizeCurrencyCode
 import com.davideagostini.summ.widget.model.SpendingSummaryWidgetState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -37,6 +39,8 @@ class SpendingSummaryWidgetDataSource @Inject constructor() {
             val userSnapshot = firestore.document(FirestorePaths.user(currentUser.uid)).get().await()
             val householdId = userSnapshot.getString("householdId")?.takeIf(String::isNotBlank)
                 ?: return SpendingSummaryWidgetState.NeedsHousehold
+            val householdSnapshot = firestore.document(FirestorePaths.household(householdId)).get().await()
+            val currency = normalizeCurrencyCode(householdSnapshot.getString("currency") ?: DEFAULT_CURRENCY)
 
             val today = LocalDate.now(zoneId)
             // We align the "week" window with the rest of the app expectations:
@@ -74,6 +78,7 @@ class SpendingSummaryWidgetDataSource @Inject constructor() {
                 weekAmount = weekAmount,
                 monthAmount = monthAmount,
                 previousMonthAmount = previousMonthAmount,
+                currency = currency,
             )
         }.getOrElse {
             // Widgets should fail soft: one loading error must not crash the host launcher.

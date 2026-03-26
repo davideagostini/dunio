@@ -6,6 +6,8 @@ import com.davideagostini.summ.data.entity.AssetHistoryEntry
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.repository.AssetRepository
 import com.davideagostini.summ.data.repository.EntryRepository
+import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,6 +24,7 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     assetRepository: AssetRepository,
     entryRepository: EntryRepository,
+    sessionRepository: SessionRepository,
 ) : ViewModel() {
     private val historyLoaded = MutableStateFlow(false)
     private val entriesLoaded = MutableStateFlow(false)
@@ -34,6 +37,9 @@ class DashboardViewModel @Inject constructor(
         .onEach { entriesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+
     val isLoading: StateFlow<Boolean> = combine(historyLoaded, entriesLoaded) { history, entries ->
         !history || !entries
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
@@ -41,7 +47,7 @@ class DashboardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    val renderState: StateFlow<DashboardRenderState> = combine(assetHistory, entries, uiState) { history, allEntries, state ->
+    val renderState: StateFlow<DashboardRenderState> = combine(assetHistory, entries, householdCurrency, uiState) { history, allEntries, householdCurrency, state ->
         val selectedMonth = state.selectedMonth ?: YearMonth.now().toString()
         val selectedRange = state.selectedRange
         val assetsForMonth = buildAssetsSnapshotForMonth(history, selectedMonth)
@@ -103,6 +109,7 @@ class DashboardViewModel @Inject constructor(
 
         DashboardRenderState(
             selectedMonth = selectedMonth,
+            householdCurrency = householdCurrency,
             selectedRange = selectedRange,
             metrics = metrics,
             chartPoints = chartPoints,
@@ -118,6 +125,7 @@ class DashboardViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         DashboardRenderState(
             selectedMonth = YearMonth.now().toString(),
+            householdCurrency = DEFAULT_CURRENCY,
             selectedRange = DashboardRange.SixMonths,
             metrics = DashboardMetrics(0.0, 0.0, 0.0, null, 0.0, null),
             chartPoints = emptyList(),

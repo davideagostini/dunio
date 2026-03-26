@@ -28,6 +28,7 @@ data class UnusualSpendingInsight(
 @Immutable
 data class EntriesRenderState(
     val selectedMonth: String,
+    val householdCurrency: String,
     val isMonthClosed: Boolean,
     val monthEntries: List<EntryDisplayItem>,
     val visibleEntries: List<EntryDisplayItem>,

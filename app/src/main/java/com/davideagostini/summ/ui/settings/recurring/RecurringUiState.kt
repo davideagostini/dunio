@@ -28,4 +28,5 @@ data class RecurringUiState(
 @Immutable
 data class RecurringRenderState(
     val filteredRecurring: List<RecurringTransaction>,
+    val householdCurrency: String,
 )

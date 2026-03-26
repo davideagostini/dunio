@@ -59,7 +59,8 @@ import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.currencySymbol
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.settings.recurring.RecurringEvent
 import com.davideagostini.summ.ui.settings.recurring.RecurringSheetMode
 import com.davideagostini.summ.ui.settings.recurring.RecurringUiState
@@ -76,6 +77,7 @@ import java.util.Locale
 internal fun RecurringSheet(
     uiState: RecurringUiState,
     categories: List<Category>,
+    currency: String,
     onEvent: (RecurringEvent) -> Unit,
     onDismiss: () -> Unit,
     fullScreen: Boolean = false,
@@ -131,7 +133,7 @@ internal fun RecurringSheet(
                             }
                             Text(recurring.description, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             Text(
-                                formatEuro(recurring.amount),
+                                formatCurrency(recurring.amount, currency),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = if (recurring.type == "expense") ExpenseRed else IncomeGreen,
@@ -201,7 +203,7 @@ internal fun RecurringSheet(
                                     label = { Text(stringResource(R.string.entry_amount_label)) },
                                     isError = uiState.amountError != null,
                                     supportingText = uiState.amountError?.let { message -> { Text(message) } },
-                                    prefix = { Text(stringResource(R.string.entry_currency_symbol)) },
+                                    prefix = { Text(currencySymbol(currency)) },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                     shape = RoundedCornerShape(12.dp),
                                     singleLine = true,

@@ -17,7 +17,6 @@ sealed interface AssetsEvent {
     data class UpdateName(val value: String) : AssetsEvent
     data class UpdateCategory(val value: String) : AssetsEvent
     data class UpdateValue(val value: String) : AssetsEvent
-    data class UpdateCurrency(val value: String) : AssetsEvent
     data class UpdateType(val value: String) : AssetsEvent
     data object SaveAdd : AssetsEvent
     data object SaveEdit : AssetsEvent

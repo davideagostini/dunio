@@ -23,13 +23,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entries.EntriesFilterType
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import kotlin.math.abs
 
 @Composable
 internal fun BalanceCard(
+    currency: String,
     monthLabel: String,
     expenses: Double,
     income: Double,
@@ -59,7 +60,7 @@ internal fun BalanceCard(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = formatEuro(expenses),
+                text = formatCurrency(expenses, currency),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -67,7 +68,7 @@ internal fun BalanceCard(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.entries_balance_income, formatEuro(income)),
+                text = stringResource(R.string.entries_balance_income, formatCurrency(income, currency)),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -79,9 +80,9 @@ internal fun BalanceCard(
             ) {
                 Text(
                     text = if (netCashFlow >= 0) {
-                        stringResource(R.string.entries_balance_positive, formatEuro(netCashFlow))
+                        stringResource(R.string.entries_balance_positive, formatCurrency(netCashFlow, currency))
                     } else {
-                        stringResource(R.string.entries_balance_negative, formatEuro(abs(netCashFlow)))
+                        stringResource(R.string.entries_balance_negative, formatCurrency(abs(netCashFlow), currency))
                     },
                     color = if (netCashFlow >= 0) IncomeGreen else ExpenseRed,
                     style = MaterialTheme.typography.titleMedium,

@@ -61,6 +61,7 @@ import com.davideagostini.summ.ui.categories.CategoriesScreen
 import com.davideagostini.summ.ui.dashboard.DashboardScreen
 import com.davideagostini.summ.ui.entry.QuickEntryScreen
 import com.davideagostini.summ.ui.settings.SettingsScreen
+import com.davideagostini.summ.ui.settings.currency.CurrencyScreen
 import com.davideagostini.summ.ui.settings.members.MembersScreen
 import com.davideagostini.summ.ui.settings.monthclose.MonthCloseScreen
 import com.davideagostini.summ.ui.settings.recurring.RecurringScreen
@@ -73,6 +74,7 @@ fun AppNavGraph(
     sessionViewModel: SessionViewModel = hiltViewModel(),
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
+    val sessionUiState by sessionViewModel.uiState.collectAsStateWithLifecycle()
 
     // The app stays behind the auth gate until the session is restored and household access is known.
     val readyState = sessionState as? SessionState.Ready
@@ -127,6 +129,7 @@ fun AppNavGraph(
             }
             composable("settings") {
                 SettingsScreen(
+                    onNavigateCurrency = { navigate("currency") },
                     onNavigateCategories = { navigate("categories") },
                     onNavigateMembers = { navigate("members") },
                     onNavigateRecurring = { navigate("recurring") },
@@ -134,8 +137,19 @@ fun AppNavGraph(
                     onSignOut = sessionViewModel::signOut,
                     householdName = readyState.household.name,
                     householdId = readyState.household.id,
+                    householdCurrency = readyState.household.currency,
                     userName = readyState.user.name,
                     userPhotoUrl = readyState.user.photoUrl,
+                )
+            }
+            composable("currency") {
+                CurrencyScreen(
+                    selectedCurrency = readyState.household.currency,
+                    isUpdatingCurrency = sessionUiState.isSubmitting,
+                    errorMessage = sessionUiState.errorMessage,
+                    onSelectCurrency = sessionViewModel::updateHouseholdCurrency,
+                    onDismissError = sessionViewModel::consumeError,
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable("members") {
@@ -162,6 +176,7 @@ fun AppNavGraph(
 
         // Hide the bottom bar whenever a modal or fullscreen flow would compete for attention.
         if (currentRoute != "categories" &&
+            currentRoute != "currency" &&
             currentRoute != "members" &&
             currentRoute != "recurring" &&
             currentRoute != "month-close" &&

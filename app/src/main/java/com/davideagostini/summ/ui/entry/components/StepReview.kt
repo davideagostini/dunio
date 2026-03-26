@@ -26,7 +26,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
-import com.davideagostini.summ.ui.format.formatEuro
+import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -37,6 +37,7 @@ import java.util.Locale
 @Composable
 internal fun StepReview(
     uiState: EntryUiState,
+    currency: String,
     onEvent: (EntryEvent) -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -73,7 +74,7 @@ internal fun StepReview(
                 ReviewDivider()
                 ReviewRow(label = stringResource(R.string.entry_review_amount)) {
                     Text(
-                        text       = formatEuro(uiState.price.toDoubleOrNull() ?: 0.0),
+                        text       = formatCurrency(uiState.price.toDoubleOrNull() ?: 0.0, currency),
                         style      = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
