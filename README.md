@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/cover.png" alt="Track new worth in one place">
+</div>
+
 <div id="user-content-toc">
   <ul style="list-style: none;">
     <summary>
