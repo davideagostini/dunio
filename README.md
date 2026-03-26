@@ -25,14 +25,10 @@ The app is intentionally not an accounting suite. The focus is fast daily use, c
 ## Screenshots
 
 <p align="center" width="100%">
-    <img src="docs/screenshots/1.png" alt="Track net worth in one place" width="25%">
-    <img src="docs/screenshots/2.png" alt="Track every transaction" width="25%">
-    <img src="docs/screenshots/3.png" alt="Manage assets and liabilities" width="25%">
-    <img src="docs/screenshots/4.png" alt="Made for shared finances" width="25%">
-    <img src="docs/screenshots/5.png" alt="Add transactions faster" width="25%">
-    <img src="docs/screenshots/6.png" alt="Widgets for quick access" width="25%">
-    <img src="docs/screenshots/7.png" alt="Faster than opening the app" width="25%">
-    <img src="docs/screenshots/8.png" alt="Built for day and night" width="25%">
+<img src="docs/screenshots/1.png" alt="Track net worth in one place" width="25%"><img src="docs/screenshots/2.png" alt="Track every transaction" width="25%">
+<img src="docs/screenshots/3.png" alt="Manage assets and liabilities" width="25%"><img src="docs/screenshots/4.png" alt="Made for shared finances" width="25%">
+<img src="docs/screenshots/5.png" alt="Add transactions faster" width="25%"><img src="docs/screenshots/6.png" alt="Widgets for quick access" width="25%">
+<img src="docs/screenshots/7.png" alt="Faster than opening the app" width="25%"><img src="docs/screenshots/8.png" alt="Built for day and night" width="25%">
 </p>
 
 ## What this repository contains
