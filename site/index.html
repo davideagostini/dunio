@@ -91,12 +91,59 @@
               "Home-screen widgets",
               "Quick Settings Tile"
             ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://getsumm.app/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is Summ free to use?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Summ is free to use."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Summ open source?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Summ is open source, and the Android app source code is available on GitHub."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Summ available on Google Play?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Summ is built for Android and available on Google Play."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does shared household access work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each person signs in with Google, then creates a household or joins an existing one. People in the same household share the same finance data."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I support the project?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. You can support ongoing development through Buy Me a Coffee or GitHub Sponsors."
+                }
+              }
+            ]
           }
         ]
       }
     </script>
   </head>
   <body>
+    <canvas class="symbol-canvas" aria-hidden="true"></canvas>
     <div class="full-bleed-header">
       <div class="page-shell">
         <header class="site-header">
@@ -108,6 +155,7 @@
             <a href="#features">Features</a>
             <a href="#screens">Screens</a>
             <a href="#workflow">Workflow</a>
+            <a href="#faq">FAQ</a>
             <a href="#support">Support</a>
             <a href="./privacy-policy/">Privacy</a>
             <a href="./terms-of-service/">Terms</a>
@@ -131,10 +179,16 @@
               Free to use, open source, and available on Google Play.
             </p>
             <div class="hero-actions">
-              <a class="store-badge-link" href="#" aria-label="Get it on Google Play">
-                <img class="store-badge" src="./assets/play_store.png" alt="Get it on Google Play" />
+              <a class="button button-primary button-cta" href="#" aria-label="Download Summ on Google Play">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#34a853" d="M3.75 2.7c-.22.23-.35.57-.35 1v16.6c0 .43.13.77.35 1l9.2-9.3-9.2-9.3Z" />
+                  <path fill="#4285f4" d="M16.03 15.1 12.95 12l-9.2 9.3c.35.37.97.43 1.74 0l10.54-6.2Z" />
+                  <path fill="#fbbc04" d="M18.15 10.9 15.3 9.24 12.95 12l3.08 3.1 2.11-1.24c1.02-.6 1.02-1.97 0-2.96Z" />
+                  <path fill="#ea4335" d="M16.03 8.9 5.49 2.7c-.77-.43-1.39-.37-1.74 0l9.2 9.3 3.08-3.1Z" />
+                </svg>
+                <span>Download now</span>
               </a>
-              <a class="button button-secondary hero-github-button" href="https://github.com/davideagostini/summ">
+              <a class="button button-secondary button-cta" href="https://github.com/davideagostini/summ">
                 <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     fill="currentColor"
@@ -303,6 +357,43 @@
           </div>
         </section>
 
+        <section id="faq" class="section-block faq-section">
+          <div class="section-head">
+            <p class="eyebrow">FAQ</p>
+            <h2>Questions people usually have before trying Summ.</h2>
+            <p>
+              A few quick answers about pricing, platform, open-source availability, and shared
+              household access.
+            </p>
+          </div>
+
+          <div class="faq-list">
+            <details class="faq-item">
+              <summary>Is Summ free to use?</summary>
+              <p>Yes. Summ is free to use.</p>
+            </details>
+            <details class="faq-item">
+              <summary>Is Summ open source?</summary>
+              <p>Yes. Summ is open source, and the Android app source code is available on GitHub.</p>
+            </details>
+            <details class="faq-item">
+              <summary>Is Summ available on Google Play?</summary>
+              <p>Yes. Summ is built for Android and available on Google Play.</p>
+            </details>
+            <details class="faq-item">
+              <summary>How does shared household access work?</summary>
+              <p>
+                Each person signs in with Google, then creates a household or joins an existing one.
+                People in the same household share the same finance data.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>Can I support the project?</summary>
+              <p>You can support ongoing development through Buy Me a Coffee or GitHub Sponsors.</p>
+            </details>
+          </div>
+        </section>
+
         <section class="section-block callout">
           <div class="callout-card">
             <div>
@@ -313,10 +404,16 @@
               </p>
             </div>
             <div class="hero-actions callout-actions">
-              <a class="store-badge-link" href="#" aria-label="Get it on Google Play">
-                <img class="store-badge" src="./assets/play_store.png" alt="Get it on Google Play" />
+              <a class="button button-primary button-cta" href="#" aria-label="Download Summ on Google Play">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#34a853" d="M3.75 2.7c-.22.23-.35.57-.35 1v16.6c0 .43.13.77.35 1l9.2-9.3-9.2-9.3Z" />
+                  <path fill="#4285f4" d="M16.03 15.1 12.95 12l-9.2 9.3c.35.37.97.43 1.74 0l10.54-6.2Z" />
+                  <path fill="#fbbc04" d="M18.15 10.9 15.3 9.24 12.95 12l3.08 3.1 2.11-1.24c1.02-.6 1.02-1.97 0-2.96Z" />
+                  <path fill="#ea4335" d="M16.03 8.9 5.49 2.7c-.77-.43-1.39-.37-1.74 0l9.2 9.3 3.08-3.1Z" />
+                </svg>
+                <span>Download now</span>
               </a>
-              <a class="button button-secondary" href="https://github.com/davideagostini/summ">
+              <a class="button button-secondary button-cta" href="https://github.com/davideagostini/summ">
                 <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     fill="currentColor"
@@ -325,7 +422,7 @@
                 </svg>
                 <span>View on GitHub</span>
               </a>
-              <a class="button button-secondary" href="https://buymeacoffee.com/davideagostini">
+              <a class="button button-secondary button-cta" href="https://buymeacoffee.com/davideagostini">
                 <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     fill="currentColor"
