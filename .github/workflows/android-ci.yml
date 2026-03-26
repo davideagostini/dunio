@@ -167,6 +167,20 @@ jobs:
           path: app/build/outputs/mapping/release/summ-*-mapping.txt
           if-no-files-found: error
 
+      - name: Upload native debug metadata artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: summ-release-native-debug-metadata
+          path: app/build/intermediates/native_debug_metadata/release/*
+          if-no-files-found: error
+
+      - name: Upload native symbol tables artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: summ-release-native-symbol-tables
+          path: app/build/intermediates/native_symbol_tables/release/*
+          if-no-files-found: error
+
   publish-tagged-release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
