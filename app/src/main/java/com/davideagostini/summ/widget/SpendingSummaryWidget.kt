@@ -28,6 +28,7 @@ import com.davideagostini.summ.ui.theme.primaryDark
 import com.davideagostini.summ.ui.theme.primaryLight
 import com.davideagostini.summ.widget.components.SummWidgetScaffold
 import com.davideagostini.summ.widget.components.WidgetInfoState
+import com.davideagostini.summ.widget.components.openAppAction
 import com.davideagostini.summ.widget.components.quickEntryAction
 import com.davideagostini.summ.widget.data.SpendingSummaryWidgetDataSource
 import com.davideagostini.summ.widget.model.SpendingDeltaTone
@@ -55,6 +56,7 @@ class SpendingSummaryWidget : GlanceAppWidget() {
         provideContent {
             SummWidgetScaffold(
                 title = context.getString(R.string.widget_spending_title),
+                contentAction = openAppAction(context),
                 trailingAction = actionRunCallback<RefreshSpendingWidgetAction>(),
             ) {
                 when (state) {

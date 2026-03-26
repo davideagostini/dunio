@@ -25,6 +25,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.davideagostini.summ.MainActivity
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entry.QuickEntryActivity
 import com.davideagostini.summ.ui.theme.onSurfaceDark
@@ -46,10 +47,14 @@ private val widgetOnSurface = ColorProvider(onSurfaceLight, onSurfaceDark)
 fun quickEntryAction(context: Context): Action =
     actionStartActivity(Intent(context, QuickEntryActivity::class.java))
 
+fun openAppAction(context: Context): Action =
+    actionStartActivity(Intent(context, MainActivity::class.java))
+
 @androidx.compose.runtime.Composable
 fun SummWidgetScaffold(
     title: String,
     body: String? = null,
+    contentAction: Action? = null,
     trailingAction: Action? = null,
     content: @androidx.compose.runtime.Composable () -> Unit,
 ) {
@@ -68,6 +73,13 @@ fun SummWidgetScaffold(
                 .fillMaxSize()
                 .cornerRadius(20.dp)
                 .background(widgetSurface)
+                .then(
+                    if (contentAction != null) {
+                        GlanceModifier.clickable(contentAction)
+                    } else {
+                        GlanceModifier
+                    },
+                )
                 .padding(12.dp),
         ) {
             Row(
