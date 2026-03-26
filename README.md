@@ -348,6 +348,8 @@ git rm --cached app/google-services.json
 - [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [`project_overview.md`](./project_overview.md)
 - [`FIRST_RELEASE_CHECKLIST.md`](./FIRST_RELEASE_CHECKLIST.md)
+- [Privacy Policy](https://getsumm.app/privacy-policy)
+- [Terms of Service](https://getsumm.app/terms-of-service)
 
 ## Roadmap ideas
 
