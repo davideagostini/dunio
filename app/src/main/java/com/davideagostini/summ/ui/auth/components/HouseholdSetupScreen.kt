@@ -2,11 +2,13 @@ package com.davideagostini.summ.ui.auth.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -116,65 +118,71 @@ private fun HouseholdSetupContent(
     onJoinHousehold: (String) -> Unit,
     onSignOut: () -> Unit,
 ) {
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item {
-            AuthHeader(
-                title = stringResource(R.string.auth_household_setup_title),
-                subtitle = stringResource(R.string.auth_household_setup_message),
-            )
-        }
-
-        item {
-            AuthCard {
-                AuthAccountInfoBlock(
-                    label = stringResource(R.string.settings_signed_in_as),
-                    value = userName,
-                    userPhotoUrl = userPhotoUrl,
-                )
-            }
-        }
-
-        item {
-            HouseholdModeCard(
-                selectedMode = selectedMode,
-                onSelectMode = onSelectMode,
-                isSubmitting = isSubmitting,
-                errorMessage = errorMessage,
-                householdName = householdName,
-                householdId = householdId,
-                onHouseholdNameChange = onHouseholdNameChange,
-                onHouseholdIdChange = onHouseholdIdChange,
-                onDismissError = onDismissError,
-                onCreateHousehold = onCreateHousehold,
-                onJoinHousehold = onJoinHousehold,
-            )
-        }
-
-        if (!errorMessage.isNullOrBlank() && selectedMode != HouseholdSetupMode.Join) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
             item {
-                AuthErrorCard(errorMessage)
-            }
-        }
-
-        item {
-            OutlinedButton(
-                onClick = onSignOut,
-                enabled = !isSubmitting,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = AppButtonShape,
-            ) {
-                Text(
-                    text = stringResource(R.string.action_sign_out),
-                    color = MaterialTheme.colorScheme.error,
+                AuthHeader(
+                    title = stringResource(R.string.auth_household_setup_title),
+                    subtitle = stringResource(R.string.auth_household_setup_message),
                 )
+            }
+
+            item {
+                AuthCard {
+                    AuthAccountInfoBlock(
+                        label = stringResource(R.string.settings_signed_in_as),
+                        value = userName,
+                        userPhotoUrl = userPhotoUrl,
+                    )
+                }
+            }
+
+            item {
+                HouseholdModeCard(
+                    selectedMode = selectedMode,
+                    onSelectMode = onSelectMode,
+                    isSubmitting = isSubmitting,
+                    errorMessage = errorMessage,
+                    householdName = householdName,
+                    householdId = householdId,
+                    onHouseholdNameChange = onHouseholdNameChange,
+                    onHouseholdIdChange = onHouseholdIdChange,
+                    onDismissError = onDismissError,
+                    onCreateHousehold = onCreateHousehold,
+                    onJoinHousehold = onJoinHousehold,
+                )
+            }
+
+            if (!errorMessage.isNullOrBlank() && selectedMode != HouseholdSetupMode.Join) {
+                item {
+                    AuthErrorCard(errorMessage)
+                }
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = onSignOut,
+                    enabled = !isSubmitting,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = AppButtonShape,
+                ) {
+                    Text(
+                        text = stringResource(R.string.action_sign_out),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.davideagostini.summ.data.session
 
 import android.content.Context
+import android.os.SystemClock
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -23,10 +24,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -72,6 +75,27 @@ class SessionRepository @Inject constructor(
         Category(name = appContext.getString(R.string.default_category_work), emoji = "💼"),
         Category(name = appContext.getString(R.string.default_category_other), emoji = "📦"),
     )
+    private val householdBootstrapInFlight = MutableStateFlow(false)
+    @Volatile
+    private var householdBootstrapHoldUntilMs: Long = 0L
+
+    private fun isBootstrapProtected(): Boolean =
+        householdBootstrapInFlight.value || SystemClock.elapsedRealtime() < householdBootstrapHoldUntilMs
+
+    private fun beginHouseholdBootstrap() {
+        householdBootstrapInFlight.value = true
+        householdBootstrapHoldUntilMs = 0L
+    }
+
+    private fun endHouseholdBootstrapWithHold() {
+        householdBootstrapHoldUntilMs = SystemClock.elapsedRealtime() + 1_500L
+        householdBootstrapInFlight.value = false
+    }
+
+    private fun clearHouseholdBootstrap() {
+        householdBootstrapInFlight.value = false
+        householdBootstrapHoldUntilMs = 0L
+    }
 
     val sessionState: Flow<SessionState> =
         if (auth == null || firestore == null) {
@@ -79,6 +103,7 @@ class SessionRepository @Inject constructor(
         } else {
             authStateFlow(auth).flatMapLatest { firebaseUser ->
                 if (firebaseUser == null) {
+                    clearHouseholdBootstrap()
                     flowOf(SessionState.SignedOut)
                 } else {
                     userSessionFlow(firebaseUser)
@@ -109,6 +134,7 @@ class SessionRepository @Inject constructor(
     }
 
     suspend fun signOut() {
+        clearHouseholdBootstrap()
         auth?.signOut()
         runCatching {
             CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
@@ -123,6 +149,7 @@ class SessionRepository @Inject constructor(
         require(name.trim().isNotEmpty()) { appContext.getString(R.string.session_household_name_required) }
         val householdRef = db.collection("households").document()
         val batch = db.batch()
+        beginHouseholdBootstrap()
 
         batch.set(
             householdRef,
@@ -169,9 +196,14 @@ class SessionRepository @Inject constructor(
             SetOptions.merge()
         )
 
-        batch.commit().await()
-        // A newly created household changes widget eligibility immediately.
-        SummWidgetsUpdater.refreshAll(appContext)
+        try {
+            batch.commit().await()
+            // A newly created household changes widget eligibility immediately.
+            SummWidgetsUpdater.refreshAll(appContext)
+        } catch (throwable: Throwable) {
+            clearHouseholdBootstrap()
+            throw throwable
+        }
     }
 
     suspend fun joinHousehold(householdId: String) {
@@ -195,6 +227,7 @@ class SessionRepository @Inject constructor(
         val invitedRole = inviteSnapshot.getString("role")?.ifBlank { null } ?: "member"
 
         val batch = db.batch()
+        beginHouseholdBootstrap()
         batch.set(
             db.document(FirestorePaths.member(trimmedId, firebaseUser.uid)),
             mapOf(
@@ -222,9 +255,14 @@ class SessionRepository @Inject constructor(
             ),
             SetOptions.merge()
         )
-        batch.commit().await()
-        // Joining an existing household unlocks widget data for the first time on a new device.
-        SummWidgetsUpdater.refreshAll(appContext)
+        try {
+            batch.commit().await()
+            // Joining an existing household unlocks widget data for the first time on a new device.
+            SummWidgetsUpdater.refreshAll(appContext)
+        } catch (throwable: Throwable) {
+            clearHouseholdBootstrap()
+            throw throwable
+        }
     }
 
     suspend fun requireHouseholdId(): String {
@@ -275,6 +313,13 @@ class SessionRepository @Inject constructor(
         val db = requireNotNull(firestore)
         return callbackFlow {
             var householdRegistration: com.google.firebase.firestore.ListenerRegistration? = null
+            val fallbackUser = AppUser(
+                uid = firebaseUser.uid,
+                email = firebaseUser.email.orEmpty(),
+                name = firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name),
+                photoUrl = firebaseUser.photoUrl?.toString(),
+                householdId = null,
+            )
 
             val registration = db.document(FirestorePaths.user(firebaseUser.uid))
                 .addSnapshotListener { snapshot, error ->
@@ -287,7 +332,11 @@ class SessionRepository @Inject constructor(
                     householdRegistration = null
 
                     if (snapshot == null || !snapshot.exists()) {
-                        trySend(SessionState.Loading)
+                        if (isBootstrapProtected()) {
+                            trySend(SessionState.Loading)
+                        } else {
+                            trySend(SessionState.NeedsHousehold(fallbackUser))
+                        }
                         return@addSnapshotListener
                     }
 
@@ -308,9 +357,7 @@ class SessionRepository @Inject constructor(
 
                     val householdId = document.householdId
                     if (householdId.isNullOrBlank()) {
-                        // During sign-in we can briefly see a cached/stale user document before
-                        // Firestore returns the server copy that already contains the household.
-                        if (snapshot.metadata.isFromCache) {
+                        if (isBootstrapProtected()) {
                             trySend(SessionState.Loading)
                         } else {
                             trySend(SessionState.NeedsHousehold(user))
@@ -318,23 +365,26 @@ class SessionRepository @Inject constructor(
                         return@addSnapshotListener
                     }
 
-                    trySend(SessionState.Loading)
-
                     householdRegistration = db.document(FirestorePaths.household(householdId))
                         .addSnapshotListener { householdSnapshot, householdError ->
                             if (householdError != null) {
-                                trySend(SessionState.ConfigurationError(householdError.message ?: appContext.getString(R.string.session_household_load_error)))
+                                if (householdError.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
+                                    trySend(SessionState.NeedsHousehold(user.copy(householdId = null)))
+                                } else {
+                                    trySend(SessionState.ConfigurationError(householdError.message ?: appContext.getString(R.string.session_household_load_error)))
+                                }
                                 return@addSnapshotListener
                             }
 
                             val household = householdSnapshot?.toObject(HouseholdDocument::class.java)
                             if (householdSnapshot == null || !householdSnapshot.exists() || household == null) {
-                                if (householdSnapshot?.metadata?.isFromCache == true) {
+                                if (isBootstrapProtected()) {
                                     trySend(SessionState.Loading)
                                 } else {
                                     trySend(SessionState.NeedsHousehold(user.copy(householdId = null)))
                                 }
                             } else {
+                                endHouseholdBootstrapWithHold()
                                 trySend(
                                     SessionState.Ready(
                                         user = user,

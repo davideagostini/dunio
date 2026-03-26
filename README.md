@@ -68,6 +68,7 @@ Each household uses one shared currency configured from Settings. The app does n
 - create household
 - join household with invite + household ID
 - owner/member household model
+- household onboarding keeps the user behind a loading state until session access is fully resolved
 
 ### Dashboard
 
@@ -180,6 +181,11 @@ Minimum backend setup:
 - `app/google-services.json` added locally
 - `firebase/firestore.rules` deployed
 - `firebase/firestore.indexes.json` deployed
+
+The provided Firestore rules support the initial household bootstrap flow used by the Android app:
+- create household document
+- create the owner membership
+- seed default categories
 
 This repository is app-first, but the Android client depends on that Firebase setup to work correctly.
 

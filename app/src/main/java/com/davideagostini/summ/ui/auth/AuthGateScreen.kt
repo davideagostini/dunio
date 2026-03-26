@@ -29,6 +29,11 @@ fun AuthGateScreen(
     val sessionState by viewModel.sessionState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    if (uiState.isHouseholdTransitioning && uiState.errorMessage == null) {
+        LoadingScreen()
+        return
+    }
+
     when (val state = sessionState) {
         SessionState.Loading -> LoadingScreen()
         is SessionState.ConfigurationError -> MessageScreen(

@@ -177,6 +177,7 @@ Responsibility:
 - gate the app on auth + household membership
 - handle Google sign-in flow
 - handle create/join household onboarding
+- keep create/join transitions in a dedicated loading state until the session becomes ready
 - expose household-level settings updates such as the shared currency
 
 ### `ui/dashboard`

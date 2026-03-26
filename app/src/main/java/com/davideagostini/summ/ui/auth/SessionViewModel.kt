@@ -12,13 +12,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 data class SessionUiState(
     val isSubmitting: Boolean = false,
+    val isHouseholdTransitioning: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -50,13 +54,13 @@ class SessionViewModel @Inject constructor(
     }
 
     fun createHousehold(name: String) {
-        launchAction {
+        launchAction(awaitReady = true, householdTransition = true) {
             sessionRepository.createHousehold(name)
         }
     }
 
     fun joinHousehold(householdId: String) {
-        launchAction {
+        launchAction(awaitReady = true, householdTransition = true) {
             sessionRepository.joinHousehold(householdId)
         }
     }
@@ -73,16 +77,32 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    private fun launchAction(action: suspend () -> Unit) {
+    private fun launchAction(
+        awaitReady: Boolean = false,
+        householdTransition: Boolean = false,
+        action: suspend () -> Unit,
+    ) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true, errorMessage = null) }
+            _uiState.update {
+                it.copy(
+                    isSubmitting = true,
+                    isHouseholdTransitioning = householdTransition,
+                    errorMessage = null,
+                )
+            }
             try {
                 action()
-                _uiState.update { it.copy(isSubmitting = false) }
+                if (awaitReady) {
+                    withTimeoutOrNull(10_000) {
+                        sessionState.filterIsInstance<SessionState.Ready>().first()
+                    }
+                }
+                _uiState.update { it.copy(isSubmitting = false, isHouseholdTransitioning = false) }
             } catch (throwable: Throwable) {
                 _uiState.update {
                     it.copy(
                         isSubmitting = false,
+                        isHouseholdTransitioning = false,
                         errorMessage = throwable.message ?: appContext.getString(R.string.session_generic_error),
                     )
                 }

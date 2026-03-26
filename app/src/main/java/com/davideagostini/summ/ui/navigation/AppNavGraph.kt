@@ -77,6 +77,11 @@ fun AppNavGraph(
     val sessionUiState by sessionViewModel.uiState.collectAsStateWithLifecycle()
 
     // The app stays behind the auth gate until the session is restored and household access is known.
+    if (sessionUiState.isHouseholdTransitioning) {
+        AuthGateScreen(sessionViewModel)
+        return
+    }
+
     val readyState = sessionState as? SessionState.Ready
     if (readyState == null) {
         AuthGateScreen(sessionViewModel)

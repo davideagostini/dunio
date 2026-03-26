@@ -21,6 +21,12 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid)).data.role == "owner";
     }
 
+    function isBootstrappingHouseholdOwner(householdId) {
+      return isSignedIn()
+        && existsAfter(/databases/$(database)/documents/households/$(householdId))
+        && getAfter(/databases/$(database)/documents/households/$(householdId)).data.ownerId == request.auth.uid;
+    }
+
     function isMonthClosed(householdId, period) {
       return exists(/databases/$(database)/documents/households/$(householdId)/monthCloses/$(period))
         && get(/databases/$(database)/documents/households/$(householdId)/monthCloses/$(period)).data.status == "closed";
@@ -79,6 +85,11 @@ service cloud.firestore {
               && request.resource.data.role == currentInviteRole(householdId)
             )
             || isHouseholdOwner(householdId)
+            || (
+              request.auth.uid == userId
+              && request.resource.data.role == "owner"
+              && isBootstrappingHouseholdOwner(householdId)
+            )
           );
         allow update, delete: if isHouseholdOwner(householdId);
       }
@@ -120,7 +131,8 @@ service cloud.firestore {
       }
 
       match /categories/{categoryId} {
-        allow read, create, update, delete: if isHouseholdMember(householdId);
+        allow read, update, delete: if isHouseholdMember(householdId);
+        allow create: if isHouseholdMember(householdId) || isBootstrappingHouseholdOwner(householdId);
       }
 
       match /invites/{inviteId} {
