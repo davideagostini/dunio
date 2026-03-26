@@ -8,7 +8,8 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-val appVersionName = "0.0.14"
+val appVersionName = "0.0.15"
+val appVersionCode = 6
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -37,7 +38,7 @@ android {
         applicationId = "com.davideagostini.summ"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
+        versionCode = appVersionCode
         versionName = appVersionName
 
         ndk {
