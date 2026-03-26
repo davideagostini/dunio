@@ -30,40 +30,44 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Create placeholder google-services.json
+      - name: Create google-services.json
         run: |
           mkdir -p app
-          cat <<'EOF' > app/google-services.json
-          {
-            "project_info": {
-              "project_number": "1234567890",
-              "project_id": "placeholder-project",
-              "storage_bucket": "placeholder-project.appspot.com"
-            },
-            "client": [
-              {
-                "client_info": {
-                  "mobilesdk_app_id": "1:1234567890:android:placeholder",
-                  "android_client_info": {
-                    "package_name": "com.davideagostini.summ"
-                  }
-                },
-                "oauth_client": [],
-                "api_key": [
-                  {
-                    "current_key": "placeholder"
-                  }
-                ],
-                "services": {
-                  "appinvite_service": {
-                    "other_platform_oauth_client": []
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" ]; then
+            echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+          else
+            cat <<'EOF' > app/google-services.json
+            {
+              "project_info": {
+                "project_number": "1234567890",
+                "project_id": "placeholder-project",
+                "storage_bucket": "placeholder-project.appspot.com"
+              },
+              "client": [
+                {
+                  "client_info": {
+                    "mobilesdk_app_id": "1:1234567890:android:placeholder",
+                    "android_client_info": {
+                      "package_name": "com.davideagostini.summ"
+                    }
+                  },
+                  "oauth_client": [],
+                  "api_key": [
+                    {
+                      "current_key": "placeholder"
+                    }
+                  ],
+                  "services": {
+                    "appinvite_service": {
+                      "other_platform_oauth_client": []
+                    }
                   }
                 }
-              }
-            ],
-            "configuration_version": "1"
-          }
-          EOF
+              ],
+              "configuration_version": "1"
+            }
+            EOF
+          fi
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
@@ -77,6 +81,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
     env:
+      GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -96,40 +101,14 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Create placeholder google-services.json
+      - name: Create google-services.json
         run: |
           mkdir -p app
-          cat <<'EOF' > app/google-services.json
-          {
-            "project_info": {
-              "project_number": "1234567890",
-              "project_id": "placeholder-project",
-              "storage_bucket": "placeholder-project.appspot.com"
-            },
-            "client": [
-              {
-                "client_info": {
-                  "mobilesdk_app_id": "1:1234567890:android:placeholder",
-                  "android_client_info": {
-                    "package_name": "com.davideagostini.summ"
-                  }
-                },
-                "oauth_client": [],
-                "api_key": [
-                  {
-                    "current_key": "placeholder"
-                  }
-                ],
-                "services": {
-                  "appinvite_service": {
-                    "other_platform_oauth_client": []
-                  }
-                }
-              }
-            ],
-            "configuration_version": "1"
-          }
-          EOF
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "GOOGLE_SERVICES_JSON_BASE64 secret is required for release builds." >&2
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > app/google-services.json
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
