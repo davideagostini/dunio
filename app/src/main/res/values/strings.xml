@@ -46,6 +46,8 @@
     <string name="auth_sign_in_body">Track income and expenses, monitor assets and liabilities, and keep your household finances in sync every day.</string>
     <string name="auth_signing_in">Signing in…</string>
     <string name="auth_continue_with_google">Continue with Google</string>
+    <string name="auth_privacy_policy">Privacy Policy</string>
+    <string name="auth_terms_of_service">Terms of Service</string>
     <string name="auth_household_setup_title">Household setup</string>
     <string name="auth_household_setup_message">Create a new household or join an existing one to unlock the dashboard.</string>
     <string name="auth_signed_in_as">Signed in as %1$s</string>

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.AppButtonShape
@@ -42,6 +45,7 @@ fun SignInScreen(
     onDismissError: () -> Unit,
     onGoogleSignIn: () -> Unit,
 ) {
+    val uriHandler = LocalUriHandler.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -90,6 +94,30 @@ fun SignInScreen(
                         stringResource(R.string.auth_continue_with_google)
                     }
                 )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(
+                    onClick = { uriHandler.openUri("https://google.com") },
+                ) {
+                    Text(text = stringResource(R.string.auth_privacy_policy))
+                }
+                Text(
+                    text = "•",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(
+                    onClick = { uriHandler.openUri("https://google.com") },
+                ) {
+                    Text(text = stringResource(R.string.auth_terms_of_service))
+                }
             }
         }
     }
