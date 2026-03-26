@@ -171,15 +171,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: summ-release-native-debug-metadata
-          path: app/build/intermediates/native_debug_metadata/release/*
-          if-no-files-found: error
+          path: app/build/intermediates/native_debug_metadata/release/extractReleaseNativeDebugMetadata/out/**
+          if-no-files-found: warn
 
       - name: Upload native symbol tables artifact
         uses: actions/upload-artifact@v4
         with:
           name: summ-release-native-symbol-tables
-          path: app/build/intermediates/native_symbol_tables/release/*
-          if-no-files-found: error
+          path: app/build/intermediates/native_symbol_tables/release/extractReleaseNativeSymbolTables/out/**
+          if-no-files-found: warn
 
   publish-tagged-release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')

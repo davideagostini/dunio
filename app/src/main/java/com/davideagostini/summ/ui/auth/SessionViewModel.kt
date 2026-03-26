@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ class SessionViewModel @Inject constructor(
     }
 
     fun signInWithGoogle(context: Context) {
-        launchAction {
+        launchAction(awaitSessionSettled = true) {
             sessionRepository.signInWithGoogle(context)
         }
     }
@@ -79,6 +80,7 @@ class SessionViewModel @Inject constructor(
 
     private fun launchAction(
         awaitReady: Boolean = false,
+        awaitSessionSettled: Boolean = false,
         householdTransition: Boolean = false,
         action: suspend () -> Unit,
     ) {
@@ -92,6 +94,15 @@ class SessionViewModel @Inject constructor(
             }
             try {
                 action()
+                if (awaitSessionSettled) {
+                    withTimeoutOrNull(10_000) {
+                        sessionState.firstOrNull { state ->
+                            state is SessionState.Ready ||
+                                state is SessionState.NeedsHousehold ||
+                                state is SessionState.ConfigurationError
+                        }
+                    }
+                }
                 if (awaitReady) {
                     withTimeoutOrNull(10_000) {
                         sessionState.filterIsInstance<SessionState.Ready>().first()
