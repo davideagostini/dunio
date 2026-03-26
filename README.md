@@ -363,6 +363,13 @@ git rm --cached app/google-services.json
 Summ is free to use and open source. If you find it useful and want to support ongoing development, you can do it here:
 
 - [Buy Me a Coffee](https://buymeacoffee.com/davideagostini)
+- [GitHub Sponsors](https://github.com/sponsors/davideagostini)
+
+## Star History
+
+If you find Summ useful, consider giving the repository a star.
+
+[![Star History Chart](https://app.repohistory.com/api/svg?repo=davideagostini/summ&type=Date&background=F9FAEF&color=4C662B)](https://app.repohistory.com/star-history)
 
 ## License
 
