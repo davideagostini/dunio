@@ -1,7 +1,6 @@
 package com.davideagostini.summ.data.firebase
 
 import android.content.Context
-import com.davideagostini.summ.R
 
 object FirebaseConfig {
     fun getDefaultWebClientId(context: Context): String? {
@@ -10,6 +9,6 @@ object FirebaseConfig {
             return null
         }
 
-        return context.getString(R.string.default_web_client_id).takeIf(String::isNotBlank)
+        return context.resources.getString(resourceId).takeIf(String::isNotBlank)
     }
 }
