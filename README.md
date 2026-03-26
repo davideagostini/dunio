@@ -354,6 +354,12 @@ git rm --cached app/google-services.json
 - notifications and reminders
 - better backup and migration flows
 
+## Support the project
+
+Summ is free to use and open source. If you find it useful and want to support ongoing development, you can do it here:
+
+- [Buy Me a Coffee](https://buymeacoffee.com/davideagostini)
+
 ## License
 
 This repository uses the MIT license. See [`LICENSE`](./LICENSE).
