@@ -317,6 +317,12 @@ Required GitHub Actions secrets:
 - `ANDROID_KEYSTORE_PASSWORD`
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
+- `GOOGLE_SERVICES_JSON_BASE64`
+
+Release notes:
+
+- CI validates that the decoded `google-services.json` matches `com.davideagostini.summ` and generates `default_web_client_id`
+- release builds explicitly keep `@string/default_web_client_id` so `shrinkResources` does not remove Google Sign-In configuration
 
 How it works:
 
