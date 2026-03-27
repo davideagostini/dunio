@@ -184,4 +184,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+/site/TWITTER_30_DAY_PLAN.md
+/site/CLOUDFLARE_PAGES_DEPLOY.md
+
 # End of https://www.gitignore.io/api/java,linux,macos,windows,android,intellij,androidstudio
