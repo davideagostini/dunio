@@ -15,6 +15,7 @@ Use this checklist before publishing the first public GitHub release or Play Con
 
 - [ ] `./gradlew assembleDebug` passes
 - [ ] `./gradlew bundleRelease` passes with a local signing config
+- [ ] signed release APK installs locally and completes a cold start without crashing
 - [ ] version code and version name are correct
 - [ ] app name, package name, and icon branding are consistent
 - [ ] no placeholder UI text remains
@@ -33,6 +34,7 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] sign in works
 - [ ] create household works
 - [ ] join household works with a real invite
+- [ ] create/join household does not flash back to setup during the transition
 - [ ] dashboard loads
 - [ ] entries CRUD works
 - [ ] assets CRUD works
@@ -47,5 +49,7 @@ Use this checklist before publishing the first public GitHub release or Play Con
 
 - [ ] issue templates are present
 - [ ] CI workflow is green
+- [ ] release workflow uploads `APK`, `AAB`, and `mapping.txt`
+- [ ] optional native symbol artifacts are checked if the workflow produced them
 - [ ] first release notes drafted
 - [ ] screenshots or demo media prepared
