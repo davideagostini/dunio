@@ -115,3 +115,56 @@ Ordine pratico che farei io:
 8. widget/quick entry
 
 Se vuoi, il prossimo passo è che trasformo questa lista in una checklist markdown pronta da copiare in una issue o nel release note.
+
+====
+
+Ecco una versione finale, pronta da usare per `Google Play`.
+
+**App title**  
+`Summ: Shared Finance Tracker`
+
+**Short description**  
+`Track shared household finances with net worth, expenses, assets, recurring payments, widgets, and quick entry.`
+
+**Full description**  
+`Summ is a shared finance tracker for couples and households to track net worth, expenses, income, assets, liabilities, and recurring payments.
+
+Summ is a mobile-first finance app built for shared households.
+
+Track net worth, income, expenses, assets, liabilities, and recurring transactions in one clean and simple app. Summ is designed for couples, families, or anyone managing money together inside a shared household.
+
+With Summ you can:
+• track net worth month by month
+• log income and expenses quickly
+• manage assets and liabilities
+• organize transactions with categories
+• automate recurring transactions
+• review cash flow, savings rate, and financial runway
+• close each month to keep history clean
+• use home-screen widgets for quick access
+• add transactions faster with the Quick Settings tile
+
+Summ focuses on clarity, speed, and daily usability. It avoids the complexity of traditional accounting software and gives you a lightweight financial dashboard that is easy to maintain over time.
+
+Built for shared finances:
+• one household
+• multiple members
+• shared dashboard
+• shared financial data
+
+Whether you want a household finance tracker, a net worth app, or a lightweight money manager for two people, Summ helps you stay organized without unnecessary complexity.`
+
+
+
+- shared finance tracker
+- household finance
+- couple finance
+- net worth tracker
+- expense tracker
+- income tracker
+- recurring payments
+- assets and liabilities
+- money manager
+- personal finance
+
+Se vuoi, nel prossimo messaggio posso anche prepararti una versione `più premium e meno SEO`, da confrontare prima di pubblicare.

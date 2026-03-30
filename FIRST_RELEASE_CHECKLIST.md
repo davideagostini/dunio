@@ -39,11 +39,15 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] entries CRUD works
 - [ ] assets CRUD works
 - [ ] household currency can be changed from Settings
+- [ ] app language can be changed from Settings
+- [ ] selected app language is pinned to the top of the language list
 - [ ] currency search works and keeps the selected currency at the top
+- [ ] core screens show the expected localized strings for supported languages
 - [ ] dashboard, entries, assets, recurring, and widgets reflect the selected household currency
 - [ ] recurring apply due works without duplicates
 - [ ] month close read-only mode works
 - [ ] member vs owner invite visibility works as expected
+- [ ] widget refresh behavior is re-reviewed from the current simple baseline before the next release
 
 ## GitHub polish
 

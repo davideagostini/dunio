@@ -9,6 +9,7 @@ data class EntryDisplayItem(
     val description: String,
     val price: Double,
     val category: String,
+    val categoryKey: String? = null,
     val emoji: String,
     val date: Long,
 )

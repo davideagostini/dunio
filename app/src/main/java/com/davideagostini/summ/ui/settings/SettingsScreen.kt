@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.davideagostini.summ.BuildConfig
 import com.davideagostini.summ.R
+import com.davideagostini.summ.ui.settings.language.AppLanguageManager
 import com.davideagostini.summ.ui.settings.components.SettingsInfoItem
 import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.settings.components.SettingsSectionLabel
@@ -62,6 +64,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     onNavigateCurrency: () -> Unit,
+    onNavigateLanguage: () -> Unit,
     onNavigateCategories: () -> Unit,
     onNavigateMembers: () -> Unit,
     onNavigateRecurring: () -> Unit,
@@ -76,6 +79,9 @@ fun SettingsScreen(
     var showSignOutDialog by remember { mutableStateOf(false) }
     val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
+    val currentLanguageName = remember {
+        AppLanguageManager.displayName(AppLanguageManager.currentLanguage().tag)
+    }
 
     Column(
         modifier = Modifier
@@ -124,6 +130,15 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_currency_title),
                     subtitle = stringResource(R.string.settings_currency_subtitle, householdCurrency),
                     onClick = onNavigateCurrency,
+                )
+            }
+
+            item {
+                SettingsNavItem(
+                    icon = Icons.Default.Language,
+                    title = stringResource(R.string.settings_language_title),
+                    subtitle = stringResource(R.string.settings_language_subtitle, currentLanguageName),
+                    onClick = onNavigateLanguage,
                 )
             }
 

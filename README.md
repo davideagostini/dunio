@@ -104,6 +104,7 @@ Each household uses one shared currency configured from Settings. The app does n
 ### Settings
 
 - household currency
+- app language selection
 - category management
 - recurring transactions
 - month close
@@ -112,6 +113,22 @@ Each household uses one shared currency configured from Settings. The app does n
 - household details
 
 The household currency is changed from a dedicated searchable settings screen, and the selected currency is surfaced at the top of the list.
+
+The app also includes a dedicated language selection screen in Settings. The currently selected language is pinned to the top of the list and the remaining supported languages are sorted alphabetically using the same list style as the currency screen.
+
+Current app-language support includes:
+
+- English
+- Italian
+- French
+- German
+- Dutch
+- Spanish
+- Portuguese (Brazil)
+- Russian
+- Arabic
+- Chinese (Simplified)
+- Japanese
 
 ### Quick access
 
@@ -160,6 +177,8 @@ ViewModel
 Repository / Use Case
   -> reads and writes Firebase-backed data
 ```
+
+App text is resource-based and ready for Android per-app language switching through the system locale picker and the in-app language screen.
 
 Composable screens should stay focused on rendering and screen orchestration. Derived business data such as totals, grouped lists, chart models, and filtered lists should be prepared in `ViewModel` or shared model/use-case code.
 

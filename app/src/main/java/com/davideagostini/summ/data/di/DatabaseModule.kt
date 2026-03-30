@@ -1,5 +1,6 @@
 package com.davideagostini.summ.data.di
 
+import android.content.Context
 import com.davideagostini.summ.data.dao.AssetDao
 import com.davideagostini.summ.data.dao.CategoryDao
 import com.davideagostini.summ.data.dao.EntryDao
@@ -12,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 
 @Module
@@ -26,15 +28,17 @@ object DatabaseModule {
 
     @Provides
     fun provideEntryDao(
+        @ApplicationContext appContext: Context,
         firestore: FirebaseFirestore?,
         sessionRepository: SessionRepository,
-    ): EntryDao = EntryDao(firestore, sessionRepository)
+    ): EntryDao = EntryDao(appContext, firestore, sessionRepository)
 
     @Provides
     fun provideCategoryDao(
+        @ApplicationContext appContext: Context,
         firestore: FirebaseFirestore?,
         sessionRepository: SessionRepository,
-    ): CategoryDao = CategoryDao(firestore, sessionRepository)
+    ): CategoryDao = CategoryDao(appContext, firestore, sessionRepository)
 
     @Provides
     fun provideMemberDao(
@@ -50,9 +54,10 @@ object DatabaseModule {
 
     @Provides
     fun provideRecurringTransactionDao(
+        @ApplicationContext appContext: Context,
         firestore: FirebaseFirestore?,
         sessionRepository: SessionRepository,
-    ): RecurringTransactionDao = RecurringTransactionDao(firestore, sessionRepository)
+    ): RecurringTransactionDao = RecurringTransactionDao(appContext, firestore, sessionRepository)
 
     @Provides
     fun provideMonthCloseDao(

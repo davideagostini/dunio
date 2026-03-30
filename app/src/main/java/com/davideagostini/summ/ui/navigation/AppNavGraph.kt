@@ -62,6 +62,7 @@ import com.davideagostini.summ.ui.dashboard.DashboardScreen
 import com.davideagostini.summ.ui.entry.QuickEntryScreen
 import com.davideagostini.summ.ui.settings.SettingsScreen
 import com.davideagostini.summ.ui.settings.currency.CurrencyScreen
+import com.davideagostini.summ.ui.settings.language.LanguageScreen
 import com.davideagostini.summ.ui.settings.members.MembersScreen
 import com.davideagostini.summ.ui.settings.monthclose.MonthCloseScreen
 import com.davideagostini.summ.ui.settings.recurring.RecurringScreen
@@ -135,6 +136,7 @@ fun AppNavGraph(
             composable("settings") {
                 SettingsScreen(
                     onNavigateCurrency = { navigate("currency") },
+                    onNavigateLanguage = { navigate("language") },
                     onNavigateCategories = { navigate("categories") },
                     onNavigateMembers = { navigate("members") },
                     onNavigateRecurring = { navigate("recurring") },
@@ -154,6 +156,11 @@ fun AppNavGraph(
                     errorMessage = sessionUiState.errorMessage,
                     onSelectCurrency = sessionViewModel::updateHouseholdCurrency,
                     onDismissError = sessionViewModel::consumeError,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("language") {
+                LanguageScreen(
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -182,6 +189,7 @@ fun AppNavGraph(
         // Hide the bottom bar whenever a modal or fullscreen flow would compete for attention.
         if (currentRoute != "categories" &&
             currentRoute != "currency" &&
+            currentRoute != "language" &&
             currentRoute != "members" &&
             currentRoute != "recurring" &&
             currentRoute != "month-close" &&

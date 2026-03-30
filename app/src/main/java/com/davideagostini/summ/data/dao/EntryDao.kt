@@ -1,11 +1,14 @@
 package com.davideagostini.summ.data.dao
 
+import android.content.Context
+import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -21,6 +24,7 @@ private data class TransactionDocument(
     val amount: Double = 0.0,
     val type: String = "expense",
     val category: String = "",
+    val categoryKey: String? = null,
     val period: String = "",
     val recurringTransactionId: String? = null,
 )
@@ -28,6 +32,7 @@ private data class TransactionDocument(
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryDao @Inject constructor(
+    @param:ApplicationContext private val appContext: Context,
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,
 ) {
@@ -43,6 +48,7 @@ class EntryDao @Inject constructor(
                 "amount" to entry.price,
                 "type" to entry.type,
                 "category" to entry.category,
+                "categoryKey" to entry.categoryKey,
                 "period" to resolvePeriod(entry),
                 "recurringTransactionId" to entry.recurringTransactionId,
                 "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
@@ -62,6 +68,7 @@ class EntryDao @Inject constructor(
                     "amount" to entry.price,
                     "type" to entry.type,
                     "category" to entry.category,
+                    "categoryKey" to entry.categoryKey,
                     "period" to resolvePeriod(entry),
                     "recurringTransactionId" to entry.recurringTransactionId,
                     "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
@@ -113,17 +120,25 @@ class EntryDao @Inject constructor(
         }
 
     private fun TransactionDocument.toEntry(id: String, householdId: String): Entry =
-        Entry(
-            id = id,
-            householdId = householdId,
-            type = type,
-            description = description,
-            price = amount,
-            category = category,
-            date = dateToEpoch(date),
-            period = period.ifBlank { date.take(7) },
-            recurringTransactionId = recurringTransactionId,
-        )
+        run {
+            val resolvedCategoryKey = categoryKey ?: SystemCategories.inferSystemKey(
+                context = appContext,
+                name = category,
+            )
+
+            Entry(
+                id = id,
+                householdId = householdId,
+                type = type,
+                description = description,
+                price = amount,
+                category = category,
+                categoryKey = resolvedCategoryKey,
+                date = dateToEpoch(date),
+                period = period.ifBlank { date.take(7) },
+                recurringTransactionId = recurringTransactionId,
+            )
+        }
 
     private fun resolvePeriod(entry: Entry): String =
         entry.period.ifBlank { epochToDate(entry.date).take(7) }

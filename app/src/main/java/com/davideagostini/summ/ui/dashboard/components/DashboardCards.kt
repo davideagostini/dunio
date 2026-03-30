@@ -295,9 +295,9 @@ private fun DashboardRangeGroup(
 ) {
     SingleChoiceSegmentedButtonRow {
         listOf(
-            DashboardRange.ThreeMonths to "3M",
-            DashboardRange.SixMonths to "6M",
-            DashboardRange.OneYear to "1Y",
+            DashboardRange.ThreeMonths to stringResource(R.string.dashboard_range_3m),
+            DashboardRange.SixMonths to stringResource(R.string.dashboard_range_6m),
+            DashboardRange.OneYear to stringResource(R.string.dashboard_range_1y),
         ).forEachIndexed { index, (range, label) ->
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(

@@ -240,7 +240,7 @@ internal fun RecurringSheet(
                                     index = index,
                                     count = categories.size,
                                     selected = uiState.category == category.name,
-                                    onClick = { onEvent(RecurringEvent.UpdateCategory(category.name)) },
+                                    onClick = { onEvent(RecurringEvent.UpdateCategory(category)) },
                                 )
                             }
                             item {

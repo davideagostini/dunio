@@ -156,6 +156,12 @@ widget/
 
 This is already part of the current product, not future roadmap work.
 
+Widget follow-up note:
+
+- The widget area should be re-reviewed before the next release iteration.
+- Recent attempts to make widget refresh more aggressive/automatic were intentionally reverted because they added too much complexity and made behavior less predictable.
+- Any future widget work should stay conservative, avoid extra infrastructure unless clearly justified, and start from the current simple baseline.
+
 ---
 
 ## UI Feature Breakdown
@@ -250,6 +256,17 @@ Responsibility:
 - provide inline search for faster selection
 - update the shared household currency without introducing per-feature currency settings
 
+### `ui/settings/language`
+
+Dedicated app-language selection screen inside Settings.
+
+Responsibility:
+
+- list supported app languages using the same list style as the currency screen
+- keep the currently selected language pinned to the top
+- keep the remaining languages sorted alphabetically
+- switch the app locale through Android per-app language APIs
+
 ### `ui/entry`
 
 Dedicated quick-entry flow for creating a new transaction.
@@ -294,6 +311,7 @@ Settings and sub-features.
 settings/
 ├── SettingsScreen.kt
 ├── components/
+├── language/
 ├── members/
 ├── monthclose/
 └── recurring/

@@ -9,6 +9,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import com.davideagostini.summ.R
+import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.AppUser
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Household
@@ -66,15 +67,7 @@ class SessionRepository @Inject constructor(
     private val firestore: FirebaseFirestore?,
     private val defaultWebClientId: String?,
 ) {
-    private val defaultCategories = listOf(
-        Category(name = appContext.getString(R.string.default_category_food), emoji = "🍕"),
-        Category(name = appContext.getString(R.string.default_category_transport), emoji = "🚗"),
-        Category(name = appContext.getString(R.string.default_category_home), emoji = "🏠"),
-        Category(name = appContext.getString(R.string.default_category_health), emoji = "💊"),
-        Category(name = appContext.getString(R.string.default_category_leisure), emoji = "🎉"),
-        Category(name = appContext.getString(R.string.default_category_work), emoji = "💼"),
-        Category(name = appContext.getString(R.string.default_category_other), emoji = "📦"),
-    )
+    private val defaultCategories = SystemCategories.defaultCategories(appContext)
     private val householdBootstrapInFlight = MutableStateFlow(false)
     @Volatile
     private var householdBootstrapHoldUntilMs: Long = 0L
@@ -171,13 +164,15 @@ class SessionRepository @Inject constructor(
         )
 
         defaultCategories.forEach { category ->
-            val categoryId = encodeCategoryId(category.name)
+            val categoryId = category.systemKey ?: encodeCategoryId(category.name)
             batch.set(
                 db.document(FirestorePaths.category(householdRef.id, categoryId)),
                 mapOf(
                     "name" to category.name,
                     "type" to category.type,
                     "icon" to category.emoji,
+                    "systemKey" to category.systemKey,
+                    "usesDefaultTranslation" to category.usesDefaultTranslation,
                     "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
                 )
             )

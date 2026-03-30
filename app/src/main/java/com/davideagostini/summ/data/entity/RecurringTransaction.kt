@@ -6,6 +6,7 @@ data class RecurringTransaction(
     val amount: Double = 0.0,
     val type: String = "expense",
     val category: String = "",
+    val categoryKey: String? = null,
     val dayOfMonth: Int = 1,
     val startDate: String = "",
     val active: Boolean = true,

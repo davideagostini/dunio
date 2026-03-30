@@ -7,6 +7,7 @@ data class Entry(
     val description: String,
     val price: Double,
     val category: String,
+    val categoryKey: String? = null,
     val date: Long = System.currentTimeMillis(),
     val period: String = "",
     val recurringTransactionId: String? = null,

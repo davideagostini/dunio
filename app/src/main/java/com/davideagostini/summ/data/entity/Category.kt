@@ -5,4 +5,6 @@ data class Category(
     val name: String,
     val emoji: String,
     val type: String = "expense",
+    val systemKey: String? = null,
+    val usesDefaultTranslation: Boolean = false,
 )

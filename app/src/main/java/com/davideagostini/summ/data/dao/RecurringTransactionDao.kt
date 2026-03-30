@@ -1,5 +1,7 @@
 package com.davideagostini.summ.data.dao
 
+import android.content.Context
+import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
@@ -7,6 +9,7 @@ import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -23,6 +26,7 @@ private data class RecurringTransactionDocument(
     val amount: Double = 0.0,
     val type: String = "expense",
     val category: String = "",
+    val categoryKey: String? = null,
     val frequency: String = "monthly",
     val dayOfMonth: Int = 1,
     val startDate: String = "",
@@ -33,6 +37,7 @@ private data class RecurringTransactionDocument(
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
 class RecurringTransactionDao @Inject constructor(
+    @param:ApplicationContext private val appContext: Context,
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,
 ) {
@@ -77,6 +82,7 @@ class RecurringTransactionDao @Inject constructor(
                 "amount" to recurring.amount,
                 "type" to recurring.type,
                 "category" to recurring.category,
+                "categoryKey" to recurring.categoryKey,
                 "frequency" to "monthly",
                 "dayOfMonth" to recurring.dayOfMonth,
                 "startDate" to recurring.startDate,
@@ -98,6 +104,7 @@ class RecurringTransactionDao @Inject constructor(
                     "amount" to recurring.amount,
                     "type" to recurring.type,
                     "category" to recurring.category,
+                    "categoryKey" to recurring.categoryKey,
                     "dayOfMonth" to recurring.dayOfMonth,
                     "startDate" to recurring.startDate,
                     "active" to recurring.active,
@@ -151,6 +158,7 @@ class RecurringTransactionDao @Inject constructor(
                         "amount" to recurring.amount,
                         "type" to recurring.type,
                         "category" to recurring.category,
+                        "categoryKey" to recurring.categoryKey,
                         "recurringTransactionId" to recurring.id,
                         "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
                         "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
@@ -175,17 +183,25 @@ class RecurringTransactionDao @Inject constructor(
     }
 
     private fun RecurringTransactionDocument.toRecurring(id: String): RecurringTransaction =
-        RecurringTransaction(
-            id = id,
-            description = description,
-            amount = amount,
-            type = type,
-            category = category,
-            dayOfMonth = dayOfMonth,
-            startDate = startDate,
-            active = active,
-            lastAppliedDate = lastAppliedDate,
-        )
+        run {
+            val resolvedCategoryKey = categoryKey ?: SystemCategories.inferSystemKey(
+                context = appContext,
+                name = category,
+            )
+
+            RecurringTransaction(
+                id = id,
+                description = description,
+                amount = amount,
+                type = type,
+                category = category,
+                categoryKey = resolvedCategoryKey,
+                dayOfMonth = dayOfMonth,
+                startDate = startDate,
+                active = active,
+                lastAppliedDate = lastAppliedDate,
+            )
+        }
 
     private fun getDueDateForMonth(monthKey: String, dayOfMonth: Int): String {
         val yearMonth = YearMonth.parse(monthKey)

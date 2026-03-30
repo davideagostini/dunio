@@ -17,16 +17,23 @@ class GetHomeDataUseCase @Inject constructor(
         categoryRepository.allCategories,
         entryRepository.balance,
     ) { entries, categories, balance ->
-        val emojiMap = categories.associate { it.name to it.emoji }
+        val categoriesBySystemKey = categories.mapNotNull { category ->
+            category.systemKey?.let { systemKey -> systemKey to category }
+        }.toMap()
+        val categoriesByName = categories.associateBy { it.name }
         HomeState(
             entries = entries.map { entry ->
+                val matchedCategory =
+                    entry.categoryKey?.let(categoriesBySystemKey::get)
+                        ?: categoriesByName[entry.category]
                 EntryDisplayItem(
                     id          = entry.id,
                     type        = entry.type,
                     description = entry.description,
                     price       = entry.price,
-                    category    = entry.category,
-                    emoji       = emojiMap[entry.category] ?: "📦",
+                    category    = matchedCategory?.name ?: entry.category,
+                    categoryKey = entry.categoryKey,
+                    emoji       = matchedCategory?.emoji ?: "📦",
                     date        = entry.date,
                 )
             },

@@ -55,10 +55,20 @@ class RecurringViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RecurringUiState())
     val uiState: StateFlow<RecurringUiState> = _uiState.asStateFlow()
 
-    val renderState: StateFlow<RecurringRenderState> = combine(recurringTransactions, householdCurrency, uiState) { recurring, householdCurrency, uiState ->
+    val renderState: StateFlow<RecurringRenderState> = combine(recurringTransactions, categories, householdCurrency, uiState) { recurring, categories, householdCurrency, uiState ->
+        val categoriesBySystemKey = categories.mapNotNull { category ->
+            category.systemKey?.let { systemKey -> systemKey to category }
+        }.toMap()
+        val categoriesByName = categories.associateBy { it.name }
+        val displayRecurring = recurring.map { item ->
+            val matchedCategory =
+                item.categoryKey?.let(categoriesBySystemKey::get)
+                    ?: categoriesByName[item.category]
+            item.copy(category = matchedCategory?.name ?: item.category)
+        }
         val query = uiState.searchQuery.trim()
         RecurringRenderState(
-            filteredRecurring = recurring.filter {
+            filteredRecurring = displayRecurring.filter {
                 query.isBlank() ||
                     listOf(it.description, it.category, it.type).joinToString(" ")
                         .contains(query, ignoreCase = true)
@@ -85,6 +95,7 @@ class RecurringViewModel @Inject constructor(
                     amount = "",
                     type = "expense",
                     category = "",
+                    categoryKey = null,
                     dayOfMonth = "1",
                     startDate = System.currentTimeMillis(),
                     active = true,
@@ -110,6 +121,7 @@ class RecurringViewModel @Inject constructor(
                         amount = recurring.amount.toString(),
                         type = recurring.type,
                         category = recurring.category,
+                        categoryKey = recurring.categoryKey,
                         dayOfMonth = recurring.dayOfMonth.toString(),
                         startDate = recurring.startDate.toEpochMillis(),
                         active = recurring.active,
@@ -130,7 +142,13 @@ class RecurringViewModel @Inject constructor(
             is RecurringEvent.UpdateDescription -> _uiState.update { it.copy(description = event.value, descriptionError = null, operationErrorMessage = null) }
             is RecurringEvent.UpdateAmount -> _uiState.update { it.copy(amount = event.value, amountError = null, operationErrorMessage = null) }
             is RecurringEvent.UpdateType -> _uiState.update { it.copy(type = event.value, operationErrorMessage = null) }
-            is RecurringEvent.UpdateCategory -> _uiState.update { it.copy(category = event.value, operationErrorMessage = null) }
+            is RecurringEvent.UpdateCategory -> _uiState.update {
+                it.copy(
+                    category = event.value.name,
+                    categoryKey = event.value.systemKey,
+                    operationErrorMessage = null,
+                )
+            }
             is RecurringEvent.UpdateDayOfMonth -> _uiState.update { it.copy(dayOfMonth = event.value, dayError = null, operationErrorMessage = null) }
             is RecurringEvent.UpdateStartDate -> _uiState.update { it.copy(startDate = event.value, operationErrorMessage = null) }
             is RecurringEvent.UpdateActive -> _uiState.update { it.copy(active = event.value, operationErrorMessage = null) }
@@ -221,6 +239,7 @@ class RecurringViewModel @Inject constructor(
             amount = amount,
             type = state.type,
             category = state.category,
+            categoryKey = state.categoryKey,
             dayOfMonth = day,
             startDate = state.startDate.toLocalDateString(),
             active = state.active,

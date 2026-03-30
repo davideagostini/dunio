@@ -177,7 +177,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_savings_rate_label),
-                        value = metrics.savingsRate?.let { formatPercent(it) } ?: "N/A",
+                        value = metrics.savingsRate?.let { formatPercent(it) } ?: stringResource(R.string.dashboard_value_not_available),
                         note = stringResource(R.string.dashboard_savings_rate_note),
                         trendLabel = renderState.savingsRateDelta?.let {
                             stringResource(R.string.dashboard_change_vs_3m_avg, formatPercent(abs(it)))
@@ -195,7 +195,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_runway_label),
-                        value = metrics.financialRunway?.let { formatRunwayMonths(it) } ?: "N/A",
+                        value = metrics.financialRunway?.let { formatRunwayMonths(it) } ?: stringResource(R.string.dashboard_value_not_available),
                         trailingValue = metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
                         trendLabel = renderState.runwayChangePercent?.let {
                             stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))

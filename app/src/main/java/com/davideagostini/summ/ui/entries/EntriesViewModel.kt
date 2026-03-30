@@ -189,6 +189,7 @@ class EntriesViewModel @Inject constructor(
                         description = state.editDescription.trim(),
                         price       = price!!,
                         category    = state.editCategory?.name ?: entry.category,
+                        categoryKey = state.editCategory?.systemKey ?: entry.categoryKey,
                         date        = state.editDate,
                     )
                 )
@@ -217,6 +218,7 @@ class EntriesViewModel @Inject constructor(
                         description = entry.description,
                         price       = entry.price,
                         category    = entry.category,
+                        categoryKey = entry.categoryKey,
                         date        = entry.date,
                     )
                 )

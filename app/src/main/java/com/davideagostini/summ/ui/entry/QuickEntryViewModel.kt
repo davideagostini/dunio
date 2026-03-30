@@ -124,6 +124,7 @@ class QuickEntryViewModel @Inject constructor(
                         description = state.description.trim(),
                         price       = parsedPrice,
                         category    = category.name,
+                        categoryKey = category.systemKey,
                         date        = state.date,
                     )
                 )

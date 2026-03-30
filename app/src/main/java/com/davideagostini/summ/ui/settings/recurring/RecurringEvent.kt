@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.settings.recurring
 
+import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.RecurringTransaction
 
 sealed interface RecurringEvent {
@@ -16,7 +17,7 @@ sealed interface RecurringEvent {
     data class UpdateDescription(val value: String) : RecurringEvent
     data class UpdateAmount(val value: String) : RecurringEvent
     data class UpdateType(val value: String) : RecurringEvent
-    data class UpdateCategory(val value: String) : RecurringEvent
+    data class UpdateCategory(val value: Category) : RecurringEvent
     data class UpdateDayOfMonth(val value: String) : RecurringEvent
     data class UpdateStartDate(val value: Long) : RecurringEvent
     data class UpdateActive(val value: Boolean) : RecurringEvent

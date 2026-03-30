@@ -18,22 +18,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.davideagostini.summ.R
 
-private data class EmojiSection(val name: String, val emojis: List<String>)
+private data class EmojiSection(val nameRes: Int, val emojis: List<String>)
 
 private val EMOJI_SECTIONS = listOf(
-    EmojiSection("Finance",     listOf("💰","💵","💴","💶","💷","💳","💸","📊","📈","📉","🏦","💹","🏧","💱","🪙","🤑")),
-    EmojiSection("Food",        listOf("🍕","🍔","🍟","🌮","🍜","🍣","🥗","🥩","🍳","☕","🧃","🍺","🍷","🍰","🧁","🍫")),
-    EmojiSection("Transport",   listOf("🚗","🚕","🚌","🚂","✈️","🚢","🏍️","🚲","🛵","⛽","🅿️","🚦","🛻","🚐","🛳️","🚁")),
-    EmojiSection("Home",        listOf("🏠","🏡","🛋️","🔑","💡","🧹","🔧","🪴","🛁","🚿","🧺","🪣","🛒","🪟","🛏️","🍳")),
-    EmojiSection("Health",      listOf("💊","🏥","🩺","🏃","🧘","🏋️","🦷","👓","🩹","❤️","🧬","💉","🩻","🧪","🫀","🧠")),
-    EmojiSection("Leisure",     listOf("🎮","🎬","🎵","📚","🎨","⚽","🏊","🚴","🎭","🎯","🎲","🏖️","🎪","🎢","🎸","🎤")),
-    EmojiSection("Work",        listOf("💼","💻","📱","🖥️","📝","📋","⌨️","🗂️","📌","🖊️","📎","🔍","📞","🖨️","📡","🔬")),
-    EmojiSection("Shopping",    listOf("🛍️","👗","👟","💄","💎","👜","🧴","📦","👒","🧸","🎀","👠","🕶️","⌚","💍","🪮")),
-    EmojiSection("Other",       listOf("📦","🎁","🌍","🌟","🔥","⚡","🌈","🎉","🏆","🎖️","🌺","🍀","⭐","🌙","☀️","🌊")),
+    EmojiSection(R.string.emoji_section_finance, listOf("💰","💵","💴","💶","💷","💳","💸","📊","📈","📉","🏦","💹","🏧","💱","🪙","🤑")),
+    EmojiSection(R.string.emoji_section_food, listOf("🍕","🍔","🍟","🌮","🍜","🍣","🥗","🥩","🍳","☕","🧃","🍺","🍷","🍰","🧁","🍫")),
+    EmojiSection(R.string.emoji_section_transport, listOf("🚗","🚕","🚌","🚂","✈️","🚢","🏍️","🚲","🛵","⛽","🅿️","🚦","🛻","🚐","🛳️","🚁")),
+    EmojiSection(R.string.emoji_section_home, listOf("🏠","🏡","🛋️","🔑","💡","🧹","🔧","🪴","🛁","🚿","🧺","🪣","🛒","🪟","🛏️","🍳")),
+    EmojiSection(R.string.emoji_section_health, listOf("💊","🏥","🩺","🏃","🧘","🏋️","🦷","👓","🩹","❤️","🧬","💉","🩻","🧪","🫀","🧠")),
+    EmojiSection(R.string.emoji_section_leisure, listOf("🎮","🎬","🎵","📚","🎨","⚽","🏊","🚴","🎭","🎯","🎲","🏖️","🎪","🎢","🎸","🎤")),
+    EmojiSection(R.string.emoji_section_work, listOf("💼","💻","📱","🖥️","📝","📋","⌨️","🗂️","📌","🖊️","📎","🔍","📞","🖨️","📡","🔬")),
+    EmojiSection(R.string.emoji_section_shopping, listOf("🛍️","👗","👟","💄","💎","👜","🧴","📦","👒","🧸","🎀","👠","🕶️","⌚","💍","🪮")),
+    EmojiSection(R.string.emoji_section_other, listOf("📦","🎁","🌍","🌟","🔥","⚡","🌈","🎉","🏆","🎖️","🌺","🍀","⭐","🌙","☀️","🌊")),
 )
 
 @Composable
@@ -49,7 +51,7 @@ internal fun EmojiPickerGrid(
         EMOJI_SECTIONS.forEach { section ->
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text       = section.name,
+                    text       = stringResource(section.nameRes),
                     style      = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
                     color      = MaterialTheme.colorScheme.onSurfaceVariant,

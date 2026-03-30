@@ -15,6 +15,7 @@ data class RecurringUiState(
     val amount: String = "",
     val type: String = "expense",
     val category: String = "",
+    val categoryKey: String? = null,
     val dayOfMonth: String = "1",
     val startDate: Long = System.currentTimeMillis(),
     val active: Boolean = true,

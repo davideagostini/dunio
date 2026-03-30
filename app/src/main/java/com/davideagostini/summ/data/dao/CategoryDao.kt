@@ -1,5 +1,7 @@
 package com.davideagostini.summ.data.dao
 
+import android.content.Context
+import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
@@ -7,6 +9,7 @@ import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -23,11 +26,14 @@ private data class CategoryDocument(
     val name: String = "",
     val type: String = "expense",
     val icon: String? = null,
+    val systemKey: String? = null,
+    val usesDefaultTranslation: Boolean? = null,
 )
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
 class CategoryDao @Inject constructor(
+    @param:ApplicationContext private val appContext: Context,
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,
 ) {
@@ -42,6 +48,8 @@ class CategoryDao @Inject constructor(
                     "name" to category.name.trim(),
                     "type" to category.type,
                     "icon" to category.emoji,
+                    "systemKey" to category.systemKey,
+                    "usesDefaultTranslation" to category.usesDefaultTranslation,
                     "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
                 )
             )
@@ -51,12 +59,20 @@ class CategoryDao @Inject constructor(
     suspend fun update(category: Category) {
         val db = requireNotNull(firestore) { "Firestore is not available." }
         val householdId = sessionRepository.requireHouseholdId()
+        val normalizedName = category.name.trim()
+        val shouldUseDefaultTranslation = SystemCategories.shouldUseDefaultTranslation(
+            context = appContext,
+            key = category.systemKey,
+            name = normalizedName,
+        )
         db.document(FirestorePaths.category(householdId, category.id))
             .update(
                 mapOf(
-                    "name" to category.name.trim(),
+                    "name" to normalizedName,
                     "type" to category.type,
                     "icon" to category.emoji,
+                    "systemKey" to category.systemKey,
+                    "usesDefaultTranslation" to shouldUseDefaultTranslation,
                 )
             )
             .await()
@@ -85,12 +101,33 @@ class CategoryDao @Inject constructor(
                                 snapshot != null -> emit(
                                     Result.success(
                                         snapshot.documents.mapNotNull { document ->
-                                            document.toObject(CategoryDocument::class.java)?.let {
+                                            document.toObject(CategoryDocument::class.java)?.let { categoryDocument ->
+                                                val inferredSystemKey =
+                                                    categoryDocument.systemKey
+                                                        ?: SystemCategories.inferSystemKey(
+                                                            context = appContext,
+                                                            name = categoryDocument.name,
+                                                            emoji = categoryDocument.icon,
+                                                        )
+                                                val usesDefaultTranslation =
+                                                    categoryDocument.usesDefaultTranslation
+                                                        ?: SystemCategories.shouldUseDefaultTranslation(
+                                                            context = appContext,
+                                                            key = inferredSystemKey,
+                                                            name = categoryDocument.name,
+                                                        )
                                                 Category(
                                                     id = document.id,
-                                                    name = it.name,
-                                                    emoji = it.icon ?: "📦",
-                                                    type = it.type,
+                                                    name = SystemCategories.displayName(
+                                                        context = appContext,
+                                                        storedName = categoryDocument.name,
+                                                        systemKey = inferredSystemKey,
+                                                        usesDefaultTranslation = usesDefaultTranslation,
+                                                    ),
+                                                    emoji = categoryDocument.icon ?: "📦",
+                                                    type = categoryDocument.type,
+                                                    systemKey = inferredSystemKey,
+                                                    usesDefaultTranslation = usesDefaultTranslation,
                                                 )
                                             }
                                         }
