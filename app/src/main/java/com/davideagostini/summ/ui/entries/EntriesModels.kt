@@ -130,8 +130,7 @@ internal fun toLocalDate(epochMillis: Long): LocalDate =
 
 internal fun formatMonthLabel(monthKey: String): String {
     val month = YearMonth.parse(monthKey)
-    val locale = Locale.getDefault()
-    return "${month.month.getDisplayName(TextStyle.SHORT, locale).replaceFirstChar { it.titlecase(locale) }} ${month.year}"
+    return month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
 }
 
 internal fun formatDayLabel(

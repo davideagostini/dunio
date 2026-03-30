@@ -54,7 +54,7 @@ fun buildAssetsSnapshotForMonth(entries: List<AssetHistoryEntry>, month: String)
         .sortedByDescending { it.value }
 
 fun formatMonthLabel(month: String): String =
-    YearMonth.parse(month).format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault()))
+    YearMonth.parse(month).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
 
 fun calculateAssetChange(
     historyEntries: List<AssetHistoryEntry>,

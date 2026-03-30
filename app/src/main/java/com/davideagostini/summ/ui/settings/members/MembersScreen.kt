@@ -333,7 +333,7 @@ private fun MemberRow(
                 )
             }
             Text(
-                text = member.role.uppercase(),
+                text = roleLabel(member.role),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.SemiBold,
@@ -425,13 +425,21 @@ private fun SignedInRoleBadge(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = stringResource(R.string.members_signed_in_role, signedInRole),
+            text = stringResource(R.string.members_signed_in_role, roleLabel(signedInRole)),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
+
+@Composable
+private fun roleLabel(role: String): String =
+    when (role) {
+        "owner" -> stringResource(R.string.members_role_owner)
+        "member" -> stringResource(R.string.members_role_member)
+        else -> role.replaceFirstChar { it.uppercase() }
+    }
 
 @Composable
 private fun InviteRow(

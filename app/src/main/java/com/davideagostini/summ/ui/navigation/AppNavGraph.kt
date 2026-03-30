@@ -293,13 +293,13 @@ private fun SummBottomBar(
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 NavTab(
-                    label = stringResource(R.string.dashboard_nav_label),
+                    label = stringResource(R.string.dashboard_title),
                     icon = if (currentRoute == "dashboard") Icons.Filled.BarChart else Icons.Outlined.BarChart,
                     selected = currentRoute == "dashboard",
                     onClick = onNavigateDashboard,
                 )
                 NavTab(
-                    label = stringResource(R.string.entries),
+                    label = stringResource(R.string.entries_action_title),
                     icon = if (currentRoute == "entries") Icons.Filled.Receipt else Icons.Outlined.Receipt,
                     selected = currentRoute == "entries",
                     onClick = onNavigateEntries,
