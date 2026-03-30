@@ -11,7 +11,6 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.AppUser
-import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Household
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY

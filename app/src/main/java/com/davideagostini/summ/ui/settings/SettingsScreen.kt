@@ -52,10 +52,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.davideagostini.summ.BuildConfig
 import com.davideagostini.summ.R
-import com.davideagostini.summ.ui.settings.language.AppLanguageManager
 import com.davideagostini.summ.ui.settings.components.SettingsInfoItem
 import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.settings.components.SettingsSectionLabel
+import com.davideagostini.summ.ui.settings.language.AppLanguageManager
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
 import kotlinx.coroutines.launch
