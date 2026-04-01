@@ -1,5 +1,6 @@
 package com.davideagostini.summ.ui.dashboard
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
@@ -9,6 +10,7 @@ import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,11 +19,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
+    @param:ApplicationContext private val appContext: Context,
     assetRepository: AssetRepository,
     entryRepository: EntryRepository,
     sessionRepository: SessionRepository,
@@ -39,6 +43,7 @@ class DashboardViewModel @Inject constructor(
 
     private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+    private val getStartedPrefs = DashboardGetStartedManager.prefs
 
     val isLoading: StateFlow<Boolean> = combine(historyLoaded, entriesLoaded) { history, entries ->
         !history || !entries
@@ -46,6 +51,10 @@ class DashboardViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+
+    init {
+        DashboardGetStartedManager.init(appContext)
+    }
 
     val renderState: StateFlow<DashboardRenderState> = combine(assetHistory, entries, householdCurrency, uiState) { history, allEntries, householdCurrency, state ->
         val selectedMonth = state.selectedMonth ?: YearMonth.now().toString()
@@ -111,6 +120,8 @@ class DashboardViewModel @Inject constructor(
             selectedMonth = selectedMonth,
             householdCurrency = householdCurrency,
             selectedRange = selectedRange,
+            hasEntries = allEntries.isNotEmpty(),
+            hasAssets = history.any { it.action != "deleted" },
             metrics = metrics,
             chartPoints = chartPoints,
             monthlyChangePercent = monthlyChangePercent,
@@ -127,6 +138,8 @@ class DashboardViewModel @Inject constructor(
             selectedMonth = YearMonth.now().toString(),
             householdCurrency = DEFAULT_CURRENCY,
             selectedRange = DashboardRange.SixMonths,
+            hasEntries = false,
+            hasAssets = false,
             metrics = DashboardMetrics(0.0, 0.0, 0.0, null, 0.0, null),
             chartPoints = emptyList(),
             monthlyChangePercent = null,
@@ -138,11 +151,31 @@ class DashboardViewModel @Inject constructor(
         ),
     )
 
+    init {
+        viewModelScope.launch {
+            combine(assetHistory, entries, getStartedPrefs) { history, allEntries, prefs ->
+                val hasEntries = allEntries.isNotEmpty()
+                val hasAssets = history.any { it.action != "deleted" }
+                !prefs.dismissed && (!hasEntries || !hasAssets)
+            }.collect { showGetStarted ->
+                _uiState.update {
+                    it.copy(
+                        showGetStarted = showGetStarted,
+                    )
+                }
+            }
+        }
+    }
+
     fun selectMonth(month: String) {
         _uiState.update { it.copy(selectedMonth = month) }
     }
 
     fun selectRange(range: DashboardRange) {
         _uiState.update { it.copy(selectedRange = range) }
+    }
+
+    fun dismissGetStarted() {
+        DashboardGetStartedManager.dismiss(appContext)
     }
 }

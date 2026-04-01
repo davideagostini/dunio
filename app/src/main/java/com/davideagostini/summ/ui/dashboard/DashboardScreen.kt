@@ -30,6 +30,7 @@ import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.dashboard.components.DashboardToolbar
+import com.davideagostini.summ.ui.dashboard.components.GetStartedScreen
 import com.davideagostini.summ.ui.dashboard.components.MetricCard
 import com.davideagostini.summ.ui.dashboard.components.NetWorthCard
 import com.davideagostini.summ.ui.format.formatCurrency
@@ -41,6 +42,9 @@ import kotlin.math.abs
 @Composable
 fun DashboardScreen(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
+    onGetStartedVisibilityChanged: (Boolean) -> Unit = {},
+    onOpenQuickEntry: () -> Unit = {},
+    onOpenNewAsset: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -57,6 +61,10 @@ fun DashboardScreen(
         uiState = uiState,
         onSelectMonth = viewModel::selectMonth,
         onSelectRange = viewModel::selectRange,
+        onDismissGetStarted = viewModel::dismissGetStarted,
+        onOpenQuickEntry = onOpenQuickEntry,
+        onOpenNewAsset = onOpenNewAsset,
+        onGetStartedVisibilityChanged = onGetStartedVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
     )
 }
@@ -67,6 +75,10 @@ private fun DashboardContent(
     uiState: DashboardUiState,
     onSelectMonth: (String) -> Unit,
     onSelectRange: (DashboardRange) -> Unit,
+    onDismissGetStarted: () -> Unit,
+    onOpenQuickEntry: () -> Unit,
+    onOpenNewAsset: () -> Unit,
+    onGetStartedVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
@@ -89,6 +101,21 @@ private fun DashboardContent(
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
         onMonthPickerVisibilityChanged(showMonthPicker)
+    }
+
+    LaunchedEffect(uiState.showGetStarted) {
+        onGetStartedVisibilityChanged(uiState.showGetStarted)
+    }
+
+    if (uiState.showGetStarted) {
+        GetStartedScreen(
+            hasEntries = renderState.hasEntries,
+            hasAssets = renderState.hasAssets,
+            onDismiss = onDismissGetStarted,
+            onAddEntry = onOpenQuickEntry,
+            onAddAsset = onOpenNewAsset,
+        )
+        return
     }
 
     Box(

@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +62,7 @@ import com.davideagostini.summ.ui.dashboard.DashboardScreen
 import com.davideagostini.summ.ui.entry.QuickEntryScreen
 import com.davideagostini.summ.ui.settings.SettingsScreen
 import com.davideagostini.summ.ui.settings.currency.CurrencyScreen
+import com.davideagostini.summ.ui.settings.export.ExportScreen
 import com.davideagostini.summ.ui.settings.language.LanguageScreen
 import com.davideagostini.summ.ui.settings.members.MembersScreen
 import com.davideagostini.summ.ui.settings.monthclose.MonthCloseScreen
@@ -102,6 +102,8 @@ fun AppNavGraph(
     var showEntrySheet by remember { mutableStateOf(false) }
     var showEntriesFullscreenEditor by remember { mutableStateOf(false) }
     var showAssetsFullscreenEditor by remember { mutableStateOf(false) }
+    var showDashboardGetStarted by remember { mutableStateOf(false) }
+    var openAssetsAddOnNextVisit by remember { mutableStateOf(false) }
     var showMonthPickerOverlay by remember { mutableStateOf(false) }
     var allowEntrySheetHide by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -129,6 +131,12 @@ fun AppNavGraph(
             composable("dashboard") {
                 // Dashboard only needs to report month-picker visibility.
                 DashboardScreen(
+                    onGetStartedVisibilityChanged = { showDashboardGetStarted = it },
+                    onOpenQuickEntry = { showEntrySheet = true },
+                    onOpenNewAsset = {
+                        openAssetsAddOnNextVisit = true
+                        navigate("assets")
+                    },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                 )
             }
@@ -137,6 +145,8 @@ fun AppNavGraph(
                 AssetsScreen(
                     onFullscreenEditVisibilityChanged = { showAssetsFullscreenEditor = it },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
+                    openAddOnLaunch = openAssetsAddOnNextVisit,
+                    onOpenAddConsumed = { openAssetsAddOnNextVisit = false },
                 )
             }
             composable("settings") {
@@ -144,6 +154,7 @@ fun AppNavGraph(
                     onNavigateCurrency = { navigate("currency") },
                     onNavigateLanguage = { navigate("language") },
                     onNavigateTheme = { navigate("theme") },
+                    onNavigateExport = { navigate("export-data") },
                     onNavigateCategories = { navigate("categories") },
                     onNavigateMembers = { navigate("members") },
                     onNavigateRecurring = { navigate("recurring") },
@@ -176,6 +187,11 @@ fun AppNavGraph(
                     onBack = { navController.popBackStack() },
                 )
             }
+            composable("export-data") {
+                ExportScreen(
+                    onBack = { navController.popBackStack() },
+                )
+            }
             composable("members") {
                 MembersScreen(
                     householdId = readyState.household.id,
@@ -203,9 +219,11 @@ fun AppNavGraph(
             currentRoute != "currency" &&
             currentRoute != "language" &&
             currentRoute != "theme" &&
+            currentRoute != "export-data" &&
             currentRoute != "members" &&
             currentRoute != "recurring" &&
             currentRoute != "month-close" &&
+            !showDashboardGetStarted &&
             !showMonthPickerOverlay &&
             !showEntriesFullscreenEditor &&
             !showAssetsFullscreenEditor

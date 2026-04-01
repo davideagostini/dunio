@@ -201,6 +201,7 @@ Responsibility:
 
 - summarize financial health
 - show high-level household metrics
+- present a dedicated full-screen get-started flow while the household is still missing entries or asset snapshots
 - coordinate month filtering, household currency formatting, and dashboard-specific presentation
 
 ### `ui/assets`
@@ -301,6 +302,17 @@ Responsibility:
 - show a compact horizontal bar chart for the top expense categories of the selected month
 - summarize expense categories for the selected month with totals, averages, percentages, and transaction counts
 - keep the visual treatment aligned with the existing entries cards and settings surfaces
+
+### `ui/settings/export`
+
+The settings area now includes a dedicated export screen.
+
+Responsibility:
+
+- export the current household as a JSON backup snapshot
+- export entries as CSV
+- export asset history as CSV
+- delegate file destination and permissions to the Android system document picker
 
 ### `ui/entry`
 
@@ -522,10 +534,9 @@ So `project_overview.md` should be read as documentation of an already fairly br
 
 ## Suggested Next Features
 
-The following additions would improve product polish, onboarding, and feedback loops without changing the core household-finance scope:
+The following additions would improve product polish and feedback loops without changing the core household-finance scope:
 
 - add a theme toggle for `light` / `dark` / `system` mode and persist the user preference
-- provide a dynamic walkthrough for new users based on their current state, for example first sign-in, empty household, or partially configured setup
 - implement reports or summaries for monthly review, category spending, and higher-level household trends
 - add a user feedback mechanism so people can quickly send bug reports, improvement ideas, or general product feedback from inside the app
 

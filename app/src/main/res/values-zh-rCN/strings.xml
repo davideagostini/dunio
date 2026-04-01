@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d 笔</string>
     <string name="entries_reports_empty_message">这个月还没有支出数据。</string>
     <string name="entries_reports_uncategorized">未分类</string>
+    <string name="settings_export_title">导出数据</string>
+    <string name="settings_export_subtitle">将 household 数据保存为 CSV 或 JSON</string>
+    <string name="settings_export_screen_message">使用系统文件选择器导出当前 household。CSV 文件适合电子表格，JSON 备份则包含完整的 household 快照。</string>
+    <string name="settings_export_household_title">household 备份 (JSON)</string>
+    <string name="settings_export_household_subtitle">导出 household、成员、类别、记录、资产、定期项目和月结状态</string>
+    <string name="settings_export_entries_title">记录 (CSV)</string>
+    <string name="settings_export_entries_subtitle">将当前 household 的全部记录导出为适合电子表格的 CSV 文件</string>
+    <string name="settings_export_assets_title">资产 (CSV)</string>
+    <string name="settings_export_assets_subtitle">将当前 household 的资产历史和负债导出为 CSV</string>
+    <string name="settings_export_status_running">正在导出…</string>
+    <string name="settings_export_success">导出已保存</string>
+    <string name="settings_export_error_generic">无法导出所选数据。</string>
+    <string name="settings_export_error_write_failed">无法写入导出文件。</string>
+    <string name="dashboard_get_started_title">开始使用</string>
+    <string name="dashboard_get_started_subtitle">添加你的第一批 household 数据，让仪表板真正有用。</string>
+    <string name="dashboard_get_started_add_entry">添加第一条记录</string>
+    <string name="dashboard_get_started_add_asset">添加第一个资产</string>
+    <string name="dashboard_get_started_add_action">添加</string>
+    <string name="dashboard_get_started_continue">继续前往仪表板</string>
 </resources>

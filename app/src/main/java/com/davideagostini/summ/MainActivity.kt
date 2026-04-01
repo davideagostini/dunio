@@ -11,9 +11,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.tile.QuickEntryTileService
 import com.davideagostini.summ.ui.navigation.AppNavGraph
 import com.davideagostini.summ.ui.settings.theme.AppThemeManager

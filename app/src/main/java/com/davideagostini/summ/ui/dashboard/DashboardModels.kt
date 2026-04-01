@@ -34,6 +34,8 @@ data class DashboardRenderState(
     val selectedMonth: String,
     val householdCurrency: String,
     val selectedRange: DashboardRange,
+    val hasEntries: Boolean,
+    val hasAssets: Boolean,
     val metrics: DashboardMetrics,
     val chartPoints: List<ChartPoint>,
     val monthlyChangePercent: Double?,

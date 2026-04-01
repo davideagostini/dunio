@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d件</string>
     <string name="entries_reports_empty_message">この月の支出はまだありません。</string>
     <string name="entries_reports_uncategorized">未分類</string>
+    <string name="settings_export_title">データをエクスポート</string>
+    <string name="settings_export_subtitle">household データを CSV または JSON で保存</string>
+    <string name="settings_export_screen_message">システムのファイルピッカーを使って現在の household をエクスポートします。CSV は表計算に便利で、JSON バックアップには household 全体のスナップショットが含まれます。</string>
+    <string name="settings_export_household_title">household バックアップ (JSON)</string>
+    <string name="settings_export_household_subtitle">household、メンバー、カテゴリ、記録、資産、定期項目、月次締め状態をエクスポート</string>
+    <string name="settings_export_entries_title">記録 (CSV)</string>
+    <string name="settings_export_entries_subtitle">現在の household のすべての記録を表計算向けの CSV ファイルとしてエクスポート</string>
+    <string name="settings_export_assets_title">資産 (CSV)</string>
+    <string name="settings_export_assets_subtitle">現在の household の資産履歴と負債を CSV としてエクスポート</string>
+    <string name="settings_export_status_running">エクスポート中…</string>
+    <string name="settings_export_success">エクスポートを保存しました</string>
+    <string name="settings_export_error_generic">選択したデータをエクスポートできませんでした。</string>
+    <string name="settings_export_error_write_failed">エクスポートファイルを書き込めませんでした。</string>
+    <string name="dashboard_get_started_title">はじめに</string>
+    <string name="dashboard_get_started_subtitle">最初の household データを追加して、ダッシュボードを役立つ状態にしましょう。</string>
+    <string name="dashboard_get_started_add_entry">最初の記録を追加</string>
+    <string name="dashboard_get_started_add_asset">最初の資産を追加</string>
+    <string name="dashboard_get_started_add_action">追加</string>
+    <string name="dashboard_get_started_continue">ダッシュボードへ進む</string>
 </resources>

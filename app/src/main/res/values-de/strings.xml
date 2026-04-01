@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d Buch.</string>
     <string name="entries_reports_empty_message">Für diesen Monat gibt es noch keine Ausgaben.</string>
     <string name="entries_reports_uncategorized">Ohne Kategorie</string>
+    <string name="settings_export_title">Daten exportieren</string>
+    <string name="settings_export_subtitle">Haushaltsdaten als CSV oder JSON speichern</string>
+    <string name="settings_export_screen_message">Exportiere den aktuellen Haushalt mit dem System-Dateiauswahldialog. CSV-Dateien sind praktisch für Tabellen, während das JSON-Backup einen vollständigen Haushalts-Snapshot enthält.</string>
+    <string name="settings_export_household_title">Haushalts-Backup (JSON)</string>
+    <string name="settings_export_household_subtitle">Haushalt, Mitglieder, Kategorien, Einträge, Vermögenswerte, wiederkehrende Elemente und Monatsabschlussstatus exportieren</string>
+    <string name="settings_export_entries_title">Einträge (CSV)</string>
+    <string name="settings_export_entries_subtitle">Alle Einträge des aktuellen Haushalts als tabellenfreundliche CSV-Datei exportieren</string>
+    <string name="settings_export_assets_title">Vermögenswerte (CSV)</string>
+    <string name="settings_export_assets_subtitle">Anlagenhistorie und Verbindlichkeiten des aktuellen Haushalts als CSV exportieren</string>
+    <string name="settings_export_status_running">Export läuft…</string>
+    <string name="settings_export_success">Export gespeichert</string>
+    <string name="settings_export_error_generic">Die ausgewählten Daten konnten nicht exportiert werden.</string>
+    <string name="settings_export_error_write_failed">Die Exportdatei konnte nicht geschrieben werden.</string>
+    <string name="dashboard_get_started_title">Erste Schritte</string>
+    <string name="dashboard_get_started_subtitle">Füge deine ersten Haushaltsdaten hinzu, damit das Dashboard nützlich wird.</string>
+    <string name="dashboard_get_started_add_entry">Ersten Eintrag hinzufügen</string>
+    <string name="dashboard_get_started_add_asset">Ersten Vermögenswert hinzufügen</string>
+    <string name="dashboard_get_started_add_action">Hinzufügen</string>
+    <string name="dashboard_get_started_continue">Weiter zum Dashboard</string>
 </resources>

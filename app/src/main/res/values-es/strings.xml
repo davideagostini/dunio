@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d mov.</string>
     <string name="entries_reports_empty_message">Todavía no hay gastos para este mes.</string>
     <string name="entries_reports_uncategorized">Sin categoría</string>
+    <string name="settings_export_title">Exportar datos</string>
+    <string name="settings_export_subtitle">Guardar los datos del hogar en CSV o JSON</string>
+    <string name="settings_export_screen_message">Exporta el hogar actual con el selector de archivos del sistema. Los archivos CSV son útiles para hojas de cálculo, mientras que la copia JSON incluye una instantánea completa del hogar.</string>
+    <string name="settings_export_household_title">Copia del hogar (JSON)</string>
+    <string name="settings_export_household_subtitle">Exporta el hogar, miembros, categorías, movimientos, activos, elementos recurrentes y el estado del cierre mensual</string>
+    <string name="settings_export_entries_title">Movimientos (CSV)</string>
+    <string name="settings_export_entries_subtitle">Exporta todos los movimientos del hogar actual en un archivo CSV apto para hojas de cálculo</string>
+    <string name="settings_export_assets_title">Activos (CSV)</string>
+    <string name="settings_export_assets_subtitle">Exporta el historial de activos y pasivos del hogar actual en CSV</string>
+    <string name="settings_export_status_running">Exportando…</string>
+    <string name="settings_export_success">Exportación guardada</string>
+    <string name="settings_export_error_generic">No se pudieron exportar los datos seleccionados.</string>
+    <string name="settings_export_error_write_failed">No se pudo escribir el archivo de exportación.</string>
+    <string name="dashboard_get_started_title">Para empezar</string>
+    <string name="dashboard_get_started_subtitle">Añade tus primeros datos del hogar para que el panel sea útil.</string>
+    <string name="dashboard_get_started_add_entry">Añade tu primer movimiento</string>
+    <string name="dashboard_get_started_add_asset">Añade tu primer activo</string>
+    <string name="dashboard_get_started_add_action">Añadir</string>
+    <string name="dashboard_get_started_continue">Continuar al panel</string>
 </resources>

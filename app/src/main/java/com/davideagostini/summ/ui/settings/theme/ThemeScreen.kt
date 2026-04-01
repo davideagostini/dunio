@@ -42,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.SummColors
 import com.davideagostini.summ.ui.theme.listItemShape
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

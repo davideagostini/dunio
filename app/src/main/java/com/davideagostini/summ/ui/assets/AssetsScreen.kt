@@ -59,6 +59,8 @@ fun AssetsScreen(
     viewModel: AssetsViewModel = hiltViewModel(),
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
     onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
+    openAddOnLaunch: Boolean = false,
+    onOpenAddConsumed: () -> Unit = {},
 ) {
     // Collect the feature state with lifecycle awareness so the UI only observes
     // active screens and avoids leaking recompositions in the background.
@@ -77,6 +79,8 @@ fun AssetsScreen(
         onEvent = viewModel::handleEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
+        openAddOnLaunch = openAddOnLaunch,
+        onOpenAddConsumed = onOpenAddConsumed,
     )
 
     // Keep the delete confirmation outside the content tree so it can overlay the
@@ -100,6 +104,8 @@ private fun AssetsContent(
     onEvent: (AssetsEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
+    openAddOnLaunch: Boolean,
+    onOpenAddConsumed: () -> Unit,
 ) {
     // Local UI flags stay inside the composable because they only describe how the
     // current screen is presented, not app data that must survive process death.
@@ -133,6 +139,14 @@ private fun AssetsContent(
     // The nav host needs to know when the fullscreen editor is active so the shared bottom bar disappears.
     LaunchedEffect(showFullScreenEditor) {
         onFullscreenEditVisibilityChanged(showFullScreenEditor)
+    }
+
+    // Dashboard get-started can request the same add flow used by the floating action button.
+    LaunchedEffect(openAddOnLaunch) {
+        if (openAddOnLaunch) {
+            onEvent(AssetsEvent.StartAdd)
+            onOpenAddConsumed()
+        }
     }
 
     // Dismissing the fullscreen editor waits for the exit animation before resetting

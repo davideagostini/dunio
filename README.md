@@ -80,6 +80,7 @@ Each household uses one shared currency configured from Settings. The app does n
 - financial runway
 - 3 / 6 / 12 month net worth chart
 - month selector
+- full-screen get-started flow for households missing entries or assets
 
 ### Entries
 
@@ -108,6 +109,7 @@ Each household uses one shared currency configured from Settings. The app does n
 - household currency
 - app language selection
 - app theme selection
+- household data export to CSV or JSON
 - category management
 - recurring transactions
 - month close
@@ -120,6 +122,8 @@ The household currency is changed from a dedicated searchable settings screen, a
 The app also includes a dedicated language selection screen in Settings. It uses the same list style as the currency screen, keeps a stable alphabetical order, and highlights the currently selected language.
 
 The app theme is also changed from a dedicated Settings screen using the same list treatment as language selection. Users can choose `Light`, `Dark`, or `System`, and the selected theme is persisted across launches.
+
+The app also includes a dedicated export screen in Settings. It can export the current household as a full JSON backup, plus entries and assets as CSV files through the Android system document picker.
 
 Recurring transactions can also be auto-applied on app startup. Once per day, after the session is ready, the app checks whether the current household has due recurring items for the current month and materializes them into the entries list without requiring a manual `Apply due` tap.
 
@@ -395,23 +399,19 @@ git rm --cached app/google-services.json
 ### High Priority · Lower Effort
 
 - income vs expense analysis with category breakdown
-- transaction statistics and spending-by-category chart in the transactions screen
 - improved home-screen widgets
 - user feedback mechanism
 
 ### High Priority · Medium Effort
 
 - budgets with weekly, monthly, and yearly spending limits by category
-- export household data to CSV or JSON
 - reports and summaries for monthly review
 - notifications and reminders
-- dynamic walkthrough for new users
 
 ### Future Additions · Higher Effort
 
 - import transactions from CSV with validation
 - bank CSV import support
-- full household backup as JSON
 - better backup and migration flows
 - Wear OS support
 - AI-powered finance features

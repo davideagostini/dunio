@@ -12,4 +12,5 @@ enum class DashboardRange(val months: Int) {
 data class DashboardUiState(
     val selectedMonth: String? = null,
     val selectedRange: DashboardRange = DashboardRange.SixMonths,
+    val showGetStarted: Boolean = false,
 )

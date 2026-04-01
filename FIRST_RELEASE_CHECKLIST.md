@@ -36,12 +36,14 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] join household works with a real invite
 - [ ] create/join household does not flash back to setup during the transition
 - [ ] dashboard loads
+- [ ] get started screen appears while the household is missing entries or assets and can be dismissed
 - [ ] entries CRUD works
 - [ ] entries reports mode opens from the toolbar and shows the monthly category spending summary, horizontal bar chart, and breakdown
 - [ ] assets CRUD works
 - [ ] household currency can be changed from Settings
 - [ ] app language can be changed from Settings
 - [ ] app theme can be changed from Settings
+- [ ] household export screen can save JSON and CSV files through the system picker
 - [ ] selected app language stays highlighted in the language list and the app reloads in the chosen locale
 - [ ] selected app theme stays highlighted in the theme list and the app palette updates immediately
 - [ ] light / dark / system theme preference persists across app relaunch

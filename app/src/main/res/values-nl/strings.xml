@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d trans.</string>
     <string name="entries_reports_empty_message">Er zijn nog geen uitgaven voor deze maand.</string>
     <string name="entries_reports_uncategorized">Zonder categorie</string>
+    <string name="settings_export_title">Gegevens exporteren</string>
+    <string name="settings_export_subtitle">Huishoudgegevens opslaan als CSV of JSON</string>
+    <string name="settings_export_screen_message">Exporteer het huidige huishouden met de systeem-bestandskiezer. CSV-bestanden zijn handig voor spreadsheets, terwijl de JSON-back-up een volledige huishoudsnapshot bevat.</string>
+    <string name="settings_export_household_title">Huishoudback-up (JSON)</string>
+    <string name="settings_export_household_subtitle">Exporteer huishouden, leden, categorieën, transacties, bezittingen, terugkerende items en maandafsluitstatus</string>
+    <string name="settings_export_entries_title">Transacties (CSV)</string>
+    <string name="settings_export_entries_subtitle">Exporteer alle transacties van het huidige huishouden als een spreadsheetvriendelijk CSV-bestand</string>
+    <string name="settings_export_assets_title">Bezittingen (CSV)</string>
+    <string name="settings_export_assets_subtitle">Exporteer bezittingsgeschiedenis en schulden van het huidige huishouden als CSV</string>
+    <string name="settings_export_status_running">Exporteren…</string>
+    <string name="settings_export_success">Export opgeslagen</string>
+    <string name="settings_export_error_generic">De geselecteerde gegevens konden niet worden geëxporteerd.</string>
+    <string name="settings_export_error_write_failed">Het exportbestand kon niet worden geschreven.</string>
+    <string name="dashboard_get_started_title">Aan de slag</string>
+    <string name="dashboard_get_started_subtitle">Voeg je eerste huishoudgegevens toe om het dashboard nuttig te maken.</string>
+    <string name="dashboard_get_started_add_entry">Voeg je eerste transactie toe</string>
+    <string name="dashboard_get_started_add_asset">Voeg je eerste bezit toe</string>
+    <string name="dashboard_get_started_add_action">Toevoegen</string>
+    <string name="dashboard_get_started_continue">Doorgaan naar dashboard</string>
 </resources>

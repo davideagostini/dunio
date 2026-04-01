@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.People
@@ -45,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +70,7 @@ fun SettingsScreen(
     onNavigateCurrency: () -> Unit,
     onNavigateLanguage: () -> Unit,
     onNavigateTheme: () -> Unit,
+    onNavigateExport: () -> Unit,
     onNavigateCategories: () -> Unit,
     onNavigateMembers: () -> Unit,
     onNavigateRecurring: () -> Unit,
@@ -83,7 +84,6 @@ fun SettingsScreen(
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
     val clipboard = LocalClipboard.current
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val currentLanguage by AppLanguageManager.currentLanguage.collectAsStateWithLifecycle()
     val currentLanguageName = AppLanguageManager.displayName(currentLanguage.tag)
@@ -207,6 +207,19 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_month_close_title),
                     subtitle = stringResource(R.string.settings_month_close_subtitle),
                     onClick = onNavigateMonthClose,
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(12.dp)) }
+
+            item { SettingsSectionLabel(stringResource(R.string.settings_data)) }
+
+            item {
+                SettingsNavItem(
+                    icon = Icons.Default.FileDownload,
+                    title = stringResource(R.string.settings_export_title),
+                    subtitle = stringResource(R.string.settings_export_subtitle),
+                    onClick = onNavigateExport,
                 )
             }
 

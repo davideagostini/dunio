@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d عملية</string>
     <string name="entries_reports_empty_message">لا توجد مصروفات لهذا الشهر حتى الآن.</string>
     <string name="entries_reports_uncategorized">بدون فئة</string>
+    <string name="settings_export_title">تصدير البيانات</string>
+    <string name="settings_export_subtitle">حفظ بيانات household بصيغة CSV أو JSON</string>
+    <string name="settings_export_screen_message">صدّر household الحالي باستخدام أداة اختيار الملفات في النظام. ملفات CSV مفيدة لجداول البيانات، بينما يتضمن النسخ الاحتياطي JSON لقطة كاملة للـ household.</string>
+    <string name="settings_export_household_title">نسخة احتياطية للـ household ‏(JSON)</string>
+    <string name="settings_export_household_subtitle">تصدير household والأعضاء والفئات والعمليات والأصول والعناصر المتكررة وحالة إغلاق الشهر</string>
+    <string name="settings_export_entries_title">العمليات (CSV)</string>
+    <string name="settings_export_entries_subtitle">تصدير جميع عمليات household الحالي في ملف CSV مناسب لجداول البيانات</string>
+    <string name="settings_export_assets_title">الأصول (CSV)</string>
+    <string name="settings_export_assets_subtitle">تصدير سجل الأصول والالتزامات الخاصة بالـ household الحالي بصيغة CSV</string>
+    <string name="settings_export_status_running">جارٍ التصدير…</string>
+    <string name="settings_export_success">تم حفظ التصدير</string>
+    <string name="settings_export_error_generic">تعذر تصدير البيانات المحددة.</string>
+    <string name="settings_export_error_write_failed">تعذر كتابة ملف التصدير.</string>
+    <string name="dashboard_get_started_title">للبدء</string>
+    <string name="dashboard_get_started_subtitle">أضف أول بيانات household لجعل لوحة التحكم مفيدة.</string>
+    <string name="dashboard_get_started_add_entry">أضف أول عملية</string>
+    <string name="dashboard_get_started_add_asset">أضف أول أصل</string>
+    <string name="dashboard_get_started_add_action">إضافة</string>
+    <string name="dashboard_get_started_continue">المتابعة إلى لوحة التحكم</string>
 </resources>

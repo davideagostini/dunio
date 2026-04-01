@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d écr.</string>
     <string name="entries_reports_empty_message">Aucune dépense pour ce mois pour le moment.</string>
     <string name="entries_reports_uncategorized">Sans catégorie</string>
+    <string name="settings_export_title">Exporter les données</string>
+    <string name="settings_export_subtitle">Enregistrer les données du household en CSV ou JSON</string>
+    <string name="settings_export_screen_message">Exportez le household actuel avec le sélecteur de fichiers système. Les fichiers CSV sont utiles pour les tableurs, tandis que la sauvegarde JSON inclut un instantané complet du household.</string>
+    <string name="settings_export_household_title">Sauvegarde household (JSON)</string>
+    <string name="settings_export_household_subtitle">Exporter le household, les membres, les catégories, les écritures, les actifs, les éléments récurrents et l’état de clôture mensuelle</string>
+    <string name="settings_export_entries_title">Écritures (CSV)</string>
+    <string name="settings_export_entries_subtitle">Exporter toutes les écritures du household actuel dans un fichier CSV adapté aux tableurs</string>
+    <string name="settings_export_assets_title">Actifs (CSV)</string>
+    <string name="settings_export_assets_subtitle">Exporter l’historique des actifs et des passifs du household actuel en CSV</string>
+    <string name="settings_export_status_running">Export en cours…</string>
+    <string name="settings_export_success">Export enregistré</string>
+    <string name="settings_export_error_generic">Impossible d’exporter les données sélectionnées.</string>
+    <string name="settings_export_error_write_failed">Impossible d’écrire le fichier d’export.</string>
+    <string name="dashboard_get_started_title">Pour commencer</string>
+    <string name="dashboard_get_started_subtitle">Ajoutez vos premières données household pour rendre le tableau de bord utile.</string>
+    <string name="dashboard_get_started_add_entry">Ajouter votre première écriture</string>
+    <string name="dashboard_get_started_add_asset">Ajouter votre premier actif</string>
+    <string name="dashboard_get_started_add_action">Ajouter</string>
+    <string name="dashboard_get_started_continue">Continuer vers le tableau de bord</string>
 </resources>

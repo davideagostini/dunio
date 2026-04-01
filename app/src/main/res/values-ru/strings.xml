@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d опер.</string>
     <string name="entries_reports_empty_message">За этот месяц пока нет расходов.</string>
     <string name="entries_reports_uncategorized">Без категории</string>
+    <string name="settings_export_title">Экспорт данных</string>
+    <string name="settings_export_subtitle">Сохранить данные household в CSV или JSON</string>
+    <string name="settings_export_screen_message">Экспортируйте текущий household через системный выбор файла. CSV удобен для таблиц, а JSON-резервная копия включает полный снимок household.</string>
+    <string name="settings_export_household_title">Резервная копия household (JSON)</string>
+    <string name="settings_export_household_subtitle">Экспортировать household, участников, категории, операции, активы, регулярные элементы и статус закрытия месяца</string>
+    <string name="settings_export_entries_title">Операции (CSV)</string>
+    <string name="settings_export_entries_subtitle">Экспортировать все операции текущего household в CSV-файл для таблиц</string>
+    <string name="settings_export_assets_title">Активы (CSV)</string>
+    <string name="settings_export_assets_subtitle">Экспортировать историю активов и обязательств текущего household в CSV</string>
+    <string name="settings_export_status_running">Экспорт…</string>
+    <string name="settings_export_success">Экспорт сохранён</string>
+    <string name="settings_export_error_generic">Не удалось экспортировать выбранные данные.</string>
+    <string name="settings_export_error_write_failed">Не удалось записать файл экспорта.</string>
+    <string name="dashboard_get_started_title">Начало работы</string>
+    <string name="dashboard_get_started_subtitle">Добавьте первые данные household, чтобы дашборд стал полезным.</string>
+    <string name="dashboard_get_started_add_entry">Добавить первую операцию</string>
+    <string name="dashboard_get_started_add_asset">Добавить первый актив</string>
+    <string name="dashboard_get_started_add_action">Добавить</string>
+    <string name="dashboard_get_started_continue">Перейти к дашборду</string>
 </resources>

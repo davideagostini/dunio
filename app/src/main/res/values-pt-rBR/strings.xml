@@ -314,4 +314,23 @@
     <string name="entries_reports_transactions_value">%1$d lanç.</string>
     <string name="entries_reports_empty_message">Ainda não há gastos para este mês.</string>
     <string name="entries_reports_uncategorized">Sem categoria</string>
+    <string name="settings_export_title">Exportar dados</string>
+    <string name="settings_export_subtitle">Salvar os dados da household em CSV ou JSON</string>
+    <string name="settings_export_screen_message">Exporte a household atual usando o seletor de arquivos do sistema. Arquivos CSV são úteis para planilhas, enquanto o backup JSON inclui um snapshot completo da household.</string>
+    <string name="settings_export_household_title">Backup da household (JSON)</string>
+    <string name="settings_export_household_subtitle">Exportar household, membros, categorias, lançamentos, ativos, itens recorrentes e o estado do fechamento mensal</string>
+    <string name="settings_export_entries_title">Lançamentos (CSV)</string>
+    <string name="settings_export_entries_subtitle">Exportar todos os lançamentos da household atual em um arquivo CSV compatível com planilhas</string>
+    <string name="settings_export_assets_title">Ativos (CSV)</string>
+    <string name="settings_export_assets_subtitle">Exportar histórico de ativos e passivos da household atual em CSV</string>
+    <string name="settings_export_status_running">Exportando…</string>
+    <string name="settings_export_success">Exportação salva</string>
+    <string name="settings_export_error_generic">Não foi possível exportar os dados selecionados.</string>
+    <string name="settings_export_error_write_failed">Não foi possível gravar o arquivo de exportação.</string>
+    <string name="dashboard_get_started_title">Primeiros passos</string>
+    <string name="dashboard_get_started_subtitle">Adicione os primeiros dados da household para tornar o dashboard útil.</string>
+    <string name="dashboard_get_started_add_entry">Adicione seu primeiro lançamento</string>
+    <string name="dashboard_get_started_add_asset">Adicione seu primeiro ativo</string>
+    <string name="dashboard_get_started_add_action">Adicionar</string>
+    <string name="dashboard_get_started_continue">Continuar para o dashboard</string>
 </resources>

@@ -106,8 +106,15 @@ fun SignInScreen(
             ) {
                 TextButton(
                     onClick = { uriHandler.openUri("https://getsumm.app/privacy-policy/") },
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
                 ) {
-                    Text(text = stringResource(R.string.auth_privacy_policy))
+                    Text(
+                        text = stringResource(R.string.auth_privacy_policy),
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
                 }
                 Text(
                     text = "•",
@@ -115,8 +122,15 @@ fun SignInScreen(
                 )
                 TextButton(
                     onClick = { uriHandler.openUri("https://getsumm.app/terms-of-service/") },
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
                 ) {
-                    Text(text = stringResource(R.string.auth_terms_of_service))
+                    Text(
+                        text = stringResource(R.string.auth_terms_of_service),
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
                 }
             }
         }
