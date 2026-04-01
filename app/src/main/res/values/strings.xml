@@ -156,6 +156,9 @@
     <string name="settings_signed_in_as">Signed in as</string>
     <string name="settings_current_household">Current household</string>
     <string name="settings_data">Data</string>
+    <string name="settings_preferences">Preferences</string>
+    <string name="settings_household">Household</string>
+    <string name="settings_finance">Finance</string>
     <string name="settings_currency_title">Currency</string>
     <string name="settings_currency_subtitle">Household currency: %1$s</string>
     <string name="settings_currency_screen_message">Choose one currency for the whole household. Assets, entries, dashboard, recurring amounts, and widgets all use this selection.</string>

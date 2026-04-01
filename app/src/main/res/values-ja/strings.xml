@@ -110,9 +110,9 @@
     <string name="assets_net_worth">Net worth</string>
     <string name="assets_label">Assets</string>
     <string name="liabilities_label">負債</string>
-    <string name="assets_empty_filtered">No matching assets</string>
+    <string name="assets_empty_filtered">一致する資産はありません</string>
     <string name="assets_empty">No assets yet</string>
-    <string name="assets_empty_filtered_message">Try a different search query.</string>
+    <string name="assets_empty_filtered_message">別の検索語を試してください。</string>
     <string name="assets_empty_message">Add your first asset or liability to start tracking net worth.</string>
     <string name="asset_new_title">New Asset</string>
     <string name="asset_edit_title">資産を編集</string>
@@ -164,6 +164,9 @@
     <string name="settings_theme_option_dark_description">常にダーク表示を使用します</string>
     <string name="settings_theme_option_system">システム</string>
     <string name="settings_theme_option_system_description">端末の設定に従います</string>
+    <string name="settings_preferences">設定</string>
+    <string name="settings_household">household</string>
+    <string name="settings_finance">家計</string>
     <string name="settings_members_title">household メンバー</string>
     <string name="settings_members_subtitle">household へのアクセス共有と招待の管理</string>
     <string name="settings_categories_title">カテゴリ</string>

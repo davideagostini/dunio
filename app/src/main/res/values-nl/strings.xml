@@ -110,9 +110,9 @@
     <string name="assets_net_worth">Net worth</string>
     <string name="assets_label">Assets</string>
     <string name="liabilities_label">Verplichtingen</string>
-    <string name="assets_empty_filtered">No matching assets</string>
+    <string name="assets_empty_filtered">Geen overeenkomende assets</string>
     <string name="assets_empty">No assets yet</string>
-    <string name="assets_empty_filtered_message">Try a different search query.</string>
+    <string name="assets_empty_filtered_message">Probeer een andere zoekopdracht.</string>
     <string name="assets_empty_message">Add your first asset or liability to start tracking net worth.</string>
     <string name="asset_new_title">New Asset</string>
     <string name="asset_edit_title">Asset bewerken</string>
@@ -164,6 +164,9 @@
     <string name="settings_theme_option_dark_description">Altijd het donkere uiterlijk gebruiken</string>
     <string name="settings_theme_option_system">Systeem</string>
     <string name="settings_theme_option_system_description">De apparaatinstelling volgen</string>
+    <string name="settings_preferences">Voorkeuren</string>
+    <string name="settings_household">Huishouden</string>
+    <string name="settings_finance">Financiën</string>
     <string name="settings_members_title">Huishoudleden</string>
     <string name="settings_members_subtitle">Deel huishoudtoegang en beheer uitnodigingen</string>
     <string name="settings_categories_title">Categorieën</string>

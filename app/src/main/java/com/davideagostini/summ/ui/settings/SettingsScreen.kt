@@ -135,7 +135,9 @@ fun SettingsScreen(
                 )
             }
 
-            item { SettingsSectionLabel(stringResource(R.string.settings_data)) }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
+
+            item { SettingsSectionLabel(stringResource(R.string.settings_preferences)) }
 
             item {
                 SettingsNavItem(
@@ -164,6 +166,10 @@ fun SettingsScreen(
                 )
             }
 
+            item { Spacer(modifier = Modifier.height(12.dp)) }
+
+            item { SettingsSectionLabel(stringResource(R.string.settings_household)) }
+
             item {
                 SettingsNavItem(
                     icon = Icons.Default.People,
@@ -182,6 +188,10 @@ fun SettingsScreen(
                 )
             }
 
+            item { Spacer(modifier = Modifier.height(12.dp)) }
+
+            item { SettingsSectionLabel(stringResource(R.string.settings_finance)) }
+
             item {
                 SettingsNavItem(
                     icon = Icons.Default.Autorenew,
@@ -199,6 +209,8 @@ fun SettingsScreen(
                     onClick = onNavigateMonthClose,
                 )
             }
+
+            item { Spacer(modifier = Modifier.height(12.dp)) }
 
             item { SettingsSectionLabel(stringResource(R.string.settings_about)) }
 

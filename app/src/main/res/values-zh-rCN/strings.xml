@@ -110,9 +110,9 @@
     <string name="assets_net_worth">Net worth</string>
     <string name="assets_label">Assets</string>
     <string name="liabilities_label">负债</string>
-    <string name="assets_empty_filtered">No matching assets</string>
+    <string name="assets_empty_filtered">没有匹配的资产</string>
     <string name="assets_empty">No assets yet</string>
-    <string name="assets_empty_filtered_message">Try a different search query.</string>
+    <string name="assets_empty_filtered_message">请尝试其他搜索内容。</string>
     <string name="assets_empty_message">Add your first asset or liability to start tracking net worth.</string>
     <string name="asset_new_title">New Asset</string>
     <string name="asset_edit_title">编辑资产</string>
@@ -164,6 +164,9 @@
     <string name="settings_theme_option_dark_description">始终使用深色外观</string>
     <string name="settings_theme_option_system">系统</string>
     <string name="settings_theme_option_system_description">跟随设备设置</string>
+    <string name="settings_preferences">偏好设置</string>
+    <string name="settings_household">household</string>
+    <string name="settings_finance">财务</string>
     <string name="settings_members_title">household 成员</string>
     <string name="settings_members_subtitle">共享 household 访问权限并管理邀请</string>
     <string name="settings_categories_title">分类</string>

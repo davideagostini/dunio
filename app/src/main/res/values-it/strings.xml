@@ -110,9 +110,9 @@
     <string name="assets_net_worth">Net worth</string>
     <string name="assets_label">Assets</string>
     <string name="liabilities_label">Passività</string>
-    <string name="assets_empty_filtered">No matching assets</string>
+    <string name="assets_empty_filtered">Nessun asset corrispondente</string>
     <string name="assets_empty">No assets yet</string>
-    <string name="assets_empty_filtered_message">Try a different search query.</string>
+    <string name="assets_empty_filtered_message">Prova una ricerca diversa.</string>
     <string name="assets_empty_message">Add your first asset or liability to start tracking net worth.</string>
     <string name="asset_new_title">New Asset</string>
     <string name="asset_edit_title">Modifica asset</string>
@@ -164,6 +164,9 @@
     <string name="settings_theme_option_dark_description">Usa sempre l’aspetto scuro</string>
     <string name="settings_theme_option_system">Sistema</string>
     <string name="settings_theme_option_system_description">Segui l’impostazione del dispositivo</string>
+    <string name="settings_preferences">Preferenze</string>
+    <string name="settings_household">Nucleo familiare</string>
+    <string name="settings_finance">Finanza</string>
     <string name="settings_members_title">Membri del nucleo familiare</string>
     <string name="settings_members_subtitle">Condividi l’accesso all’household e gestisci gli inviti</string>
     <string name="settings_categories_title">Categorie</string>
