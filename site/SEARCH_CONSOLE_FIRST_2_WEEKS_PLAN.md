@@ -2,7 +2,7 @@
 
 ## Goal
 
-Use the first 14 days after adding `getsumm.app` to Google Search Console to:
+Use the first 14 days after adding `dunio.app` to Google Search Console to:
 
 - confirm indexing is working
 - make sure new SEO pages are discoverable
@@ -18,13 +18,13 @@ This plan is intentionally simple and practical.
 
 These are the pages worth checking first:
 
-- `https://getsumm.app/`
-- `https://getsumm.app/resources`
-- `https://getsumm.app/shared-finance-app-for-couples`
-- `https://getsumm.app/couples-budget-app`
-- `https://getsumm.app/household-budget-app`
-- `https://getsumm.app/household-expense-tracker`
-- `https://getsumm.app/net-worth-tracker-for-couples`
+- `https://dunio.app/`
+- `https://dunio.app/resources`
+- `https://dunio.app/shared-finance-app-for-couples`
+- `https://dunio.app/couples-budget-app`
+- `https://dunio.app/household-budget-app`
+- `https://dunio.app/household-expense-tracker`
+- `https://dunio.app/net-worth-tracker-for-couples`
 
 ---
 
@@ -35,7 +35,7 @@ These are the pages worth checking first:
 In Search Console:
 
 - open `Sitemaps`
-- confirm `https://getsumm.app/sitemap.xml` is listed
+- confirm `https://dunio.app/sitemap.xml` is listed
 - check that Google accepted it successfully
 
 What you want to see:
@@ -162,7 +162,7 @@ You are looking for queries like:
 - `couples budget app`
 - `household budget app`
 - `net worth tracker for couples`
-- branded queries like `summ app`
+- branded queries like `dunio app`
 
 If you see impressions for related but unexpected terms, note them. Those can become future content opportunities.
 

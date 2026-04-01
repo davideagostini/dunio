@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://getsumm.app/sitemap.xml
+Sitemap: https://dunio.app/sitemap.xml
