@@ -1,3 +1,11 @@
-/privacy-policy /privacy-policy.html 200
-/terms-of-service /terms-of-service.html 200
+/privacy-policy /privacy-policy/ 301
+/terms-of-service /terms-of-service/ 301
 /account-deletion /account-deletion/ 301
+/resources /resources/ 301
+/shared-finance-app-for-couples /shared-finance-app-for-couples/ 301
+/household-expense-tracker /household-expense-tracker/ 301
+/net-worth-tracker-for-couples /net-worth-tracker-for-couples/ 301
+/recurring-payments-tracker /recurring-payments-tracker/ 301
+/how-to-manage-money-as-a-couple /how-to-manage-money-as-a-couple/ 301
+/couples-budget-app /couples-budget-app/ 301
+/household-budget-app /household-budget-app/ 301
