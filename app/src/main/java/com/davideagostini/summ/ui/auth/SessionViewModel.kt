@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
+import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
+import com.davideagostini.summ.widget.SummWidgetsUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import java.time.LocalDate
 import javax.inject.Inject
 
 data class SessionUiState(
@@ -32,7 +35,17 @@ class SessionViewModel @Inject constructor(
     @param:ApplicationContext
     private val appContext: Context,
     private val sessionRepository: SessionRepository,
+    private val recurringTransactionRepository: RecurringTransactionRepository,
 ) : ViewModel() {
+    companion object {
+        private const val RECURRING_AUTO_APPLY_PREFS = "summ_recurring_auto_apply"
+        private const val RECURRING_AUTO_APPLY_PREFIX = "last_auto_apply_"
+        private const val RECURRING_AUTO_APPLY_TIMEOUT_MS = 5_000L
+    }
+
+    private val recurringAutoApplyPrefs by lazy {
+        appContext.getSharedPreferences(RECURRING_AUTO_APPLY_PREFS, Context.MODE_PRIVATE)
+    }
 
     val sessionState: StateFlow<SessionState> = sessionRepository.sessionState
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionState.Loading)
@@ -75,6 +88,28 @@ class SessionViewModel @Inject constructor(
     fun updateHouseholdCurrency(currency: String) {
         launchAction {
             sessionRepository.updateHouseholdCurrency(currency)
+        }
+    }
+
+    fun runRecurringAutoApplyIfNeeded(readyState: SessionState.Ready) {
+        viewModelScope.launch {
+            val todayKey = LocalDate.now().toString()
+            val prefKey = "$RECURRING_AUTO_APPLY_PREFIX${readyState.household.id}"
+            if (recurringAutoApplyPrefs.getString(prefKey, null) == todayKey) {
+                return@launch
+            }
+
+            runCatching {
+                val recurring = withTimeoutOrNull(RECURRING_AUTO_APPLY_TIMEOUT_MS) {
+                    recurringTransactionRepository.allRecurringTransactions.first()
+                } ?: return@runCatching
+
+                val createdCount = recurringTransactionRepository.applyDueRecurringTransactions(recurring)
+                recurringAutoApplyPrefs.edit().putString(prefKey, todayKey).apply()
+                if (createdCount > 0) {
+                    SummWidgetsUpdater.refreshAll(appContext)
+                }
+            }
         }
     }
 

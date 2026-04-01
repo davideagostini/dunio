@@ -41,13 +41,14 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] household currency can be changed from Settings
 - [ ] app language can be changed from Settings
 - [ ] app theme can be changed from Settings
-- [ ] selected app language is pinned to the top of the language list
-- [ ] selected app theme is pinned to the top of the theme list
+- [ ] selected app language stays highlighted in the language list and the app reloads in the chosen locale
+- [ ] selected app theme stays highlighted in the theme list and the app palette updates immediately
 - [ ] light / dark / system theme preference persists across app relaunch
 - [ ] currency search works and keeps the selected currency at the top
 - [ ] core screens show the expected localized strings for supported languages
 - [ ] dashboard, entries, assets, recurring, and widgets reflect the selected household currency
 - [ ] recurring apply due works without duplicates
+- [ ] recurring due items are auto-applied once per day on app startup
 - [ ] month close read-only mode works
 - [ ] member vs owner invite visibility works as expected
 - [ ] widget refresh behavior is re-reviewed from the current simple baseline before the next release

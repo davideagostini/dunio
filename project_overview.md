@@ -263,7 +263,7 @@ Dedicated app-language selection screen inside Settings.
 Responsibility:
 
 - list supported app languages using the same list style as the currency screen
-- keep the currently selected language pinned to the top
+- keep the language list in a stable alphabetical order while highlighting the current selection
 - keep the remaining languages sorted alphabetically
 - switch the app locale through Android per-app language APIs
 
@@ -274,10 +274,21 @@ Dedicated app-theme selection screen inside Settings.
 Responsibility:
 
 - list the three supported app themes using the same list style as the currency and language screens
-- keep the currently selected theme pinned to the top
+- keep the theme list in a stable order while highlighting the current selection
 - keep the remaining theme options sorted alphabetically
 - persist the app theme as `light`, `dark`, or `system`
 - apply the saved preference through Android night-mode APIs before the Compose tree is rendered
+
+### Recurring auto-apply
+
+Recurring items are also checked automatically on app startup after the session reaches `Ready`.
+
+Responsibility:
+
+- run a silent due-recurring sync for the current household
+- limit the automatic sync to at most once per day per household on the device
+- keep the operation idempotent by relying on the existing recurring-to-entry duplicate guard
+- avoid background scheduling complexity until a stronger automation model is needed
 
 ### `ui/entry`
 
