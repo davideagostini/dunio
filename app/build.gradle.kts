@@ -95,7 +95,7 @@ val renameReleaseApk by tasks.registering {
     doLast {
         val releaseDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
         val sourceApk = releaseDir.resolve("app-release.apk")
-        val targetApk = releaseDir.resolve("summ-$appVersionName.apk")
+        val targetApk = releaseDir.resolve("dunio-$appVersionName.apk")
 
         if (sourceApk.exists()) {
             if (targetApk.exists()) {
@@ -112,7 +112,7 @@ val renameReleaseBundle by tasks.registering {
     doLast {
         val releaseDir = layout.buildDirectory.dir("outputs/bundle/release").get().asFile
         val sourceBundle = releaseDir.resolve("app-release.aab")
-        val targetBundle = releaseDir.resolve("summ-$appVersionName.aab")
+        val targetBundle = releaseDir.resolve("dunio-$appVersionName.aab")
 
         if (sourceBundle.exists()) {
             if (targetBundle.exists()) {
@@ -127,7 +127,7 @@ val renameReleaseMapping by tasks.registering {
     doLast {
         val mappingDir = layout.buildDirectory.dir("outputs/mapping/release").get().asFile
         val sourceMapping = mappingDir.resolve("mapping.txt")
-        val targetMapping = mappingDir.resolve("summ-$appVersionName-mapping.txt")
+        val targetMapping = mappingDir.resolve("dunio-$appVersionName-mapping.txt")
 
         if (sourceMapping.exists()) {
             if (targetMapping.exists()) {

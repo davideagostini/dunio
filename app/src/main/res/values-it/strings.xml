@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Summ</string>
-    <string name="widget_quick_access_name">Accesso rapido Summ</string>
+    <string name="app_name">Dunio</string>
+    <string name="widget_quick_access_name">Accesso rapido Dunio</string>
     <string name="widget_quick_entry_label">Voce rapida</string>
-    <string name="widget_spending_name">Spese Summ</string>
+    <string name="widget_spending_name">Spese Dunio</string>
     <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Summ</string>
+    <string name="tile_subtitle">Dunio</string>
     <string name="content_desc_back">Indietro</string>
     <string name="content_desc_close">Chiudi</string>
     <string name="content_desc_add_category">Aggiungi categoria</string>

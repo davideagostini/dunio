@@ -164,22 +164,22 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: summ-release-apk
-          path: app/build/outputs/apk/release/summ-*.apk
+          name: dunio-release-apk
+          path: app/build/outputs/apk/release/dunio-*.apk
           if-no-files-found: error
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: summ-release-aab
-          path: app/build/outputs/bundle/release/summ-*.aab
+          name: dunio-release-aab
+          path: app/build/outputs/bundle/release/dunio-*.aab
           if-no-files-found: error
 
       - name: Upload mapping artifact
         uses: actions/upload-artifact@v4
         with:
-          name: summ-release-mapping
-          path: app/build/outputs/mapping/release/summ-*-mapping.txt
+          name: dunio-release-mapping
+          path: app/build/outputs/mapping/release/dunio-*-mapping.txt
           if-no-files-found: error
 
       - name: Check native debug metadata artifact contents
@@ -195,7 +195,7 @@ jobs:
         if: steps.native_debug_metadata.outputs.has_files == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: summ-release-native-debug-metadata
+          name: dunio-release-native-debug-metadata
           path: app/build/intermediates/native_debug_metadata/release/extractReleaseNativeDebugMetadata/out/**
           if-no-files-found: error
 
@@ -212,7 +212,7 @@ jobs:
         if: steps.native_symbol_tables.outputs.has_files == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: summ-release-native-symbol-tables
+          name: dunio-release-native-symbol-tables
           path: app/build/intermediates/native_symbol_tables/release/extractReleaseNativeSymbolTables/out/**
           if-no-files-found: error
 
@@ -225,20 +225,20 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: summ-release-apk
+          name: dunio-release-apk
           path: dist/apk
 
       - name: Download AAB artifact
         uses: actions/download-artifact@v4
         with:
-          name: summ-release-aab
+          name: dunio-release-aab
           path: dist/aab
 
       - name: Publish tagged release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Summ ${{ github.ref_name }}
+          name: Dunio ${{ github.ref_name }}
           generate_release_notes: true
           make_latest: true
           files: |

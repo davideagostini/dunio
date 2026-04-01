@@ -5,16 +5,16 @@
 <div id="user-content-toc">
   <ul style="list-style: none;">
     <summary>
-      <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="Summ Logo" width="120" align="left" hspace="20"><h1>Summ</h1>
+      <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="Dunio Logo" width="120" align="left" hspace="20"><h1>Dunio</h1>
       <p>
-      <a href="https://github.com/davideagostini/summ/releases/latest"><img src="https://img.shields.io/github/v/release/davideagostini/summ?logo=github&labelColor=1a1a1a"></a>
+      <a href="https://github.com/davideagostini/dunio/releases/latest"><img src="https://img.shields.io/github/v/release/davideagostini/dunio?logo=github&labelColor=1a1a1a"></a>
       <a href="https://opensource.org/license/mit"><img src="https://img.shields.io/badge/License-Mit%202.0-blue.svg" alt="License"></a>
       <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.0%2B-blue" alt="Kotlin"></a>
     </summary>
   </ul>
 </div>
 
-Summ is a mobile-first Android app for shared household finance tracking.
+Dunio is a mobile-first Android app for shared household finance tracking.
 
 It is designed for small shared workspaces such as couples or families who want a simple way to track:
 
@@ -366,7 +366,7 @@ git tag v0.0.5
 git push origin v0.0.5
 ```
 
-The workflow will decode the keystore, sign the release build, generate both `APK` and `AAB`, and attach them to the GitHub Release.
+The workflow will decode the keystore, sign the release build, generate both `APK` and `AAB`, and attach them to the Dunio GitHub Release.
 
 Release builds use minification and resource shrinking. The generated `mapping.txt` is uploaded as a GitHub Actions artifact so you can keep the deobfuscation file for Play Console or post-release analysis without exposing it in the public GitHub Release. Native debug metadata and symbol tables are also uploaded as optional workflow artifacts when AGP produces them.
 
@@ -391,8 +391,8 @@ git rm --cached app/google-services.json
 - [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [`project_overview.md`](./project_overview.md)
 - [`FIRST_RELEASE_CHECKLIST.md`](./FIRST_RELEASE_CHECKLIST.md)
-- [Privacy Policy](https://getsumm.app/privacy-policy)
-- [Terms of Service](https://getsumm.app/terms-of-service)
+- [Privacy Policy](https://dunio.app/privacy-policy)
+- [Terms of Service](https://dunio.app/terms-of-service)
 
 ## Roadmap ideas
 
@@ -418,16 +418,16 @@ git rm --cached app/google-services.json
 
 ## Support the project
 
-Summ is free to use and open source. If you find it useful and want to support ongoing development, you can do it here:
+Dunio is free to use and open source. If you find it useful and want to support ongoing development, you can do it here:
 
 - [Buy Me a Coffee](https://buymeacoffee.com/davideagostini)
 - [GitHub Sponsors](https://github.com/sponsors/davideagostini)
 
 ## Star History
 
-If you find Summ useful, consider giving the repository a star.
+If you find Dunio useful, consider giving the repository a star.
 
-[![Star History Chart](https://app.repohistory.com/api/svg?repo=davideagostini/summ&type=Date&background=F9FAEF&color=4C662B)](https://app.repohistory.com/star-history)
+[![Star History Chart](https://app.repohistory.com/api/svg?repo=davideagostini/dunio&type=Date&background=F9FAEF&color=4C662B)](https://app.repohistory.com/star-history)
 
 ## License
 

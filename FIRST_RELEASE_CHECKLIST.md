@@ -18,6 +18,7 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] signed release APK installs locally and completes a cold start without crashing
 - [ ] version code and version name are correct
 - [ ] app name, package name, and icon branding are consistent
+- [ ] public branding uses `Dunio` and any remaining `summ` references are intentional technical identifiers
 - [ ] no placeholder UI text remains
 
 ## Firebase
@@ -64,3 +65,4 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] optional native symbol artifacts are checked if the workflow produced them
 - [ ] first release notes drafted
 - [ ] screenshots or demo media prepared
+- [ ] public release artifacts use the `Dunio` brand

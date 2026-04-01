@@ -1,6 +1,6 @@
-# Summ — Project Overview
+# Dunio — Project Overview
 
-Summ is the Android mobile app for the shared-household finance product in this repository. It is a Compose-first application built in Kotlin, backed by Firebase Authentication and Cloud Firestore, and organized around feature packages such as dashboard, assets, entries, categories, recurring, members, and month close.
+Dunio is the Android mobile app for the shared-household finance product in this repository. It is a Compose-first application built in Kotlin, backed by Firebase Authentication and Cloud Firestore, and organized around feature packages such as dashboard, assets, entries, categories, recurring, members, and month close.
 
 This document describes the structure that exists today in `mobile-app`, including the quick-entry activity, Android tile integration, and home-screen widgets.
 
@@ -47,6 +47,11 @@ The main Kotlin package root is:
 ```text
 app/src/main/java/com/davideagostini/summ
 ```
+
+Public branding note:
+
+- the public app name is `Dunio`
+- internal package names still use `summ` during the current testing phase
 
 The project is Compose-first, but it is not literally XML-free:
 

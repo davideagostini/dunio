@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to `Summ Android`.
+Thanks for contributing to `Dunio Android`.
 
 This project is public because it is useful as:
 

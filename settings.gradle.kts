@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Summ"
+rootProject.name = "Dunio"
 include(":app")
