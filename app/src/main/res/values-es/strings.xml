@@ -71,6 +71,7 @@
     <string name="entries_filter_all">Todo</string>
     <string name="entries_filter_expenses">Gastos</string>
     <string name="entries_filter_income">Ingresos</string>
+    <string name="entries_reports_percentage_value">%1$d%% del gasto total</string>
     <string name="entry_step_date_title">¿Cuándo ocurrió?</string>
     <string name="entry_step_amount_title">¿Cuánto fue?</string>
     <string name="entry_step_description_title">¿Para qué fue?</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">Otro</string>
     <string name="entry_step_pick_category">Elige una categoría</string>
     <string name="entry_step_select_category">Selecciona una categoría</string>
+    <string name="content_desc_toggle_entries_reports">Mostrar informes de movimientos</string>
+    <string name="entries_reports_title">Gasto por categoría</string>
+    <string name="entries_reports_subtitle">Desglose de las categorías de gasto del mes seleccionado.</string>
+    <string name="entries_reports_total_expenses">Total gastado</string>
+    <string name="entries_reports_categories">Categorías</string>
+    <string name="entries_reports_transactions">Movimientos</string>
+    <string name="entries_reports_chart_title">Categorías principales</string>
+    <string name="entries_reports_breakdown_title">Desglose</string>
+    <string name="entries_reports_average_transactions_value">Prom. %1$s / %2$d mov.</string>
+    <string name="entries_reports_transactions_value">%1$d mov.</string>
+    <string name="entries_reports_empty_message">Todavía no hay gastos para este mes.</string>
+    <string name="entries_reports_uncategorized">Sin categoría</string>
 </resources>

@@ -6,11 +6,13 @@ import com.davideagostini.summ.domain.model.EntryDisplayItem
 
 enum class EntrySheetMode { Hidden, Action, Edit, Success }
 enum class EntriesFilterType { All, Expenses, Income }
+enum class EntriesContentMode { Entries, Reports }
 
 @Immutable
 data class EntriesUiState(
     val selectedMonth: String?        = null,
     val filterType: EntriesFilterType = EntriesFilterType.All,
+    val contentMode: EntriesContentMode = EntriesContentMode.Entries,
     val searchQuery: String           = "",
     val searchVisible: Boolean        = false,
     val sheetMode: EntrySheetMode     = EntrySheetMode.Hidden,

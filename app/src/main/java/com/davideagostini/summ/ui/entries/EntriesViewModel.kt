@@ -82,6 +82,10 @@ class EntriesViewModel @Inject constructor(
         val visibleEntries = monthEntries.filter { entry ->
             matchesFilter(entry, state.filterType) && matchesSearch(entry, state.searchQuery)
         }
+        val categorySpendingBreakdown = buildCategorySpendingBreakdown(
+            entries = monthEntries,
+            uncategorizedLabel = appContext.getString(R.string.entries_reports_uncategorized),
+        )
 
         EntriesRenderState(
             selectedMonth = selectedMonth,
@@ -91,6 +95,9 @@ class EntriesViewModel @Inject constructor(
             visibleEntries = visibleEntries,
             dayGroups = buildDayGroups(visibleEntries),
             unusualSpendingInsights = buildUnusualSpendingInsights(home.entries, selectedMonth),
+            categorySpendingBreakdown = categorySpendingBreakdown,
+            categorySpendingTotal = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::totalAmount),
+            categorySpendingTransactionCount = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::transactionCount),
             totalExpenses = monthEntries.sumOf { entry -> if (entry.type == "expense") entry.price else 0.0 },
             totalIncome = monthEntries.sumOf { entry -> if (entry.type == "income") entry.price else 0.0 },
             monthLabel = formatMonthLabel(selectedMonth),
@@ -107,6 +114,9 @@ class EntriesViewModel @Inject constructor(
             visibleEntries = emptyList(),
             dayGroups = emptyList(),
             unusualSpendingInsights = emptyList(),
+            categorySpendingBreakdown = emptyList(),
+            categorySpendingTotal = 0.0,
+            categorySpendingTransactionCount = 0,
             totalExpenses = 0.0,
             totalIncome = 0.0,
             monthLabel = formatMonthLabel(preferredRecentMonth(buildRecentMonthOptions())),
@@ -120,11 +130,29 @@ class EntriesViewModel @Inject constructor(
             // Filter and search updates are pure state mutations and do not hit the repository layer.
             is EntriesEvent.SelectMonth    -> _uiState.update { it.copy(selectedMonth = event.monthKey) }
             is EntriesEvent.SelectFilter   -> _uiState.update { it.copy(filterType = event.filter) }
-            EntriesEvent.ToggleSearch      -> _uiState.update {
+            EntriesEvent.ToggleContentMode -> _uiState.update {
+                val nextMode = if (it.contentMode == EntriesContentMode.Entries) {
+                    EntriesContentMode.Reports
+                } else {
+                    EntriesContentMode.Entries
+                }
                 it.copy(
-                    searchVisible = !it.searchVisible,
-                    searchQuery = if (it.searchVisible) "" else it.searchQuery,
+                    contentMode = nextMode,
+                    searchVisible = if (nextMode == EntriesContentMode.Reports) false else it.searchVisible,
                 )
+            }
+            EntriesEvent.ToggleSearch      -> _uiState.update {
+                if (it.contentMode == EntriesContentMode.Reports) {
+                    it.copy(
+                        contentMode = EntriesContentMode.Entries,
+                        searchVisible = true,
+                    )
+                } else {
+                    it.copy(
+                        searchVisible = !it.searchVisible,
+                        searchQuery = if (it.searchVisible) "" else it.searchQuery,
+                    )
+                }
             }
             is EntriesEvent.UpdateSearchQuery -> _uiState.update { it.copy(searchQuery = event.query) }
             is EntriesEvent.Select         -> _uiState.update {

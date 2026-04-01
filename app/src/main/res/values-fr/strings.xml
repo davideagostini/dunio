@@ -71,6 +71,7 @@
     <string name="entries_filter_all">Tout</string>
     <string name="entries_filter_expenses">Dépenses</string>
     <string name="entries_filter_income">Revenus</string>
+    <string name="entries_reports_percentage_value">%1$d%% du total dépensé</string>
     <string name="entry_step_date_title">Quand cela s’est-il produit ?</string>
     <string name="entry_step_amount_title">Quel montant ?</string>
     <string name="entry_step_description_title">À quoi cela correspond-il ?</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">Autre</string>
     <string name="entry_step_pick_category">Choisissez une catégorie</string>
     <string name="entry_step_select_category">Veuillez sélectionner une catégorie</string>
+    <string name="content_desc_toggle_entries_reports">Afficher les rapports des écritures</string>
+    <string name="entries_reports_title">Dépenses par catégorie</string>
+    <string name="entries_reports_subtitle">Répartition des catégories de dépenses du mois sélectionné.</string>
+    <string name="entries_reports_total_expenses">Total dépensé</string>
+    <string name="entries_reports_categories">Catégories</string>
+    <string name="entries_reports_transactions">Écritures</string>
+    <string name="entries_reports_chart_title">Catégories principales</string>
+    <string name="entries_reports_breakdown_title">Répartition</string>
+    <string name="entries_reports_average_transactions_value">Moy. %1$s / %2$d écr.</string>
+    <string name="entries_reports_transactions_value">%1$d écr.</string>
+    <string name="entries_reports_empty_message">Aucune dépense pour ce mois pour le moment.</string>
+    <string name="entries_reports_uncategorized">Sans catégorie</string>
 </resources>

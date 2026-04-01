@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import androidx.annotation.StringRes
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
+import com.davideagostini.summ.ui.settings.language.AppLanguageManager
 import java.util.Locale
 
 data class SystemCategoryDefinition(
@@ -59,7 +60,7 @@ object SystemCategories {
 
     fun localizedName(context: Context, key: String): String {
         val definition = definitions.firstOrNull { it.key == key } ?: return key
-        return context.getString(definition.labelResId)
+        return AppLanguageManager.wrap(context).getString(definition.labelResId)
     }
 
     fun inferSystemKey(context: Context, name: String, emoji: String? = null): String? {

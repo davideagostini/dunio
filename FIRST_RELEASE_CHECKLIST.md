@@ -37,6 +37,7 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] create/join household does not flash back to setup during the transition
 - [ ] dashboard loads
 - [ ] entries CRUD works
+- [ ] entries reports mode opens from the toolbar and shows the monthly category spending summary, horizontal bar chart, and breakdown
 - [ ] assets CRUD works
 - [ ] household currency can be changed from Settings
 - [ ] app language can be changed from Settings

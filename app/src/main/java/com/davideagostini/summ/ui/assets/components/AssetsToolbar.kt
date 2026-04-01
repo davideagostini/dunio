@@ -42,6 +42,7 @@ fun AssetsToolbar(
             MonthPickerField(
                 label = formatMonthLabel(selectedMonth),
                 onClick = onOpenMonthPicker,
+                compact = true,
                 modifier = Modifier.weight(1f),
             )
 
@@ -53,7 +54,7 @@ fun AssetsToolbar(
                     MaterialTheme.colorScheme.surfaceContainerLowest
                 },
                 tonalElevation = 2.dp,
-                modifier = Modifier.size(60.dp),
+                modifier = Modifier.size(52.dp),
             ) {
                 IconButton(onClick = onToggleSearch) {
                     Icon(

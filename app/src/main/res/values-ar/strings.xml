@@ -71,6 +71,7 @@
     <string name="entries_filter_all">الكل</string>
     <string name="entries_filter_expenses">المصروفات</string>
     <string name="entries_filter_income">الدخل</string>
+    <string name="entries_reports_percentage_value">%1$d%% من إجمالي الإنفاق</string>
     <string name="entry_step_date_title">متى حدثت؟</string>
     <string name="entry_step_amount_title">كم المبلغ؟</string>
     <string name="entry_step_description_title">ما الغرض منها؟</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">أخرى</string>
     <string name="entry_step_pick_category">اختر فئة</string>
     <string name="entry_step_select_category">يرجى اختيار فئة</string>
+    <string name="content_desc_toggle_entries_reports">عرض تقارير العمليات</string>
+    <string name="entries_reports_title">الإنفاق حسب الفئة</string>
+    <string name="entries_reports_subtitle">تفصيل فئات الإنفاق للشهر المحدد.</string>
+    <string name="entries_reports_total_expenses">إجمالي الإنفاق</string>
+    <string name="entries_reports_categories">الفئات</string>
+    <string name="entries_reports_transactions">العمليات</string>
+    <string name="entries_reports_chart_title">أهم الفئات</string>
+    <string name="entries_reports_breakdown_title">التفصيل</string>
+    <string name="entries_reports_average_transactions_value">المتوسط %1$s / %2$d عملية</string>
+    <string name="entries_reports_transactions_value">%1$d عملية</string>
+    <string name="entries_reports_empty_message">لا توجد مصروفات لهذا الشهر حتى الآن.</string>
+    <string name="entries_reports_uncategorized">بدون فئة</string>
 </resources>

@@ -290,6 +290,18 @@ Responsibility:
 - keep the operation idempotent by relying on the existing recurring-to-entry duplicate guard
 - avoid background scheduling complexity until a stronger automation model is needed
 
+### `ui/entries` reports mode
+
+The entries screen also includes a secondary reports presentation mode for the selected month.
+
+Responsibility:
+
+- reuse the existing entries screen shell instead of introducing a separate navigation destination
+- let the toolbar toggle between the standard grouped transaction list and the reports view
+- show a compact horizontal bar chart for the top expense categories of the selected month
+- summarize expense categories for the selected month with totals, averages, percentages, and transaction counts
+- keep the visual treatment aligned with the existing entries cards and settings surfaces
+
 ### `ui/entry`
 
 Dedicated quick-entry flow for creating a new transaction.

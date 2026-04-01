@@ -71,6 +71,7 @@
     <string name="entries_filter_all">Alle</string>
     <string name="entries_filter_expenses">Ausgaben</string>
     <string name="entries_filter_income">Einnahmen</string>
+    <string name="entries_reports_percentage_value">%1$d%% der Gesamtausgaben</string>
     <string name="entry_step_date_title">Wann ist es passiert?</string>
     <string name="entry_step_amount_title">Wie viel?</string>
     <string name="entry_step_description_title">Wofür war es?</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">Sonstiges</string>
     <string name="entry_step_pick_category">Wähle eine Kategorie</string>
     <string name="entry_step_select_category">Bitte wähle eine Kategorie aus</string>
+    <string name="content_desc_toggle_entries_reports">Auswertungen der Einträge anzeigen</string>
+    <string name="entries_reports_title">Ausgaben nach Kategorie</string>
+    <string name="entries_reports_subtitle">Aufschlüsselung der Ausgabenkategorien des ausgewählten Monats.</string>
+    <string name="entries_reports_total_expenses">Gesamtausgaben</string>
+    <string name="entries_reports_categories">Kategorien</string>
+    <string name="entries_reports_transactions">Einträge</string>
+    <string name="entries_reports_chart_title">Top-Kategorien</string>
+    <string name="entries_reports_breakdown_title">Aufschlüsselung</string>
+    <string name="entries_reports_average_transactions_value">Ø %1$s / %2$d Buch.</string>
+    <string name="entries_reports_transactions_value">%1$d Buch.</string>
+    <string name="entries_reports_empty_message">Für diesen Monat gibt es noch keine Ausgaben.</string>
+    <string name="entries_reports_uncategorized">Ohne Kategorie</string>
 </resources>

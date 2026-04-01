@@ -132,6 +132,7 @@ private fun MonthCloseContent(
                         MonthPickerField(
                             label = formatMonthOption(uiState.month),
                             onClick = { showMonthPicker = true },
+                            compact = true,
                             modifier = Modifier.weight(1f),
                         )
                         Surface(
@@ -140,7 +141,7 @@ private fun MonthCloseContent(
                         ) {
                             Text(
                                 text = if (uiState.status == "closed") stringResource(R.string.month_close_closed) else stringResource(R.string.month_close_draft),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = if (uiState.status == "closed") IncomeGreen else MaterialTheme.colorScheme.onSurfaceVariant,

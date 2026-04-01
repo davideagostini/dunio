@@ -86,8 +86,10 @@ Each household uses one shared currency configured from Settings. The app does n
 - monthly transaction list
 - grouped by day
 - search
+- entries / reports toggle in the toolbar
 - `All / Expenses / Income` filter
 - unusual spending insights
+- category spending report with a horizontal bar chart plus totals, averages, percentages, and transaction counts
 - entry edit and delete flow
 - quick-entry flow
 
@@ -392,7 +394,6 @@ git rm --cached app/google-services.json
 
 ### High Priority · Lower Effort
 
-- category spending breakdown with totals, averages, and percentages
 - income vs expense analysis with category breakdown
 - transaction statistics and spending-by-category chart in the transactions screen
 - improved home-screen widgets

@@ -71,6 +71,7 @@
     <string name="entries_filter_all">Все</string>
     <string name="entries_filter_expenses">Расходы</string>
     <string name="entries_filter_income">Доходы</string>
+    <string name="entries_reports_percentage_value">%1$d%% от общих расходов</string>
     <string name="entry_step_date_title">Когда это произошло?</string>
     <string name="entry_step_amount_title">Сколько?</string>
     <string name="entry_step_description_title">На что это было?</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">Другое</string>
     <string name="entry_step_pick_category">Выберите категорию</string>
     <string name="entry_step_select_category">Пожалуйста, выберите категорию</string>
+    <string name="content_desc_toggle_entries_reports">Показать отчёты по операциям</string>
+    <string name="entries_reports_title">Расходы по категориям</string>
+    <string name="entries_reports_subtitle">Разбивка категорий расходов за выбранный месяц.</string>
+    <string name="entries_reports_total_expenses">Всего потрачено</string>
+    <string name="entries_reports_categories">Категории</string>
+    <string name="entries_reports_transactions">Операции</string>
+    <string name="entries_reports_chart_title">Основные категории</string>
+    <string name="entries_reports_breakdown_title">Разбивка</string>
+    <string name="entries_reports_average_transactions_value">Ср. %1$s / %2$d опер.</string>
+    <string name="entries_reports_transactions_value">%1$d опер.</string>
+    <string name="entries_reports_empty_message">За этот месяц пока нет расходов.</string>
+    <string name="entries_reports_uncategorized">Без категории</string>
 </resources>

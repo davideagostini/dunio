@@ -71,6 +71,7 @@
     <string name="entries_filter_all">すべて</string>
     <string name="entries_filter_expenses">支出</string>
     <string name="entries_filter_income">収入</string>
+    <string name="entries_reports_percentage_value">支出合計の%1$d%%</string>
     <string name="entry_step_date_title">いつ発生しましたか？</string>
     <string name="entry_step_amount_title">金額はいくらですか？</string>
     <string name="entry_step_description_title">何の支出・収入ですか？</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">その他</string>
     <string name="entry_step_pick_category">カテゴリを選択</string>
     <string name="entry_step_select_category">カテゴリを選択してください</string>
+    <string name="content_desc_toggle_entries_reports">記録レポートを表示</string>
+    <string name="entries_reports_title">カテゴリ別支出</string>
+    <string name="entries_reports_subtitle">選択した月の支出カテゴリの内訳です。</string>
+    <string name="entries_reports_total_expenses">合計支出</string>
+    <string name="entries_reports_categories">カテゴリ</string>
+    <string name="entries_reports_transactions">記録数</string>
+    <string name="entries_reports_chart_title">主なカテゴリ</string>
+    <string name="entries_reports_breakdown_title">内訳</string>
+    <string name="entries_reports_average_transactions_value">平均 %1$s / %2$d件</string>
+    <string name="entries_reports_transactions_value">%1$d件</string>
+    <string name="entries_reports_empty_message">この月の支出はまだありません。</string>
+    <string name="entries_reports_uncategorized">未分類</string>
 </resources>

@@ -15,6 +15,7 @@ fun DashboardToolbar(
     MonthPickerField(
         label = formatMonthOption(selectedMonth),
         onClick = onOpenMonthPicker,
+        compact = true,
         modifier = Modifier.padding(horizontal = 20.dp),
     )
 }

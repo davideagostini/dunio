@@ -12,6 +12,7 @@
     <string name="content_desc_add_asset">Add asset</string>
     <string name="assets_more_actions">Asset actions</string>
     <string name="content_desc_search_entries">Search entries</string>
+    <string name="content_desc_toggle_entries_reports">Toggle entries reports</string>
     <string name="content_desc_search_assets">Search assets</string>
     <string name="content_desc_clear_search">Clear search</string>
 
@@ -148,6 +149,18 @@
     <string name="entries_yesterday">Yesterday</string>
     <string name="entries_validation_description_required">Description is required</string>
     <string name="entries_validation_amount_valid">Enter a valid amount</string>
+    <string name="entries_reports_title">Category spending</string>
+    <string name="entries_reports_subtitle">Breakdown of this month’s expense categories.</string>
+    <string name="entries_reports_total_expenses">Total spent</string>
+    <string name="entries_reports_categories">Categories</string>
+    <string name="entries_reports_transactions">Transactions</string>
+    <string name="entries_reports_chart_title">Top categories</string>
+    <string name="entries_reports_breakdown_title">Breakdown</string>
+    <string name="entries_reports_average_transactions_value">Avg %1$s / %2$d tx</string>
+    <string name="entries_reports_percentage_value">%1$d%% of total spend</string>
+    <string name="entries_reports_transactions_value">%1$d tx</string>
+    <string name="entries_reports_empty_message">No expense data for this month yet.</string>
+    <string name="entries_reports_uncategorized">Uncategorized</string>
     <string name="dashboard_nav_label">Dashboard</string>
     <string name="add_entry">Add Entry</string>
 

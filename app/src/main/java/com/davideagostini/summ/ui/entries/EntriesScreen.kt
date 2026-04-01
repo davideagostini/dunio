@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,6 +49,9 @@ import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.entries.components.BalanceCard
+import com.davideagostini.summ.ui.entries.components.CategorySpendingBreakdownCard
+import com.davideagostini.summ.ui.entries.components.CategorySpendingChartCard
+import com.davideagostini.summ.ui.entries.components.CategorySpendingSummaryCard
 import com.davideagostini.summ.ui.entries.components.DayGroupSection
 import com.davideagostini.summ.ui.entries.components.EmptyState
 import com.davideagostini.summ.ui.entries.components.EntriesToolbar
@@ -106,6 +111,7 @@ internal fun EntriesContent(
     val dayGroups = renderState.dayGroups
     val unusualSpendingInsights = renderState.unusualSpendingInsights
     val monthLabel = renderState.monthLabel
+    val isReportsMode = uiState.contentMode == EntriesContentMode.Reports
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
@@ -173,9 +179,11 @@ internal fun EntriesContent(
                 item {
                     EntriesToolbar(
                         selectedMonth = selectedMonth,
+                        contentMode = uiState.contentMode,
                         searchVisible = uiState.searchVisible,
                         searchQuery = uiState.searchQuery,
                         onOpenMonthPicker = { showMonthPicker = true },
+                        onToggleContentMode = { onEvent(EntriesEvent.ToggleContentMode) },
                         onToggleSearch = { onEvent(EntriesEvent.ToggleSearch) },
                         onSearchQueryChange = { onEvent(EntriesEvent.UpdateSearchQuery(it)) },
                     )
@@ -193,45 +201,80 @@ internal fun EntriesContent(
                     }
                 }
 
-                item {
-                    BalanceCard(
-                        currency = renderState.householdCurrency,
-                        monthLabel = monthLabel,
-                        expenses = renderState.totalExpenses,
-                        income = renderState.totalIncome,
-                        netCashFlow = renderState.totalIncome - renderState.totalExpenses,
-                        filterType = uiState.filterType,
-                        onFilterSelected = { onEvent(EntriesEvent.SelectFilter(it)) },
-                    )
-                }
-
-                item {
-                    if (unusualSpendingInsights.isNotEmpty()) {
-                        UnusualSpendingCard(
+                if (!isReportsMode) {
+                    item {
+                        BalanceCard(
                             currency = renderState.householdCurrency,
-                            insights = unusualSpendingInsights,
+                            monthLabel = monthLabel,
+                            expenses = renderState.totalExpenses,
+                            income = renderState.totalIncome,
+                            netCashFlow = renderState.totalIncome - renderState.totalExpenses,
+                            filterType = uiState.filterType,
+                            onFilterSelected = { onEvent(EntriesEvent.SelectFilter(it)) },
                         )
                     }
-                }
 
-                if (dayGroups.isEmpty()) {
-                    // Empty state changes its copy depending on whether the month has data at all or only filters hide it.
+                    item {
+                        if (unusualSpendingInsights.isNotEmpty()) {
+                            UnusualSpendingCard(
+                                currency = renderState.householdCurrency,
+                                insights = unusualSpendingInsights,
+                            )
+                        }
+                    }
+
+                    if (dayGroups.isEmpty()) {
+                        // Empty state changes its copy depending on whether the month has data at all or only filters hide it.
+                        item {
+                            EmptyState(
+                                message = if (!renderState.hasAnyEntries) {
+                                    stringResource(R.string.entries_empty_message)
+                                } else {
+                                    stringResource(R.string.entries_empty_filtered_message)
+                                }
+                            )
+                        }
+                    } else {
+                        items(dayGroups, key = { it.key.toString() }) { group ->
+                            DayGroupSection(
+                                currency = renderState.householdCurrency,
+                                group = group,
+                                readOnly = isMonthClosed,
+                                onEntryClick = { onEvent(EntriesEvent.Select(it)) },
+                            )
+                        }
+                    }
+                } else if (renderState.categorySpendingBreakdown.isEmpty()) {
                     item {
                         EmptyState(
-                            message = if (!renderState.hasAnyEntries) {
-                                stringResource(R.string.entries_empty_message)
-                            } else {
-                                stringResource(R.string.entries_empty_filtered_message)
-                            }
+                            message = stringResource(R.string.entries_reports_empty_message),
                         )
                     }
                 } else {
-                    items(dayGroups, key = { it.key.toString() }) { group ->
-                        DayGroupSection(
+                    item {
+                        CategorySpendingSummaryCard(
                             currency = renderState.householdCurrency,
-                            group = group,
-                            readOnly = isMonthClosed,
-                            onEntryClick = { onEvent(EntriesEvent.Select(it)) },
+                            totalExpenses = renderState.categorySpendingTotal,
+                            categoryCount = renderState.categorySpendingBreakdown.size,
+                            transactionCount = renderState.categorySpendingTransactionCount,
+                        )
+                    }
+
+                    item {
+                        CategorySpendingChartCard(
+                            currency = renderState.householdCurrency,
+                            items = renderState.categorySpendingBreakdown,
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    item {
+                        CategorySpendingBreakdownCard(
+                            currency = renderState.householdCurrency,
+                            items = renderState.categorySpendingBreakdown,
                         )
                     }
                 }

@@ -6,6 +6,7 @@ import com.davideagostini.summ.domain.model.EntryDisplayItem
 sealed class EntriesEvent {
     data class SelectMonth(val monthKey: String)     : EntriesEvent()
     data class SelectFilter(val filter: EntriesFilterType) : EntriesEvent()
+    data object ToggleContentMode                    : EntriesEvent()
     data object ToggleSearch                         : EntriesEvent()
     data class UpdateSearchQuery(val query: String)  : EntriesEvent()
     data class Select(val entry: EntryDisplayItem)  : EntriesEvent()

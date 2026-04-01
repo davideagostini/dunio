@@ -71,6 +71,7 @@
     <string name="entries_filter_all">Alles</string>
     <string name="entries_filter_expenses">Uitgaven</string>
     <string name="entries_filter_income">Inkomsten</string>
+    <string name="entries_reports_percentage_value">%1$d%% van de totale uitgaven</string>
     <string name="entry_step_date_title">Wanneer gebeurde het?</string>
     <string name="entry_step_amount_title">Hoeveel?</string>
     <string name="entry_step_description_title">Waar was het voor?</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">Overig</string>
     <string name="entry_step_pick_category">Kies een categorie</string>
     <string name="entry_step_select_category">Selecteer een categorie</string>
+    <string name="content_desc_toggle_entries_reports">Rapporten van transacties tonen</string>
+    <string name="entries_reports_title">Uitgaven per categorie</string>
+    <string name="entries_reports_subtitle">Uitsplitsing van de uitgavencategorieën van de geselecteerde maand.</string>
+    <string name="entries_reports_total_expenses">Totaal uitgegeven</string>
+    <string name="entries_reports_categories">Categorieën</string>
+    <string name="entries_reports_transactions">Transacties</string>
+    <string name="entries_reports_chart_title">Topcategorieën</string>
+    <string name="entries_reports_breakdown_title">Uitsplitsing</string>
+    <string name="entries_reports_average_transactions_value">Gem. %1$s / %2$d trans.</string>
+    <string name="entries_reports_transactions_value">%1$d trans.</string>
+    <string name="entries_reports_empty_message">Er zijn nog geen uitgaven voor deze maand.</string>
+    <string name="entries_reports_uncategorized">Zonder categorie</string>
 </resources>

@@ -12,6 +12,7 @@
     <string name="content_desc_add_asset">Aggiungi asset</string>
     <string name="assets_more_actions">Azioni asset</string>
     <string name="content_desc_search_entries">Cerca movimenti</string>
+    <string name="content_desc_toggle_entries_reports">Mostra report movimenti</string>
     <string name="content_desc_search_assets">Cerca asset</string>
     <string name="content_desc_clear_search">Cancella ricerca</string>
     <string name="action_delete">Elimina</string>
@@ -140,6 +141,18 @@
     <string name="entries_yesterday">Ieri</string>
     <string name="entries_validation_description_required">La descrizione è obbligatoria</string>
     <string name="entries_validation_amount_valid">Inserisci un importo valido</string>
+    <string name="entries_reports_title">Spese per categoria</string>
+    <string name="entries_reports_subtitle">Ripartizione delle categorie di spesa del mese selezionato.</string>
+    <string name="entries_reports_total_expenses">Totale speso</string>
+    <string name="entries_reports_categories">Categorie</string>
+    <string name="entries_reports_transactions">Movimenti</string>
+    <string name="entries_reports_chart_title">Categorie principali</string>
+    <string name="entries_reports_breakdown_title">Dettaglio</string>
+    <string name="entries_reports_average_transactions_value">Media %1$s / %2$d tx</string>
+    <string name="entries_reports_percentage_value">%1$d%% del totale speso</string>
+    <string name="entries_reports_transactions_value">%1$d mov.</string>
+    <string name="entries_reports_empty_message">Non ci sono ancora spese per questo mese.</string>
+    <string name="entries_reports_uncategorized">Senza categoria</string>
     <string name="dashboard_nav_label">Dashboard</string>
     <string name="add_entry">Aggiungi movimento</string>
     <string name="settings_title">Impostazioni</string>

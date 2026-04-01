@@ -25,6 +25,16 @@ data class UnusualSpendingInsight(
 )
 
 @Immutable
+data class CategorySpendingBreakdownItem(
+    val category: String,
+    val emoji: String,
+    val totalAmount: Double,
+    val averageAmount: Double,
+    val transactionCount: Int,
+    val percentage: Double,
+)
+
+@Immutable
 data class EntriesRenderState(
     val selectedMonth: String,
     val householdCurrency: String,
@@ -33,6 +43,9 @@ data class EntriesRenderState(
     val visibleEntries: List<EntryDisplayItem>,
     val dayGroups: List<EntryDayGroup>,
     val unusualSpendingInsights: List<UnusualSpendingInsight>,
+    val categorySpendingBreakdown: List<CategorySpendingBreakdownItem>,
+    val categorySpendingTotal: Double,
+    val categorySpendingTransactionCount: Int,
     val totalExpenses: Double,
     val totalIncome: Double,
     val monthLabel: String,
@@ -110,6 +123,30 @@ internal fun buildUnusualSpendingInsights(
         }
         .sortedByDescending { it.percentChange }
         .take(2)
+}
+
+internal fun buildCategorySpendingBreakdown(
+    entries: List<EntryDisplayItem>,
+    uncategorizedLabel: String,
+): List<CategorySpendingBreakdownItem> {
+    val expenseEntries = entries.filter { it.type == "expense" }
+    val totalExpenses = expenseEntries.sumOf { it.price }
+    if (expenseEntries.isEmpty() || totalExpenses <= 0.0) return emptyList()
+
+    return expenseEntries
+        .groupBy { entry -> entry.category.ifBlank { uncategorizedLabel } }
+        .map { (category, categoryEntries) ->
+            val totalAmount = categoryEntries.sumOf { it.price }
+            CategorySpendingBreakdownItem(
+                category = category,
+                emoji = categoryEntries.firstOrNull()?.emoji ?: "📦",
+                totalAmount = totalAmount,
+                averageAmount = totalAmount / categoryEntries.size,
+                transactionCount = categoryEntries.size,
+                percentage = totalAmount / totalExpenses,
+            )
+        }
+        .sortedByDescending(CategorySpendingBreakdownItem::totalAmount)
 }
 
 internal fun previousMonthKeys(selectedMonth: String, count: Int): List<String> {

@@ -71,6 +71,7 @@
     <string name="entries_filter_all">Todos</string>
     <string name="entries_filter_expenses">Despesas</string>
     <string name="entries_filter_income">Receitas</string>
+    <string name="entries_reports_percentage_value">%1$d%% do gasto total</string>
     <string name="entry_step_date_title">Quando aconteceu?</string>
     <string name="entry_step_amount_title">Quanto?</string>
     <string name="entry_step_description_title">Para que foi?</string>
@@ -301,4 +302,16 @@
     <string name="default_category_other">Outro</string>
     <string name="entry_step_pick_category">Escolha uma categoria</string>
     <string name="entry_step_select_category">Selecione uma categoria</string>
+    <string name="content_desc_toggle_entries_reports">Mostrar relatórios de lançamentos</string>
+    <string name="entries_reports_title">Gastos por categoria</string>
+    <string name="entries_reports_subtitle">Detalhamento das categorias de gasto do mês selecionado.</string>
+    <string name="entries_reports_total_expenses">Total gasto</string>
+    <string name="entries_reports_categories">Categorias</string>
+    <string name="entries_reports_transactions">Lançamentos</string>
+    <string name="entries_reports_chart_title">Principais categorias</string>
+    <string name="entries_reports_breakdown_title">Detalhamento</string>
+    <string name="entries_reports_average_transactions_value">Média %1$s / %2$d lanç.</string>
+    <string name="entries_reports_transactions_value">%1$d lanç.</string>
+    <string name="entries_reports_empty_message">Ainda não há gastos para este mês.</string>
+    <string name="entries_reports_uncategorized">Sem categoria</string>
 </resources>

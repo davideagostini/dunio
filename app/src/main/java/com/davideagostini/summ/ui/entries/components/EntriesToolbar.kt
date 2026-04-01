@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,17 +26,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.components.MonthPickerField
+import com.davideagostini.summ.ui.entries.EntriesContentMode
 import com.davideagostini.summ.ui.entries.formatMonthLabel
 
 @Composable
 internal fun EntriesToolbar(
     selectedMonth: String,
+    contentMode: EntriesContentMode,
     searchVisible: Boolean,
     searchQuery: String,
     onOpenMonthPicker: () -> Unit,
+    onToggleContentMode: () -> Unit,
     onToggleSearch: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
 ) {
+    val isReportsMode = contentMode == EntriesContentMode.Reports
+
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -43,6 +50,7 @@ internal fun EntriesToolbar(
             MonthPickerField(
                 label = formatMonthLabel(selectedMonth),
                 onClick = onOpenMonthPicker,
+                compact = true,
                 modifier = Modifier.weight(1f),
             )
 
@@ -50,7 +58,7 @@ internal fun EntriesToolbar(
                 shape = CircleShape,
                 color = if (searchVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLowest,
                 tonalElevation = 2.dp,
-                modifier = Modifier.size(60.dp),
+                modifier = Modifier.size(52.dp),
             ) {
                 IconButton(onClick = onToggleSearch) {
                     Icon(
@@ -60,9 +68,24 @@ internal fun EntriesToolbar(
                     )
                 }
             }
+
+            Surface(
+                shape = CircleShape,
+                color = if (isReportsMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLowest,
+                tonalElevation = 2.dp,
+                modifier = Modifier.size(52.dp),
+            ) {
+                IconButton(onClick = onToggleContentMode) {
+                    Icon(
+                        imageVector = if (isReportsMode) Icons.Filled.BarChart else Icons.Outlined.BarChart,
+                        contentDescription = stringResource(R.string.content_desc_toggle_entries_reports),
+                        tint = if (isReportsMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
         }
 
-        if (searchVisible) {
+        if (searchVisible && !isReportsMode) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,

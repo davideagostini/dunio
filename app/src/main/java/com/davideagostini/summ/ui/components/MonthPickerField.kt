@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.listItemShape
 
@@ -45,6 +46,7 @@ fun MonthPickerField(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     // Compact trigger surface reused in toolbars and settings screens.
     Surface(
@@ -57,14 +59,21 @@ fun MonthPickerField(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                .padding(
+                    horizontal = if (compact) 16.dp else 18.dp,
+                    vertical = if (compact) 14.dp else 18.dp,
+                ),
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Icons.Outlined.CalendarMonth, contentDescription = null)
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium,
+                style = if (compact) {
+                    MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp)
+                } else {
+                    MaterialTheme.typography.titleMedium
+                },
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
