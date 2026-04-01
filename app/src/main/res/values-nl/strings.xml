@@ -154,7 +154,16 @@
     <string name="settings_currency_invalid_code">Voer een geldige ISO-valutacode in, bijvoorbeeld EUR of USD.</string>
     <string name="settings_language_title">Taal</string>
     <string name="settings_language_subtitle">Apptaal: %1$s</string>
-    <string name="settings_language_screen_message">Kies de taal die in de app wordt gebruikt. De geselecteerde taal staat bovenaan de lijst.</string>
+    <string name="settings_language_screen_message">Kies de taal die in de app wordt gebruikt. De actieve keuze wordt in de lijst gemarkeerd.</string>
+    <string name="settings_theme_title">Thema</string>
+    <string name="settings_theme_subtitle">Appthema: %1$s</string>
+    <string name="settings_theme_screen_message">Kies hoe de app eruit moet zien. De actieve keuze wordt in de lijst gemarkeerd.</string>
+    <string name="settings_theme_option_light">Licht</string>
+    <string name="settings_theme_option_light_description">Altijd het lichte uiterlijk gebruiken</string>
+    <string name="settings_theme_option_dark">Donker</string>
+    <string name="settings_theme_option_dark_description">Altijd het donkere uiterlijk gebruiken</string>
+    <string name="settings_theme_option_system">Systeem</string>
+    <string name="settings_theme_option_system_description">De apparaatinstelling volgen</string>
     <string name="settings_members_title">Huishoudleden</string>
     <string name="settings_members_subtitle">Deel huishoudtoegang en beheer uitnodigingen</string>
     <string name="settings_categories_title">Categorieën</string>

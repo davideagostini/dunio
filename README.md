@@ -105,6 +105,7 @@ Each household uses one shared currency configured from Settings. The app does n
 
 - household currency
 - app language selection
+- app theme selection
 - category management
 - recurring transactions
 - month close
@@ -115,6 +116,8 @@ Each household uses one shared currency configured from Settings. The app does n
 The household currency is changed from a dedicated searchable settings screen, and the selected currency is surfaced at the top of the list.
 
 The app also includes a dedicated language selection screen in Settings. The currently selected language is pinned to the top of the list and the remaining supported languages are sorted alphabetically using the same list style as the currency screen.
+
+The app theme is also changed from a dedicated Settings screen using the same list treatment as language selection. Users can choose `Light`, `Dark`, or `System`, and the selected theme is pinned to the top of the list and persisted across launches.
 
 Current app-language support includes:
 
@@ -385,12 +388,16 @@ git rm --cached app/google-services.json
 
 ## Roadmap ideas
 
+- user feedback mechanism
+- dynamic walkthrough for new users
+- transaction statistics and spending-by-category chart in the transactions screen
+- reports and summaries
+- notifications and reminders
+- import / export data
+- better backup and migration flows
 - improved home-screen widgets
 - Wear OS support
 - AI-powered finance features
-- import / export data
-- notifications and reminders
-- better backup and migration flows
 
 ## Support the project
 

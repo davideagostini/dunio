@@ -267,6 +267,18 @@ Responsibility:
 - keep the remaining languages sorted alphabetically
 - switch the app locale through Android per-app language APIs
 
+### `ui/settings/theme`
+
+Dedicated app-theme selection screen inside Settings.
+
+Responsibility:
+
+- list the three supported app themes using the same list style as the currency and language screens
+- keep the currently selected theme pinned to the top
+- keep the remaining theme options sorted alphabetically
+- persist the app theme as `light`, `dark`, or `system`
+- apply the saved preference through Android night-mode APIs before the Compose tree is rendered
+
 ### `ui/entry`
 
 Dedicated quick-entry flow for creating a new transaction.
@@ -482,6 +494,17 @@ The existing mobile app already covers the main household finance flows:
 - home-screen widgets
 
 So `project_overview.md` should be read as documentation of an already fairly broad product surface, not as a greenfield starter skeleton.
+
+---
+
+## Suggested Next Features
+
+The following additions would improve product polish, onboarding, and feedback loops without changing the core household-finance scope:
+
+- add a theme toggle for `light` / `dark` / `system` mode and persist the user preference
+- provide a dynamic walkthrough for new users based on their current state, for example first sign-in, empty household, or partially configured setup
+- implement reports or summaries for monthly review, category spending, and higher-level household trends
+- add a user feedback mechanism so people can quickly send bug reports, improvement ideas, or general product feedback from inside the app
 
 ---
 

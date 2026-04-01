@@ -9,10 +9,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.edit
 import com.davideagostini.summ.tile.QuickEntryTileService
 import com.davideagostini.summ.ui.navigation.AppNavGraph
+import com.davideagostini.summ.ui.settings.theme.AppThemeManager
+import com.davideagostini.summ.ui.settings.theme.SupportedAppTheme
 import com.davideagostini.summ.ui.theme.SummTheme
 import com.davideagostini.summ.ui.theme.surfaceContainerDark
 import com.davideagostini.summ.ui.theme.surfaceContainerLight
@@ -20,6 +25,9 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.davideagostini.summ.ui.settings.language.AppLanguageManager.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +45,14 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         setContent {
-            SummTheme {
+            val themePreference by AppThemeManager.currentTheme.collectAsStateWithLifecycle()
+            val darkTheme = when (themePreference) {
+                SupportedAppTheme.LIGHT -> false
+                SupportedAppTheme.DARK -> true
+                SupportedAppTheme.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            SummTheme(darkTheme = darkTheme) {
                 AppNavGraph()
             }
         }

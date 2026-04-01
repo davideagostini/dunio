@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -44,11 +45,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.davideagostini.summ.BuildConfig
 import com.davideagostini.summ.R
@@ -56,6 +59,7 @@ import com.davideagostini.summ.ui.settings.components.SettingsInfoItem
 import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.settings.components.SettingsSectionLabel
 import com.davideagostini.summ.ui.settings.language.AppLanguageManager
+import com.davideagostini.summ.ui.settings.theme.AppThemeManager
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
 import kotlinx.coroutines.launch
@@ -65,6 +69,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     onNavigateCurrency: () -> Unit,
     onNavigateLanguage: () -> Unit,
+    onNavigateTheme: () -> Unit,
     onNavigateCategories: () -> Unit,
     onNavigateMembers: () -> Unit,
     onNavigateRecurring: () -> Unit,
@@ -78,10 +83,18 @@ fun SettingsScreen(
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
     val clipboard = LocalClipboard.current
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val currentLanguageName = remember {
-        AppLanguageManager.displayName(AppLanguageManager.currentLanguage().tag)
-    }
+    val currentLanguage by AppLanguageManager.currentLanguage.collectAsStateWithLifecycle()
+    val currentLanguageName = AppLanguageManager.displayName(currentLanguage.tag)
+    val currentTheme by AppThemeManager.currentTheme.collectAsStateWithLifecycle()
+    val currentThemeName = stringResource(
+        when (currentTheme) {
+            com.davideagostini.summ.ui.settings.theme.SupportedAppTheme.LIGHT -> R.string.settings_theme_option_light
+            com.davideagostini.summ.ui.settings.theme.SupportedAppTheme.DARK -> R.string.settings_theme_option_dark
+            com.davideagostini.summ.ui.settings.theme.SupportedAppTheme.SYSTEM -> R.string.settings_theme_option_system
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -139,6 +152,15 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_language_title),
                     subtitle = stringResource(R.string.settings_language_subtitle, currentLanguageName),
                     onClick = onNavigateLanguage,
+                )
+            }
+
+            item {
+                SettingsNavItem(
+                    icon = Icons.Default.DarkMode,
+                    title = stringResource(R.string.settings_theme_title),
+                    subtitle = stringResource(R.string.settings_theme_subtitle, currentThemeName),
+                    onClick = onNavigateTheme,
                 )
             }
 

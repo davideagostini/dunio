@@ -154,7 +154,16 @@
     <string name="settings_currency_invalid_code">Inserisci un codice valuta ISO valido, ad esempio EUR o USD.</string>
     <string name="settings_language_title">Lingua</string>
     <string name="settings_language_subtitle">Lingua app: %1$s</string>
-    <string name="settings_language_screen_message">Scegli la lingua usata nell’app. La lingua selezionata viene mostrata per prima nella lista.</string>
+    <string name="settings_language_screen_message">Scegli la lingua usata nell’app. La scelta attiva viene evidenziata nella lista.</string>
+    <string name="settings_theme_title">Tema</string>
+    <string name="settings_theme_subtitle">Tema app: %1$s</string>
+    <string name="settings_theme_screen_message">Scegli come deve apparire l’app. La scelta attiva viene evidenziata nella lista.</string>
+    <string name="settings_theme_option_light">Chiaro</string>
+    <string name="settings_theme_option_light_description">Usa sempre l’aspetto chiaro</string>
+    <string name="settings_theme_option_dark">Scuro</string>
+    <string name="settings_theme_option_dark_description">Usa sempre l’aspetto scuro</string>
+    <string name="settings_theme_option_system">Sistema</string>
+    <string name="settings_theme_option_system_description">Segui l’impostazione del dispositivo</string>
     <string name="settings_members_title">Membri del nucleo familiare</string>
     <string name="settings_members_subtitle">Condividi l’accesso all’household e gestisci gli inviti</string>
     <string name="settings_categories_title">Categorie</string>

@@ -40,7 +40,10 @@ Use this checklist before publishing the first public GitHub release or Play Con
 - [ ] assets CRUD works
 - [ ] household currency can be changed from Settings
 - [ ] app language can be changed from Settings
+- [ ] app theme can be changed from Settings
 - [ ] selected app language is pinned to the top of the language list
+- [ ] selected app theme is pinned to the top of the theme list
+- [ ] light / dark / system theme preference persists across app relaunch
 - [ ] currency search works and keeps the selected currency at the top
 - [ ] core screens show the expected localized strings for supported languages
 - [ ] dashboard, entries, assets, recurring, and widgets reflect the selected household currency

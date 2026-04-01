@@ -154,7 +154,16 @@
     <string name="settings_currency_invalid_code">Введите корректный ISO-код валюты, например EUR или USD.</string>
     <string name="settings_language_title">Язык</string>
     <string name="settings_language_subtitle">Язык приложения: %1$s</string>
-    <string name="settings_language_screen_message">Выберите язык приложения. Выбранный язык показывается первым в списке.</string>
+    <string name="settings_language_screen_message">Выберите язык приложения. Активный язык выделяется в списке.</string>
+    <string name="settings_theme_title">Тема</string>
+    <string name="settings_theme_subtitle">Тема приложения: %1$s</string>
+    <string name="settings_theme_screen_message">Выберите внешний вид приложения. Активная тема выделяется в списке.</string>
+    <string name="settings_theme_option_light">Светлая</string>
+    <string name="settings_theme_option_light_description">Всегда использовать светлое оформление</string>
+    <string name="settings_theme_option_dark">Тёмная</string>
+    <string name="settings_theme_option_dark_description">Всегда использовать тёмное оформление</string>
+    <string name="settings_theme_option_system">Система</string>
+    <string name="settings_theme_option_system_description">Следовать настройке устройства</string>
     <string name="settings_members_title">Участники household</string>
     <string name="settings_members_subtitle">Делитесь доступом к household и управляйте приглашениями</string>
     <string name="settings_categories_title">Категории</string>

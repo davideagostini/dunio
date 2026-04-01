@@ -66,6 +66,7 @@ import com.davideagostini.summ.ui.settings.language.LanguageScreen
 import com.davideagostini.summ.ui.settings.members.MembersScreen
 import com.davideagostini.summ.ui.settings.monthclose.MonthCloseScreen
 import com.davideagostini.summ.ui.settings.recurring.RecurringScreen
+import com.davideagostini.summ.ui.settings.theme.ThemeScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +138,7 @@ fun AppNavGraph(
                 SettingsScreen(
                     onNavigateCurrency = { navigate("currency") },
                     onNavigateLanguage = { navigate("language") },
+                    onNavigateTheme = { navigate("theme") },
                     onNavigateCategories = { navigate("categories") },
                     onNavigateMembers = { navigate("members") },
                     onNavigateRecurring = { navigate("recurring") },
@@ -161,6 +163,11 @@ fun AppNavGraph(
             }
             composable("language") {
                 LanguageScreen(
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("theme") {
+                ThemeScreen(
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -190,6 +197,7 @@ fun AppNavGraph(
         if (currentRoute != "categories" &&
             currentRoute != "currency" &&
             currentRoute != "language" &&
+            currentRoute != "theme" &&
             currentRoute != "members" &&
             currentRoute != "recurring" &&
             currentRoute != "month-close" &&
@@ -342,14 +350,9 @@ private fun NavTab(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ),
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
         ) {
             Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
-            Text(
-                label,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(start = 6.dp)
-            )
         }
     } else {
         IconButton(onClick = onClick) {

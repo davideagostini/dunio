@@ -154,7 +154,16 @@
     <string name="settings_currency_invalid_code">请输入有效的 ISO 货币代码，例如 EUR 或 USD。</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_subtitle">应用语言：%1$s</string>
-    <string name="settings_language_screen_message">选择应用中使用的语言。当前所选语言会显示在列表顶部。</string>
+    <string name="settings_language_screen_message">选择应用中使用的语言。当前选项会在列表中高亮显示。</string>
+    <string name="settings_theme_title">主题</string>
+    <string name="settings_theme_subtitle">应用主题：%1$s</string>
+    <string name="settings_theme_screen_message">选择应用的显示方式。当前选项会在列表中高亮显示。</string>
+    <string name="settings_theme_option_light">浅色</string>
+    <string name="settings_theme_option_light_description">始终使用浅色外观</string>
+    <string name="settings_theme_option_dark">深色</string>
+    <string name="settings_theme_option_dark_description">始终使用深色外观</string>
+    <string name="settings_theme_option_system">系统</string>
+    <string name="settings_theme_option_system_description">跟随设备设置</string>
     <string name="settings_members_title">household 成员</string>
     <string name="settings_members_subtitle">共享 household 访问权限并管理邀请</string>
     <string name="settings_categories_title">分类</string>

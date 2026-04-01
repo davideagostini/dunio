@@ -154,7 +154,16 @@
     <string name="settings_currency_invalid_code">أدخل رمز عملة ISO صالحًا، مثل EUR أو USD.</string>
     <string name="settings_language_title">اللغة</string>
     <string name="settings_language_subtitle">لغة التطبيق: %1$s</string>
-    <string name="settings_language_screen_message">اختر اللغة المستخدمة في التطبيق. تظهر اللغة المحددة أولاً في القائمة.</string>
+    <string name="settings_language_screen_message">اختر اللغة المستخدمة في التطبيق. يتم تمييز الخيار النشط داخل القائمة.</string>
+    <string name="settings_theme_title">المظهر</string>
+    <string name="settings_theme_subtitle">مظهر التطبيق: %1$s</string>
+    <string name="settings_theme_screen_message">اختر كيف يجب أن يظهر التطبيق. يتم تمييز الخيار النشط داخل القائمة.</string>
+    <string name="settings_theme_option_light">فاتح</string>
+    <string name="settings_theme_option_light_description">استخدم المظهر الفاتح دائمًا</string>
+    <string name="settings_theme_option_dark">داكن</string>
+    <string name="settings_theme_option_dark_description">استخدم المظهر الداكن دائمًا</string>
+    <string name="settings_theme_option_system">النظام</string>
+    <string name="settings_theme_option_system_description">اتّبع إعداد الجهاز</string>
     <string name="settings_members_title">أعضاء household</string>
     <string name="settings_members_subtitle">شارك الوصول إلى household وأدر الدعوات</string>
     <string name="settings_categories_title">الفئات</string>

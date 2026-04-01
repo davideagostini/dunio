@@ -1,8 +1,5 @@
-package com.davideagostini.summ.ui.settings.language
+package com.davideagostini.summ.ui.settings.theme
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,8 +15,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,12 +46,12 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LanguageScreen(
+fun ThemeScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val selectedLanguage by AppLanguageManager.currentLanguage.collectAsStateWithLifecycle()
-    val orderedOptions = AppLanguageManager.supportedLanguages
+    val selectedTheme by AppThemeManager.currentTheme.collectAsStateWithLifecycle()
+    val orderedOptions = AppThemeManager.supportedThemes
 
     Column(
         modifier = Modifier
@@ -61,7 +61,7 @@ fun LanguageScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = stringResource(R.string.settings_language_title),
+                    text = stringResource(R.string.settings_theme_title),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -77,7 +77,7 @@ fun LanguageScreen(
             colors = SummColors.topBarColors,
         )
 
-        LanguageHeaderSection()
+        ThemeHeaderSection()
 
         LazyColumn(
             modifier = Modifier
@@ -86,16 +86,13 @@ fun LanguageScreen(
             contentPadding = PaddingValues(bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
-            itemsIndexed(orderedOptions, key = { _, option -> option.tag }) { index, option ->
-                LanguageListItem(
+            itemsIndexed(orderedOptions, key = { _, option -> option.key }) { index, option ->
+                ThemeListItem(
                     option = option,
                     index = index,
                     count = orderedOptions.size,
-                    isSelected = option.tag == selectedLanguage.tag,
-                    onClick = {
-                        AppLanguageManager.setLanguage(context, option.tag)
-                        context.findActivity()?.recreate()
-                    },
+                    isSelected = option == selectedTheme,
+                    onClick = { AppThemeManager.setTheme(context, option) },
                 )
             }
         }
@@ -103,7 +100,7 @@ fun LanguageScreen(
 }
 
 @Composable
-private fun LanguageHeaderSection() {
+private fun ThemeHeaderSection() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,7 +110,7 @@ private fun LanguageHeaderSection() {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Text(
-            text = stringResource(R.string.settings_language_screen_message),
+            text = stringResource(R.string.settings_theme_screen_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(16.dp),
@@ -122,14 +119,13 @@ private fun LanguageHeaderSection() {
 }
 
 @Composable
-private fun LanguageListItem(
-    option: SupportedAppLanguage,
+private fun ThemeListItem(
+    option: SupportedAppTheme,
     index: Int,
     count: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val displayLocale = Locale.getDefault()
     val shape = listItemShape(index, count)
     val verticalPadding = when {
         count == 1 -> PaddingValues(horizontal = 16.dp, vertical = 4.dp)
@@ -137,9 +133,6 @@ private fun LanguageListItem(
         index == count - 1 -> PaddingValues(start = 16.dp, end = 16.dp, top = 1.dp, bottom = 4.dp)
         else -> PaddingValues(horizontal = 16.dp, vertical = 1.dp)
     }
-
-    val displayName = AppLanguageManager.displayName(option.tag, displayLocale)
-    val nativeName = AppLanguageManager.nativeDisplayName(option.tag)
 
     Card(
         modifier = Modifier
@@ -168,7 +161,7 @@ private fun LanguageListItem(
                 },
             ) {
                 Icon(
-                    imageVector = Icons.Default.Language,
+                    imageVector = option.icon(),
                     contentDescription = null,
                     tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -179,7 +172,7 @@ private fun LanguageListItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = displayName,
+                    text = option.label(),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
@@ -187,7 +180,7 @@ private fun LanguageListItem(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = nativeName,
+                    text = option.description(),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isSelected) {
                         MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
@@ -211,8 +204,26 @@ private fun LanguageListItem(
     }
 }
 
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+@Composable
+private fun SupportedAppTheme.label(): String = stringResource(
+    when (this) {
+        SupportedAppTheme.LIGHT -> R.string.settings_theme_option_light
+        SupportedAppTheme.DARK -> R.string.settings_theme_option_dark
+        SupportedAppTheme.SYSTEM -> R.string.settings_theme_option_system
+    }
+)
+
+@Composable
+private fun SupportedAppTheme.description(): String = stringResource(
+    when (this) {
+        SupportedAppTheme.LIGHT -> R.string.settings_theme_option_light_description
+        SupportedAppTheme.DARK -> R.string.settings_theme_option_dark_description
+        SupportedAppTheme.SYSTEM -> R.string.settings_theme_option_system_description
+    }
+)
+
+private fun SupportedAppTheme.icon(): ImageVector = when (this) {
+    SupportedAppTheme.LIGHT -> Icons.Default.LightMode
+    SupportedAppTheme.DARK -> Icons.Default.DarkMode
+    SupportedAppTheme.SYSTEM -> Icons.Default.BrightnessAuto
 }

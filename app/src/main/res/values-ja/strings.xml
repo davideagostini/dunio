@@ -154,7 +154,16 @@
     <string name="settings_currency_invalid_code">EUR や USD のような有効な ISO 通貨コードを入力してください。</string>
     <string name="settings_language_title">言語</string>
     <string name="settings_language_subtitle">アプリの言語: %1$s</string>
-    <string name="settings_language_screen_message">アプリで使用する言語を選択します。選択中の言語は一覧の先頭に表示されます。</string>
+    <string name="settings_language_screen_message">アプリで使用する言語を選択します。現在の選択は一覧内で強調表示されます。</string>
+    <string name="settings_theme_title">テーマ</string>
+    <string name="settings_theme_subtitle">アプリのテーマ: %1$s</string>
+    <string name="settings_theme_screen_message">アプリの見た目を選択します。現在の選択は一覧内で強調表示されます。</string>
+    <string name="settings_theme_option_light">ライト</string>
+    <string name="settings_theme_option_light_description">常にライト表示を使用します</string>
+    <string name="settings_theme_option_dark">ダーク</string>
+    <string name="settings_theme_option_dark_description">常にダーク表示を使用します</string>
+    <string name="settings_theme_option_system">システム</string>
+    <string name="settings_theme_option_system_description">端末の設定に従います</string>
     <string name="settings_members_title">household メンバー</string>
     <string name="settings_members_subtitle">household へのアクセス共有と招待の管理</string>
     <string name="settings_categories_title">カテゴリ</string>
