@@ -408,7 +408,7 @@ private fun requestQuickSettingsTile(context: Context) {
     statusBarManager.requestAddTileService(
         ComponentName(context, QuickEntryTileService::class.java),
         context.getString(R.string.tile_label),
-        Icon.createWithResource(context, R.drawable.ic_wallet),
+        Icon.createWithResource(context, R.drawable.ic_wallet_qs),
         context.mainExecutor,
         { result ->
             val message = when (result) {

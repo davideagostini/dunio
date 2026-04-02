@@ -41,7 +41,7 @@ class QuickEntryTileService : TileService() {
     @RequiresApi(Build.VERSION_CODES.R)
     private fun updateTile() {
         val tile = qsTile ?: return
-        tile.icon = Icon.createWithResource(this, R.drawable.ic_wallet)
+        tile.icon = Icon.createWithResource(this, R.drawable.ic_wallet_qs)
         tile.label = getString(R.string.tile_label)
         tile.subtitle = getString(R.string.tile_subtitle)
         tile.stateDescription = getString(R.string.tile_subtitle)
