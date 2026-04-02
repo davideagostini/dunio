@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="site/assets/cover.png" alt="Track new worth in one place">
+  <img src="site/assets/cover.png?v=20260402-1" alt="Track net worth in one place">
 </div>
 
 <div id="user-content-toc">
