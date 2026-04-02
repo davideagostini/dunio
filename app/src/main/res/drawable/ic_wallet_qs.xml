@@ -9,10 +9,13 @@
         android:pivotY="512"
         android:scaleX="1.34"
         android:scaleY="1.34">
+
+        <clip-path android:pathData="M0,0h1024v1024h-1024z" />
+
         <path
-            android:fillColor="#FFFFFF"
-            android:fillType="evenOdd"
-            android:pathData="M372,192H652C760,192 832,264 832,372V652C832,760 760,832 652,832H372C264,832 192,760 192,652V372C192,264 264,192 372,192ZM420,360C370,412 370,612 420,664L512,664L512,360ZM604,360C654,412 654,612 604,664L512,664L512,360Z" />
+            android:fillColor="#ffffff"
+            android:pathData="M652,192C751.4,192 832,272.6 832,372V652C832,751.4 751.4,832 652,832H372C272.6,832 192,751.4 192,652V372C192,272.6 272.6,192 372,192H652ZM400,360C340,420 340,604 400,664H624C684,604 684,420 624,360H400Z" />
+
     </group>
 
 </vector>
