@@ -15,6 +15,7 @@ import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
@@ -47,17 +48,19 @@ class QuickAccessWidget : GlanceAppWidget() {
                         .cornerRadius(28.dp)
                         .background(ColorProvider(androidx.compose.ui.graphics.Color.White, surfaceContainerLowDark))
                         .clickable(quickEntryAction(context))
-                        .padding(horizontal = 6.dp, vertical = 6.dp),
+                        .padding(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Spacer(modifier = GlanceModifier.height(4.dp))
                     // Reuse the official app icon so the widget stays visually aligned
                     // with both the launcher icon and the Quick Settings tile.
                     Image(
                         provider = ImageProvider(R.drawable.ic_launcher_foreground),
                         contentDescription = context.getString(R.string.widget_quick_access_name),
-                        modifier = GlanceModifier.width(60.dp).height(60.dp),
+                        modifier = GlanceModifier.width(72.dp).height(72.dp),
                     )
+                    Spacer(modifier = GlanceModifier.height(4.dp))
                 }
             }
         }

@@ -44,7 +44,7 @@
 
         <receiver
             android:name=".widget.QuickAccessWidgetReceiver"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/widget_quick_access_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -57,7 +57,7 @@
 
         <receiver
             android:name=".widget.SpendingSummaryWidgetReceiver"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/widget_spending_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
