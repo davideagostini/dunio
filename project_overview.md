@@ -247,6 +247,8 @@ Responsibility:
 
 - list and group entries by day
 - search/filter by month and entry type
+- query only the selected month for the main list and reports
+- query only a short rolling window for unusual spending insights
 - view/edit/delete existing entries
 - show unusual spending insights and monthly balance summary
 - render amounts using the household currency from session state
@@ -318,6 +320,17 @@ Responsibility:
 - export entries as CSV
 - export asset history as CSV
 - delegate file destination and permissions to the Android system document picker
+
+### `ui/settings/monthclose`
+
+Month close review and read-only period handling.
+
+Responsibility:
+
+- review one month at a time instead of loading the full ledger/history
+- count selected-month asset snapshots and transactions
+- flag missing recurring transactions for the selected month
+- persist the close status used by dashboard, assets, and entries read-only states
 
 ### `ui/entry`
 

@@ -18,6 +18,13 @@ class EntryRepository @Inject constructor(
     val allEntries: Flow<List<Entry>> = entryDao.getAllEntries()
     val balance: Flow<Double> = entryDao.getBalance()
 
+    fun observeEntriesForMonth(period: String): Flow<List<Entry>> = entryDao.getEntriesForMonth(period)
+
+    fun observeEntriesBetween(startDate: String, endExclusiveDate: String): Flow<List<Entry>> =
+        entryDao.getEntriesBetween(startDate, endExclusiveDate)
+
+    fun observeHasAnyEntries(): Flow<Boolean> = entryDao.getHasAnyEntries()
+
     // Entry mutations are the main source of truth for the spending widget,
     // so we refresh widgets immediately after every successful write.
     suspend fun insert(entry: Entry) {

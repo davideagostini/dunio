@@ -49,10 +49,12 @@ Esito:
 **5. Entries / transactions**
 
 - month picker mostra i dati del mese corretto
+- cambio mese non scarica o ricalcola l'intero storico percepibilmente
 - filtro `All / Expenses / Income`
 - search su descrizione/categoria
 - grouping per giorno corretto
 - unusual spending insight ancora coerente
+- report categoria coerente con il solo mese selezionato
 - edit entry funziona
 - delete entry funziona
 - success state e dismiss sheet corretti
@@ -85,6 +87,7 @@ Esito:
 **8. Month close**
 
 - chiusura mese consentita
+- cambio mese resta fluido anche con storico lungo
 - mese chiuso blocca edit su entries
 - mese chiuso blocca edit su assets
 - riapertura mese, se prevista dal flusso, funziona
@@ -95,6 +98,7 @@ Esito:
 - Quick Entry flow salva correttamente
 - widget quick entry apre il flow
 - spending summary widget mostra dati coerenti
+- spending summary widget continua ad aggiornarsi dopo insert/update/delete entry
 - widget non crasha con utente signed out / senza household
 
 **10. Regressioni tecniche minime**

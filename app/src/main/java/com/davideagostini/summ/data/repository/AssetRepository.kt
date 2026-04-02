@@ -12,6 +12,8 @@ class AssetRepository @Inject constructor(
     private val assetDao: AssetDao,
 ) {
     val allAssetHistory: Flow<List<AssetHistoryEntry>> = assetDao.getAllAssetHistory()
+    fun observeAssetHistoryForMonth(period: String): Flow<List<AssetHistoryEntry>> =
+        assetDao.getAssetHistoryForMonth(period)
 
     suspend fun insert(asset: Asset) = assetDao.insert(asset)
     suspend fun update(asset: Asset) = assetDao.update(asset)

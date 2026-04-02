@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -114,9 +115,78 @@ class EntryDao @Inject constructor(
         }
     }
 
+    fun getEntriesForMonth(period: String): Flow<List<Entry>> {
+        val db = firestore ?: return flowOf(emptyList())
+        val startDate = "$period-01"
+        val endExclusiveDate = YearMonth.parse(period).plusMonths(1).atDay(1).toString()
+        return observeEntriesBetween(db, startDate, endExclusiveDate)
+    }
+
+    fun getEntriesBetween(startDate: String, endExclusiveDate: String): Flow<List<Entry>> {
+        val db = firestore ?: return flowOf(emptyList())
+        return observeEntriesBetween(db, startDate, endExclusiveDate)
+    }
+
+    fun getHasAnyEntries(): Flow<Boolean> {
+        val db = firestore ?: return flowOf(false)
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(false)
+            } else {
+                val householdId = readyState.household.id
+                firestoreFlow<Boolean> { emit ->
+                    db.collection(FirestorePaths.transactions(householdId))
+                        .limit(1)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(Result.success(!snapshot.isEmpty))
+                            }
+                        }
+                }.map { result -> result.getOrElse { false } }
+            }
+        }
+    }
+
     fun getBalance(): Flow<Double> =
         getAllEntries().map { entries ->
             entries.sumOf { entry -> if (entry.type == "income") entry.price else -entry.price }
+        }
+
+    private fun observeEntriesBetween(
+        db: FirebaseFirestore,
+        startDate: String,
+        endExclusiveDate: String,
+    ): Flow<List<Entry>> =
+        sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(emptyList())
+            } else {
+                val householdId = readyState.household.id
+                firestoreFlow<List<Entry>> { emit ->
+                    db.collection(FirestorePaths.transactions(householdId))
+                        .whereGreaterThanOrEqualTo("date", startDate)
+                        .whereLessThan("date", endExclusiveDate)
+                        .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(
+                                    Result.success(
+                                        snapshot.documents.mapNotNull { document ->
+                                            document.toObject(TransactionDocument::class.java)?.toEntry(
+                                                id = document.id,
+                                                householdId = householdId,
+                                            )
+                                        },
+                                    ),
+                                )
+                            }
+                        }
+                }.map { result -> result.getOrElse { emptyList() } }
+            }
         }
 
     private fun TransactionDocument.toEntry(id: String, householdId: String): Entry =

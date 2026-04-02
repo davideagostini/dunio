@@ -85,6 +85,7 @@ Each household uses one shared currency configured from Settings. The app does n
 ### Entries
 
 - monthly transaction list
+- Firestore reads scoped to the selected month instead of the full household history
 - grouped by day
 - search
 - entries / reports toggle in the toolbar
@@ -93,6 +94,8 @@ Each household uses one shared currency configured from Settings. The app does n
 - category spending report with a horizontal bar chart plus totals, averages, percentages, and transaction counts
 - entry edit and delete flow
 - quick-entry flow
+
+The entries screen now keeps the list and category reports month-scoped, while unusual-spending insights read only a small rolling window around the selected month instead of the full transaction archive.
 
 ### Assets
 
@@ -126,6 +129,8 @@ The app theme is also changed from a dedicated Settings screen using the same li
 The app also includes a dedicated export screen in Settings. It can export the current household as a full JSON backup, plus entries and assets as CSV files through the Android system document picker.
 
 Recurring transactions can also be auto-applied on app startup. Once per day, after the session is ready, the app checks whether the current household has due recurring items for the current month and materializes them into the entries list without requiring a manual `Apply due` tap.
+
+The month-close screen now reads only the selected month's entries and asset snapshots instead of loading the full transaction and asset history.
 
 Current app-language support includes:
 

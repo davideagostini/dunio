@@ -133,6 +133,35 @@ class AssetDao @Inject constructor(
         }
     }
 
+    fun getAssetHistoryForMonth(period: String): Flow<List<AssetHistoryEntry>> {
+        val db = firestore ?: return flowOf(emptyList())
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(emptyList())
+            } else {
+                val householdId = readyState.household.id
+                firestoreFlow<List<AssetHistoryEntry>> { emit ->
+                    db.collectionGroup("history")
+                        .whereEqualTo("householdId", householdId)
+                        .whereEqualTo("period", period)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(
+                                    Result.success(
+                                        snapshot.documents.mapNotNull { document ->
+                                            document.toObject(AssetHistoryDocument::class.java)?.toHistoryEntry(document.id)
+                                        },
+                                    ),
+                                )
+                            }
+                        }
+                }.map { result -> result.getOrElse { emptyList() } }
+            }
+        }
+    }
+
     private suspend fun upsertAssetSnapshot(
         db: FirebaseFirestore,
         householdId: String,

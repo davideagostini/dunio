@@ -13,10 +13,12 @@ import com.davideagostini.summ.data.repository.MonthCloseRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,6 +26,7 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class MonthCloseViewModel @Inject constructor(
     @param:ApplicationContext
     private val appContext: Context,
@@ -32,15 +35,21 @@ class MonthCloseViewModel @Inject constructor(
     recurringRepository: RecurringTransactionRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
+    private val defaultSelectedMonth = YearMonth.now().toString()
     private val historyLoaded = MutableStateFlow(false)
     private val entriesLoaded = MutableStateFlow(false)
     private val recurringLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
+    private val selectedMonth = MutableStateFlow(defaultSelectedMonth)
 
-    private val assetHistory = assetRepository.allAssetHistory
+    private val assetHistory = selectedMonth.flatMapLatest { month ->
+        assetRepository.observeAssetHistoryForMonth(month)
+    }
         .onEach { historyLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-    private val entries = entryRepository.allEntries
+    private val entries = selectedMonth.flatMapLatest { month ->
+        entryRepository.observeEntriesForMonth(month)
+    }
         .onEach { entriesLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     private val recurringTransactions = recurringRepository.allRecurringTransactions
@@ -54,8 +63,6 @@ class MonthCloseViewModel @Inject constructor(
         !a || !b || !c || !d
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    private val selectedMonth = MutableStateFlow(YearMonth.now().toString())
-
     val uiState: StateFlow<MonthCloseUiState> = combine(
         selectedMonth, assetHistory, entries, recurringTransactions, monthCloses
     ) { month, history, transactions, recurring, closes ->
@@ -66,7 +73,7 @@ class MonthCloseViewModel @Inject constructor(
             .filter { it.startDate.take(7) <= month }
             .filter { recurringEntry ->
                 val dueDate = getDueDateForMonth(month, recurringEntry.dayOfMonth)
-                transactions.none { transaction ->
+                monthTransactions.none { transaction ->
                     transaction.recurringTransactionId == recurringEntry.id &&
                         transaction.date.toLocalDateString() == dueDate
                 }
@@ -75,7 +82,11 @@ class MonthCloseViewModel @Inject constructor(
 
         MonthCloseUiState(
             month = month,
-            monthOptions = buildMonthOptions(history, transactions, recurring, month),
+            monthOptions = buildMonthOptions(
+                recurring = recurring,
+                monthCloses = closes,
+                selectedMonth = month,
+            ),
             status = existingClose?.status ?: "draft",
             assetSnapshotCount = monthAssets.size,
             transactionCount = monthTransactions.size,
@@ -108,15 +119,14 @@ class MonthCloseViewModel @Inject constructor(
 }
 
 private fun buildMonthOptions(
-    assetHistory: List<AssetHistoryEntry>,
-    entries: List<Entry>,
     recurring: List<RecurringTransaction>,
+    monthCloses: List<com.davideagostini.summ.data.entity.MonthClose>,
     selectedMonth: String,
 ): List<String> {
     val months = mutableSetOf<String>()
-    months += assetHistory.map { it.period }
-    months += entries.map { it.period.ifBlank { it.date.toMonthKey() } }
     months += recurring.map { it.startDate.take(7) }
+    months += monthCloses.map { it.period }
+    months += selectedMonth
     val current = YearMonth.parse(selectedMonth)
     repeat(12) { index -> months += current.minusMonths(index.toLong()).toString() }
     return months.filter { it.isNotBlank() }.sortedDescending()
