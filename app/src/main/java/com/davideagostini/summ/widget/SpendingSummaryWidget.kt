@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
@@ -34,7 +33,6 @@ import com.davideagostini.summ.widget.data.SpendingSummaryWidgetDataSource
 import com.davideagostini.summ.widget.model.SpendingDeltaTone
 import com.davideagostini.summ.widget.model.SpendingSummaryWidgetState
 import com.davideagostini.summ.widget.model.SpendingWidgetPresentation
-import com.davideagostini.summ.widget.model.WidgetLayoutSpec
 
 private val positiveDeltaColor = ColorProvider(primaryLight, primaryDark)
 private val negativeDeltaColor = ColorProvider(errorLight, errorDark)
@@ -44,10 +42,9 @@ private val neutralTextColor = ColorProvider(onSurfaceLight, onSurfaceDark)
 // The widget is intentionally limited to a few dense metrics so it stays legible
 // at common launcher sizes and refreshes quickly after entry updates.
 class SpendingSummaryWidget : GlanceAppWidget() {
-    // We provide a small set of stable widget sizes instead of a fully fluid layout.
-    // This keeps the Glance implementation predictable across launchers while still
-    // letting us tailor the content density.
-    override val sizeMode = SizeMode.Responsive(WidgetLayoutSpec.spendingSizes)
+    // Samsung launchers are more reliable with a single stable layout than with a
+    // responsive Glance widget that negotiates multiple size buckets.
+    override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         // Load data before composition so the widget body stays a pure state -> UI mapping.
@@ -95,17 +92,6 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                             "${context.getString(R.string.widget_spending_today)} ${formatCurrency(state.todayAmount, state.currency)}",
                             "${context.getString(R.string.widget_spending_week)} ${formatCurrency(state.weekAmount, state.currency)}",
                         )
-                        val widgetSize = LocalSize.current
-                        // The runtime variant is derived from the actual launcher-reported
-                        // size so the widget can degrade gracefully when first inserted or
-                        // when the user resizes it.
-                        val variant = WidgetLayoutSpec.spendingVariant(
-                            width = widgetSize.width,
-                            height = widgetSize.height,
-                        )
-                        val isSmall = variant == com.davideagostini.summ.widget.model.SpendingWidgetVariant.Small
-                        val isLarge = variant == com.davideagostini.summ.widget.model.SpendingWidgetVariant.Large
-
                         Column(modifier = GlanceModifier.fillMaxWidth()) {
                             Text(
                                 text = context.getString(R.string.widget_spending_this_month),
@@ -119,7 +105,7 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                                 text = formatCurrency(state.monthAmount, state.currency),
                                 style = TextStyle(
                                     color = neutralTextColor,
-                                    fontSize = if (isSmall) 26.sp else 28.sp,
+                                    fontSize = 28.sp,
                                     fontWeight = FontWeight.Bold,
                                 ),
                             )
@@ -140,19 +126,14 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                                     ),
                                 )
                             }
-                            if (isLarge) {
-                                // Secondary breakdown is reserved for the largest size.
-                                // This avoids the first-insert clipping issue seen on some
-                                // launchers when they initially report an optimistic height.
-                                Spacer(modifier = GlanceModifier.height(8.dp))
-                                Text(
-                                    text = secondaryLine,
-                                    style = TextStyle(
-                                        color = neutralTextColor,
-                                        fontSize = 12.sp,
-                                    ),
-                                )
-                            }
+                            Spacer(modifier = GlanceModifier.height(8.dp))
+                            Text(
+                                text = secondaryLine,
+                                style = TextStyle(
+                                    color = neutralTextColor,
+                                    fontSize = 12.sp,
+                                ),
+                            )
                         }
                     }
                 }
