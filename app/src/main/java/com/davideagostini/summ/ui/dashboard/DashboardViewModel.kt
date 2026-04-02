@@ -3,10 +3,8 @@ package com.davideagostini.summ.ui.dashboard
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.davideagostini.summ.data.entity.AssetHistoryEntry
-import com.davideagostini.summ.data.entity.Entry
-import com.davideagostini.summ.data.repository.AssetRepository
-import com.davideagostini.summ.data.repository.EntryRepository
+import com.davideagostini.summ.data.entity.DashboardMonthlySummary
+import com.davideagostini.summ.data.repository.DashboardMonthlyRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,120 +14,195 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class DashboardViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
-    assetRepository: AssetRepository,
-    entryRepository: EntryRepository,
+    dashboardMonthlyRepository: DashboardMonthlyRepository,
     sessionRepository: SessionRepository,
 ) : ViewModel() {
-    private val historyLoaded = MutableStateFlow(false)
-    private val entriesLoaded = MutableStateFlow(false)
+    private val latestSummaryLoaded = MutableStateFlow(false)
+    private val windowLoaded = MutableStateFlow(false)
+    private val hasTransactionsLoaded = MutableStateFlow(false)
+    private val hasAssetsLoaded = MutableStateFlow(false)
 
-    private val assetHistory: StateFlow<List<AssetHistoryEntry>> = assetRepository.allAssetHistory
-        .onEach { historyLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    private val latestSummary: StateFlow<DashboardMonthlySummary?> = dashboardMonthlyRepository.observeLatestSummary()
+        .onEach { latestSummaryLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    private val entries: StateFlow<List<Entry>> = entryRepository.allEntries
-        .onEach { entriesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    private val hasAnyTransactions: StateFlow<Boolean> = dashboardMonthlyRepository.observeHasAnyTransactions()
+        .onEach { hasTransactionsLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    private val hasAnyAssets: StateFlow<Boolean> = dashboardMonthlyRepository.observeHasAnyAssets()
+        .onEach { hasAssetsLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
     private val getStartedPrefs = DashboardGetStartedManager.prefs
 
-    val isLoading: StateFlow<Boolean> = combine(historyLoaded, entriesLoaded) { history, entries ->
-        !history || !entries
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
-
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    init {
-        DashboardGetStartedManager.init(appContext)
-    }
+    private val effectiveSelectedMonth: StateFlow<String> = combine(uiState, latestSummary) { state, latest ->
+        state.selectedMonth
+            ?: latest?.period
+            ?: YearMonth.now().toString()
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        YearMonth.now().toString(),
+    )
 
-    val renderState: StateFlow<DashboardRenderState> = combine(assetHistory, entries, householdCurrency, uiState) { history, allEntries, householdCurrency, state ->
-        val selectedMonth = state.selectedMonth ?: YearMonth.now().toString()
-        val selectedRange = state.selectedRange
-        val assetsForMonth = buildAssetsSnapshotForMonth(history, selectedMonth)
-        val monthEntries = allEntries.filter { entry -> monthKey(entry.date) == selectedMonth }
-        val metrics = calculateDashboardMetrics(assetsForMonth, monthEntries, allEntries, selectedMonth)
-        val averageSavingsRate = calculateAverageSavingsRate(allEntries, selectedMonth, 3)
-        val savingsRateDelta = if (metrics.savingsRate != null && averageSavingsRate != null) {
-            metrics.savingsRate - averageSavingsRate
-        } else {
-            null
-        }
+    private val dashboardWindow: StateFlow<List<DashboardMonthlySummary>> = combine(
+        effectiveSelectedMonth,
+        uiState.map { it.selectedRange },
+    ) { selectedMonth, selectedRange ->
+        val loadCount = maxOf(selectedRange.months, 4)
+        val monthWindow = buildPreviousMonths(selectedMonth, loadCount)
+        monthWindow.last() to monthWindow.first()
+    }.flatMapLatest { (startMonth, endMonth) ->
+        dashboardMonthlyRepository.observeSummaryWindow(startMonth, endMonth)
+    }.onEach {
+        windowLoaded.value = true
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        emptyList(),
+    )
 
-        val monthOptions = buildPreviousMonths(selectedMonth, selectedRange.months)
-        val chartPoints = monthOptions
-            .asReversed()
-            .map { month ->
+    private val dashboardBaseState: StateFlow<DashboardBaseState> = combine(
+        dashboardWindow,
+        effectiveSelectedMonth,
+        uiState,
+        householdCurrency,
+    ) { window, selectedMonth, state, currency ->
+        val summariesByPeriod = window.associateBy { it.period }
+        val selectedSummary = summariesByPeriod[selectedMonth] ?: DashboardMonthlySummary.empty(selectedMonth)
+        val previousMonth = YearMonth.parse(selectedMonth).minusMonths(1).toString()
+        val previousSummary = summariesByPeriod[previousMonth] ?: DashboardMonthlySummary.empty(previousMonth)
+
+        val chartPoints = buildMonthlySeries(summariesByPeriod, selectedMonth, state.selectedRange.months)
+            .map { summary ->
                 ChartPoint(
-                    month = month,
-                    label = formatShortMonth(month),
-                    value = calculateNetWorthForMonth(history, month),
+                    month = summary.period,
+                    label = formatShortMonth(summary.period),
+                    value = summary.netWorth,
                 )
             }
 
-        val previousMonth = YearMonth.parse(selectedMonth).minusMonths(1).toString()
-        val previousAssetsForMonth = buildAssetsSnapshotForMonth(history, previousMonth)
-        val previousMonthEntries = allEntries.filter { entry -> monthKey(entry.date) == previousMonth }
-        val previousMetrics = calculateDashboardMetrics(
-            previousAssetsForMonth,
-            previousMonthEntries,
-            allEntries,
-            previousMonth,
-        )
-
-        val previousValue = calculateNetWorthForMonth(history, previousMonth)
-            .takeIf { hasActiveSnapshotForMonth(history, previousMonth) }
-        val monthlyChangePercent = if (previousValue != null && previousValue != 0.0) {
-            (metrics.netWorth - previousValue) / kotlin.math.abs(previousValue)
+        val savingsRateMonths = buildPreviousMonths(selectedMonth, 4)
+            .drop(1)
+            .map { period -> summariesByPeriod[period] ?: DashboardMonthlySummary.empty(period) }
+        val averageSavingsRate = calculateAverageSavingsRate(savingsRateMonths)
+        val savingsRateDelta = if (selectedSummary.savingsRate != null && averageSavingsRate != null) {
+            selectedSummary.savingsRate - averageSavingsRate
         } else {
             null
         }
-        val cashFlowChangePercent = calculateRelativeChange(
-            currentValue = metrics.monthlyCashFlow,
-            previousValue = previousMetrics.monthlyCashFlow.takeIf { previousMonthEntries.isNotEmpty() },
-        )
-        val monthlyExpenses = monthEntries
-            .filter { it.type == "expense" }
-            .sumOf { it.price }
-        val previousMonthlyExpenses = previousMonthEntries
-            .filter { it.type == "expense" }
-            .sumOf { it.price }
-        val monthlyExpensesChangePercent = calculateRelativeChange(
-            currentValue = monthlyExpenses,
-            previousValue = previousMonthlyExpenses.takeIf { previousMonthEntries.isNotEmpty() },
-        )
-        val runwayChangePercent = calculateRelativeChange(
-            currentValue = metrics.financialRunway ?: 0.0,
-            previousValue = previousMetrics.financialRunway?.takeIf { previousMonthEntries.isNotEmpty() },
-        )
 
-        DashboardRenderState(
+        val runwayMonths = buildMonthlySeries(summariesByPeriod, selectedMonth, 3)
+        val previousRunwayMonths = buildMonthlySeries(summariesByPeriod, previousMonth, 3)
+        val metrics = buildDashboardMetrics(
+            selectedSummary = selectedSummary,
+            runwaySummaries = runwayMonths,
+        )
+        val previousRunway = calculateFinancialRunway(previousSummary, previousRunwayMonths)
+
+        val monthlyChangePercent = if (previousSummary.activeAssetCount > 0) {
+            calculateRelativeChange(
+                currentValue = metrics.netWorth,
+                previousValue = previousSummary.netWorth,
+            )
+        } else {
+            null
+        }
+        val cashFlowChangePercent = if (previousSummary.transactionCount > 0) {
+            calculateRelativeChange(
+                currentValue = metrics.monthlyCashFlow,
+                previousValue = previousSummary.cashFlow,
+            )
+        } else {
+            null
+        }
+        val monthlyExpensesChangePercent = if (previousSummary.transactionCount > 0) {
+            calculateRelativeChange(
+                currentValue = selectedSummary.monthlyExpenses,
+                previousValue = previousSummary.monthlyExpenses,
+            )
+        } else {
+            null
+        }
+        val runwayChangePercent = if (previousSummary.transactionCount > 0) {
+            calculateRelativeChange(
+                currentValue = metrics.financialRunway ?: 0.0,
+                previousValue = previousRunway,
+            )
+        } else {
+            null
+        }
+
+        DashboardBaseState(
             selectedMonth = selectedMonth,
-            householdCurrency = householdCurrency,
-            selectedRange = selectedRange,
-            hasEntries = allEntries.isNotEmpty(),
-            hasAssets = history.any { it.action != "deleted" },
+            householdCurrency = currency,
+            selectedRange = state.selectedRange,
             metrics = metrics,
             chartPoints = chartPoints,
             monthlyChangePercent = monthlyChangePercent,
             cashFlowChangePercent = cashFlowChangePercent,
             savingsRateDelta = savingsRateDelta,
-            monthlyExpenses = monthlyExpenses,
+            monthlyExpenses = selectedSummary.monthlyExpenses,
             monthlyExpensesChangePercent = monthlyExpensesChangePercent,
             runwayChangePercent = runwayChangePercent,
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        DashboardBaseState(
+            selectedMonth = YearMonth.now().toString(),
+            householdCurrency = DEFAULT_CURRENCY,
+            selectedRange = DashboardRange.SixMonths,
+            metrics = DashboardMetrics(0.0, 0.0, 0.0, null, 0.0, null),
+            chartPoints = emptyList(),
+            monthlyChangePercent = null,
+            cashFlowChangePercent = null,
+            savingsRateDelta = null,
+            monthlyExpenses = 0.0,
+            monthlyExpensesChangePercent = null,
+            runwayChangePercent = null,
+        ),
+    )
+
+    val renderState: StateFlow<DashboardRenderState> = combine(
+        dashboardBaseState,
+        hasAnyTransactions,
+        hasAnyAssets,
+    ) { baseState, hasTransactions, hasAssets ->
+        DashboardRenderState(
+            selectedMonth = baseState.selectedMonth,
+            householdCurrency = baseState.householdCurrency,
+            selectedRange = baseState.selectedRange,
+            hasEntries = hasTransactions,
+            hasAssets = hasAssets,
+            metrics = baseState.metrics,
+            chartPoints = baseState.chartPoints,
+            monthlyChangePercent = baseState.monthlyChangePercent,
+            cashFlowChangePercent = baseState.cashFlowChangePercent,
+            savingsRateDelta = baseState.savingsRateDelta,
+            monthlyExpenses = baseState.monthlyExpenses,
+            monthlyExpensesChangePercent = baseState.monthlyExpensesChangePercent,
+            runwayChangePercent = baseState.runwayChangePercent,
         )
     }.stateIn(
         viewModelScope,
@@ -151,11 +224,22 @@ class DashboardViewModel @Inject constructor(
         ),
     )
 
+    val isLoading: StateFlow<Boolean> = combine(
+        latestSummaryLoaded,
+        windowLoaded,
+        hasTransactionsLoaded,
+        hasAssetsLoaded,
+    ) { latestLoaded, windowReady, transactionsReady, assetsReady ->
+        !latestLoaded || !windowReady || !transactionsReady || !assetsReady
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    init {
+        DashboardGetStartedManager.init(appContext)
+    }
+
     init {
         viewModelScope.launch {
-            combine(assetHistory, entries, getStartedPrefs) { history, allEntries, prefs ->
-                val hasEntries = allEntries.isNotEmpty()
-                val hasAssets = history.any { it.action != "deleted" }
+            combine(hasAnyTransactions, hasAnyAssets, getStartedPrefs) { hasEntries, hasAssets, prefs ->
                 !prefs.dismissed && (!hasEntries || !hasAssets)
             }.collect { showGetStarted ->
                 _uiState.update {
@@ -177,5 +261,33 @@ class DashboardViewModel @Inject constructor(
 
     fun dismissGetStarted() {
         DashboardGetStartedManager.dismiss(appContext)
+    }
+}
+
+private data class DashboardBaseState(
+    val selectedMonth: String,
+    val householdCurrency: String,
+    val selectedRange: DashboardRange,
+    val metrics: DashboardMetrics,
+    val chartPoints: List<ChartPoint>,
+    val monthlyChangePercent: Double?,
+    val cashFlowChangePercent: Double?,
+    val savingsRateDelta: Double?,
+    val monthlyExpenses: Double,
+    val monthlyExpensesChangePercent: Double?,
+    val runwayChangePercent: Double?,
+)
+
+private fun calculateFinancialRunway(
+    selectedSummary: DashboardMonthlySummary,
+    runwaySummaries: List<DashboardMonthlySummary>,
+): Double? {
+    val averageMonthlyExpenses = runwaySummaries
+        .map { it.monthlyExpenses }
+        .average()
+    return if (averageMonthlyExpenses > 0) {
+        selectedSummary.liquidAssets / averageMonthlyExpenses
+    } else {
+        null
     }
 }

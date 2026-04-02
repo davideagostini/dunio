@@ -8,6 +8,9 @@ object FirestorePaths {
     fun transactions(householdId: String) = "households/$householdId/transactions"
     fun transaction(householdId: String, transactionId: String) =
         "households/$householdId/transactions/$transactionId"
+    fun dashboardMonthly(householdId: String) = "households/$householdId/dashboardMonthly"
+    fun dashboardMonthlyEntry(householdId: String, period: String) =
+        "households/$householdId/dashboardMonthly/$period"
     fun recurringTransactions(householdId: String) = "households/$householdId/recurringTransactions"
     fun recurringTransaction(householdId: String, recurringTransactionId: String) =
         "households/$householdId/recurringTransactions/$recurringTransactionId"

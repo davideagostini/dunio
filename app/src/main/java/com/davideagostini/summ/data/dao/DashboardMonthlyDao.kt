@@ -1,0 +1,179 @@
+package com.davideagostini.summ.data.dao
+
+import com.davideagostini.summ.data.entity.DashboardMonthlySummary
+import com.davideagostini.summ.data.firebase.FirestorePaths
+import com.davideagostini.summ.data.firebase.firestoreFlow
+import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.data.session.SessionState
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+private data class DashboardMonthlyDocument(
+    val period: String = "",
+    val incomeTotal: Double = 0.0,
+    val expenseTotal: Double = 0.0,
+    val cashFlow: Double = 0.0,
+    val savingsRate: Double? = null,
+    val totalAssets: Double = 0.0,
+    val totalLiabilities: Double = 0.0,
+    val netWorth: Double = 0.0,
+    val liquidAssets: Double = 0.0,
+    val monthlyExpenses: Double = 0.0,
+    val transactionCount: Long = 0L,
+    val activeAssetCount: Long = 0L,
+)
+
+@Singleton
+@OptIn(ExperimentalCoroutinesApi::class)
+class DashboardMonthlyDao @Inject constructor(
+    private val firestore: FirebaseFirestore?,
+    private val sessionRepository: SessionRepository,
+) {
+    fun observeHasAnyTransactions(): Flow<Boolean> {
+        val db = firestore ?: return flowOf(false)
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(false)
+            } else {
+                firestoreFlow<Boolean> { emit ->
+                    db.collection(FirestorePaths.transactions(readyState.household.id))
+                        .limit(1)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(Result.success(!snapshot.isEmpty))
+                            }
+                        }
+                }.map { result -> result.getOrElse { false } }
+            }
+        }
+    }
+
+    fun observeHasAnyAssets(): Flow<Boolean> {
+        val db = firestore ?: return flowOf(false)
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(false)
+            } else {
+                firestoreFlow<Boolean> { emit ->
+                    db.collection(FirestorePaths.assets(readyState.household.id))
+                        .limit(1)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(Result.success(!snapshot.isEmpty))
+                            }
+                        }
+                }.map { result -> result.getOrElse { false } }
+            }
+        }
+    }
+
+    fun observeLatestSummary(): Flow<DashboardMonthlySummary?> {
+        val db = firestore ?: return flowOf(null)
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(null)
+            } else {
+                firestoreFlow<DashboardMonthlySummary?> { emit ->
+                    db.collection(FirestorePaths.dashboardMonthly(readyState.household.id))
+                        .orderBy("period", Query.Direction.DESCENDING)
+                        .limit(1)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> {
+                                    val summary = snapshot.documents.firstOrNull()?.toObject(DashboardMonthlyDocument::class.java)
+                                        ?.toSummary()
+                                    emit(Result.success(summary))
+                                }
+                            }
+                        }
+                }.map { result -> result.getOrElse { null } }
+            }
+        }
+    }
+
+    fun observeRecentSummaries(limit: Long = 12L): Flow<List<DashboardMonthlySummary>> {
+        val db = firestore ?: return flowOf(emptyList())
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(emptyList())
+            } else {
+                firestoreFlow<List<DashboardMonthlySummary>> { emit ->
+                    db.collection(FirestorePaths.dashboardMonthly(readyState.household.id))
+                        .orderBy("period", Query.Direction.DESCENDING)
+                        .limit(limit)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(
+                                    Result.success(
+                                        snapshot.documents.mapNotNull { document ->
+                                            document.toObject(DashboardMonthlyDocument::class.java)?.toSummary()
+                                        },
+                                    ),
+                                )
+                            }
+                        }
+                }.map { result -> result.getOrElse { emptyList() } }
+            }
+        }
+    }
+
+    fun observeSummaryWindow(startPeriod: String, endPeriod: String): Flow<List<DashboardMonthlySummary>> {
+        val db = firestore ?: return flowOf(emptyList())
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(emptyList())
+            } else {
+                firestoreFlow<List<DashboardMonthlySummary>> { emit ->
+                    db.collection(FirestorePaths.dashboardMonthly(readyState.household.id))
+                        .whereGreaterThanOrEqualTo("period", startPeriod)
+                        .whereLessThanOrEqualTo("period", endPeriod)
+                        .orderBy("period", Query.Direction.ASCENDING)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(
+                                    Result.success(
+                                        snapshot.documents.mapNotNull { document ->
+                                            document.toObject(DashboardMonthlyDocument::class.java)?.toSummary()
+                                        },
+                                    ),
+                                )
+                            }
+                        }
+                }.map { result -> result.getOrElse { emptyList() } }
+            }
+        }
+    }
+
+    private fun DashboardMonthlyDocument.toSummary(): DashboardMonthlySummary =
+        DashboardMonthlySummary(
+            period = period,
+            incomeTotal = incomeTotal,
+            expenseTotal = expenseTotal,
+            cashFlow = cashFlow,
+            savingsRate = savingsRate,
+            totalAssets = totalAssets,
+            totalLiabilities = totalLiabilities,
+            netWorth = netWorth,
+            liquidAssets = liquidAssets,
+            monthlyExpenses = monthlyExpenses,
+            transactionCount = transactionCount.toInt(),
+            activeAssetCount = activeAssetCount.toInt(),
+        )
+}

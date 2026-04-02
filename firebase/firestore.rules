@@ -122,6 +122,11 @@ service cloud.firestore {
           && (resource.data.period == null || isOpenPeriod(householdId, resource.data.period));
       }
 
+      match /dashboardMonthly/{period} {
+        allow read: if isHouseholdMember(householdId);
+        allow create, update, delete: if false;
+      }
+
       match /recurringTransactions/{recurringTransactionId} {
         allow read, create, update, delete: if isHouseholdMember(householdId);
       }

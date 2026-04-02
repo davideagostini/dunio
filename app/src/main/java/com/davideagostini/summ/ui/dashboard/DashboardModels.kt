@@ -1,12 +1,8 @@
 package com.davideagostini.summ.ui.dashboard
 
 import androidx.compose.runtime.Immutable
-import com.davideagostini.summ.data.entity.Asset
-import com.davideagostini.summ.data.entity.AssetHistoryEntry
-import com.davideagostini.summ.data.entity.Entry
-import java.time.Instant
+import com.davideagostini.summ.data.entity.DashboardMonthlySummary
 import java.time.YearMonth
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
@@ -46,88 +42,49 @@ data class DashboardRenderState(
     val runwayChangePercent: Double?,
 )
 
-fun buildAssetsSnapshotForMonth(entries: List<AssetHistoryEntry>, month: String): List<Asset> =
-    entries
-        .filter { it.period == month }
-        .sortedWith(compareByDescending<AssetHistoryEntry> { it.period }.thenByDescending { it.snapshotDate })
-        .associateBy { it.name.trim().lowercase(Locale.getDefault()) }
-        .values
-        .filter { it.action != "deleted" }
-        .map {
-            Asset(
-                id = it.assetId,
-                householdId = it.householdId,
-                name = it.name,
-                type = it.type,
-                category = it.category,
-                value = it.value,
-                currency = it.currency,
-                liquid = it.liquid,
-                period = it.period,
-                snapshotDate = it.snapshotDate,
-            )
-        }
-        .sortedByDescending { it.value }
-
-fun calculateDashboardMetrics(
-    assets: List<Asset>,
-    monthEntries: List<Entry>,
-    allEntries: List<Entry>,
+fun buildMonthlySeries(
+    summariesByPeriod: Map<String, DashboardMonthlySummary>,
     selectedMonth: String,
+    count: Int,
+): List<DashboardMonthlySummary> =
+    buildPreviousMonths(selectedMonth, count)
+        .asReversed()
+        .map { period -> summariesByPeriod[period] ?: DashboardMonthlySummary.empty(period) }
+
+fun buildDashboardMetrics(
+    selectedSummary: DashboardMonthlySummary,
+    runwaySummaries: List<DashboardMonthlySummary>,
 ): DashboardMetrics {
-    val totalAssets = assets.filter { it.type == "asset" }.sumOf { it.value }
-    val totalLiabilities = assets.filter { it.type == "liability" }.sumOf { it.value }
-    val income = monthEntries.filter { it.type == "income" }.sumOf { it.price }
-    val expenses = monthEntries.filter { it.type == "expense" }.sumOf { it.price }
-    val runwayMonths = buildPreviousMonths(selectedMonth, 3)
-    val averageMonthlyExpenses = runwayMonths
-        .map { month ->
-            allEntries.filter { it.type == "expense" && monthKey(it.date) == month }.sumOf { it.price }
-        }
+    val averageMonthlyExpenses = runwaySummaries
+        .map { it.monthlyExpenses }
         .average()
-    val liquidAssets = assets.filter { it.type == "asset" && it.liquid }.sumOf { it.value }
+    val financialRunway = if (averageMonthlyExpenses > 0) {
+        selectedSummary.liquidAssets / averageMonthlyExpenses
+    } else {
+        null
+    }
 
     return DashboardMetrics(
-        netWorth = totalAssets - totalLiabilities,
-        totalAssets = totalAssets,
-        totalLiabilities = totalLiabilities,
-        savingsRate = if (income > 0) (income - expenses) / income else null,
-        monthlyCashFlow = income - expenses,
-        financialRunway = if (averageMonthlyExpenses > 0) liquidAssets / averageMonthlyExpenses else null,
+        netWorth = selectedSummary.netWorth,
+        totalAssets = selectedSummary.totalAssets,
+        totalLiabilities = selectedSummary.totalLiabilities,
+        savingsRate = selectedSummary.savingsRate,
+        monthlyCashFlow = selectedSummary.cashFlow,
+        financialRunway = financialRunway,
     )
 }
 
-fun calculateAverageSavingsRate(
-    allEntries: List<Entry>,
-    selectedMonth: String,
-    count: Int,
-): Double? {
-    val validRates = buildPreviousMonths(selectedMonth, count + 1)
-        .drop(1)
-        .mapNotNull { month ->
-            val income = allEntries.filter { it.type == "income" && monthKey(it.date) == month }.sumOf { it.price }
-            if (income <= 0) return@mapNotNull null
-            val expenses = allEntries.filter { it.type == "expense" && monthKey(it.date) == month }.sumOf { it.price }
-            (income - expenses) / income
+fun calculateAverageSavingsRate(previousSummaries: List<DashboardMonthlySummary>): Double? {
+    val validRates = previousSummaries.mapNotNull { summary ->
+        if (summary.incomeTotal <= 0) {
+            null
+        } else {
+            (summary.incomeTotal - summary.expenseTotal) / summary.incomeTotal
         }
+    }
 
     return if (validRates.isEmpty()) null else validRates.average()
 }
-
-fun calculateNetWorthForMonth(entries: List<AssetHistoryEntry>, month: String): Double {
-    val assets = buildAssetsSnapshotForMonth(entries, month)
-    val totals = assets.fold(0.0 to 0.0) { acc, asset ->
-        if (asset.type == "asset") {
-            acc.first + asset.value to acc.second
-        } else {
-            acc.first to acc.second + asset.value
-        }
-    }
-    return totals.first - totals.second
-}
-
-fun hasActiveSnapshotForMonth(entries: List<AssetHistoryEntry>, month: String): Boolean =
-    entries.any { it.period == month && it.action != "deleted" }
 
 fun buildSeriesMonths(monthOptions: List<String>, selectedMonth: String, count: Int): List<String> {
     val index = monthOptions.indexOf(selectedMonth)
@@ -139,12 +96,6 @@ fun buildPreviousMonths(selectedMonth: String, count: Int): List<String> {
     val base = YearMonth.parse(selectedMonth)
     return List(count) { index -> base.minusMonths(index.toLong()).toString() }
 }
-
-fun monthKey(epochMillis: Long): String =
-    Instant.ofEpochMilli(epochMillis)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .format(DateTimeFormatter.ofPattern("yyyy-MM"))
 
 fun formatMonthOption(monthValue: String): String =
     YearMonth.parse(monthValue).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))

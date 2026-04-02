@@ -28,7 +28,6 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
-import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.dashboard.components.DashboardToolbar
 import com.davideagostini.summ.ui.dashboard.components.GetStartedScreen
 import com.davideagostini.summ.ui.dashboard.components.MetricCard
@@ -36,7 +35,6 @@ import com.davideagostini.summ.ui.dashboard.components.NetWorthCard
 import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
-import java.time.YearMonth
 import kotlin.math.abs
 
 @Composable
@@ -82,21 +80,8 @@ private fun DashboardContent(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
-    val currentMonth = YearMonth.now().toString()
     val monthOptions = remember { buildRecentMonthOptions() }
-    // When the stored month is invalid or missing, fall back to the most recent available month.
-    val defaultMonth = remember(monthOptions, currentMonth) {
-        preferredRecentMonth(monthOptions, currentMonth)
-    }
-    val selectedMonth = uiState.selectedMonth
-        ?.takeIf { it in monthOptions }
-        ?: defaultMonth
-
-    // Seed the dashboard with a valid month once, then let the ViewModel own the selected month state.
-    LaunchedEffect(Unit) {
-        if (defaultMonth.isNotBlank()) onSelectMonth(defaultMonth)
-    }
-    val metrics = renderState.metrics
+    val selectedMonth = renderState.selectedMonth
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
@@ -158,7 +143,7 @@ private fun DashboardContent(
                     NetWorthCard(
                         month = selectedMonth,
                         currency = renderState.householdCurrency,
-                        netWorth = metrics.netWorth,
+                        netWorth = renderState.metrics.netWorth,
                         monthlyChangePercent = renderState.monthlyChangePercent,
                         chartPoints = renderState.chartPoints,
                         selectedRange = renderState.selectedRange,
@@ -169,7 +154,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_assets_label),
-                        value = formatCurrency(metrics.totalAssets, renderState.householdCurrency),
+                        value = formatCurrency(renderState.metrics.totalAssets, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_current_value),
                     )
                 }
@@ -177,7 +162,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_liabilities_label),
-                        value = formatCurrency(metrics.totalLiabilities, renderState.householdCurrency),
+                        value = formatCurrency(renderState.metrics.totalLiabilities, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_outstanding),
                     )
                 }
@@ -185,7 +170,7 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_cash_flow_label),
-                        value = formatCurrency(metrics.monthlyCashFlow, renderState.householdCurrency),
+                        value = formatCurrency(renderState.metrics.monthlyCashFlow, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_cash_flow_note),
                         trendLabel = renderState.cashFlowChangePercent?.let {
                             stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
@@ -197,14 +182,14 @@ private fun DashboardContent(
                             renderState.cashFlowChangePercent < 0 -> ExpenseRed
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
-                        valueColor = if (metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
+                        valueColor = if (renderState.metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
                     )
                 }
 
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_savings_rate_label),
-                        value = metrics.savingsRate?.let { formatPercent(it) } ?: stringResource(R.string.dashboard_value_not_available),
+                        value = renderState.metrics.savingsRate?.let { formatPercent(it) } ?: stringResource(R.string.dashboard_value_not_available),
                         note = stringResource(R.string.dashboard_savings_rate_note),
                         trendLabel = renderState.savingsRateDelta?.let {
                             stringResource(R.string.dashboard_change_vs_3m_avg, formatPercent(abs(it)))
@@ -222,8 +207,8 @@ private fun DashboardContent(
                 item {
                     MetricCard(
                         label = stringResource(R.string.dashboard_runway_label),
-                        value = metrics.financialRunway?.let { formatRunwayMonths(it) } ?: stringResource(R.string.dashboard_value_not_available),
-                        trailingValue = metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
+                        value = renderState.metrics.financialRunway?.let { formatRunwayMonths(it) } ?: stringResource(R.string.dashboard_value_not_available),
+                        trailingValue = renderState.metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
                         trendLabel = renderState.runwayChangePercent?.let {
                             stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
                         },
