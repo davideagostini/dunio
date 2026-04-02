@@ -100,12 +100,15 @@ The entries screen now keeps the list and category reports month-scoped, while u
 ### Assets
 
 - monthly asset snapshots
+- Firestore reads scoped to the selected month plus the previous month instead of the full asset history
 - assets and liabilities in one feature
 - search
 - edit and delete flow
 - copy previous month snapshot
 - monthly net worth summary
 - household currency applied automatically to new asset snapshots
+
+The assets screen now reads only the selected month and previous month snapshots so list rendering, month-over-month change, and `Copy previous month` stay responsive without downloading the full asset archive.
 
 ### Settings
 

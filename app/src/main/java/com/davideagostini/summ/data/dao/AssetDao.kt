@@ -162,6 +162,29 @@ class AssetDao @Inject constructor(
         }
     }
 
+    fun getHasAnyAssetHistory(): Flow<Boolean> {
+        val db = firestore ?: return flowOf(false)
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(false)
+            } else {
+                val householdId = readyState.household.id
+                firestoreFlow<Boolean> { emit ->
+                    db.collectionGroup("history")
+                        .whereEqualTo("householdId", householdId)
+                        .limit(1)
+                        .addSnapshotListener { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> emit(Result.success(!snapshot.isEmpty))
+                            }
+                        }
+                }.map { result -> result.getOrElse { false } }
+            }
+        }
+    }
+
     private suspend fun upsertAssetSnapshot(
         db: FirebaseFirestore,
         householdId: String,

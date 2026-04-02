@@ -57,21 +57,24 @@ fun formatMonthLabel(month: String): String =
     YearMonth.parse(month).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
 
 fun calculateAssetChange(
-    historyEntries: List<AssetHistoryEntry>,
+    currentMonthEntries: List<AssetHistoryEntry>,
+    previousMonthEntries: List<AssetHistoryEntry>,
     assetName: String,
     month: String,
 ): Double? {
     val normalizedName = assetName.trim().lowercase(Locale.getDefault())
-    val currentEntry = historyEntries.find { entry ->
+    val previousMonth = YearMonth.parse(month).minusMonths(1).toString()
+
+    val currentEntry = currentMonthEntries.find { entry ->
         entry.name.trim().lowercase(Locale.getDefault()) == normalizedName &&
             entry.period == month &&
             entry.action != "deleted"
     }
 
-    val previousEntry = historyEntries
+    val previousEntry = previousMonthEntries
         .filter { entry ->
             entry.name.trim().lowercase(Locale.getDefault()) == normalizedName &&
-                entry.period < month &&
+                entry.period == previousMonth &&
                 entry.action != "deleted"
         }
         .sortedWith(

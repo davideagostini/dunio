@@ -18,12 +18,15 @@ import com.davideagostini.summ.ui.format.formatEditableAmount
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -32,6 +35,7 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class AssetsViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val repository: AssetRepository,
@@ -39,15 +43,34 @@ class AssetsViewModel @Inject constructor(
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
     private val defaultSelectedMonth = YearMonth.now().toString()
+    private val _uiState = MutableStateFlow(AssetsUiState())
+    val uiState: StateFlow<AssetsUiState> = _uiState.asStateFlow()
 
     // These flags gate the initial loading state until each data source has
     // emitted at least once.
-    private val historyLoaded = MutableStateFlow(false)
+    private val currentMonthHistoryLoaded = MutableStateFlow(false)
+    private val previousMonthHistoryLoaded = MutableStateFlow(false)
+    private val hasAnyAssetsLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
 
-    private val assetHistory: StateFlow<List<AssetHistoryEntry>> = repository.allAssetHistory
-        .onEach { historyLoaded.value = true }
+    private val selectedMonth: StateFlow<String> = uiState
+        .map { state -> state.selectedMonth ?: defaultSelectedMonth }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), defaultSelectedMonth)
+
+    private val currentMonthAssetHistory: StateFlow<List<AssetHistoryEntry>> = selectedMonth
+        .flatMapLatest { month -> repository.observeAssetHistoryForMonth(month) }
+        .onEach { currentMonthHistoryLoaded.value = true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val previousMonthAssetHistory: StateFlow<List<AssetHistoryEntry>> = selectedMonth
+        .map { month -> YearMonth.parse(month).minusMonths(1).toString() }
+        .flatMapLatest { month -> repository.observeAssetHistoryForMonth(month) }
+        .onEach { previousMonthHistoryLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val hasAnyAssets: StateFlow<Boolean> = repository.observeHasAnyAssetHistory()
+        .onEach { hasAnyAssetsLoaded.value = true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
@@ -58,18 +81,38 @@ class AssetsViewModel @Inject constructor(
 
     // Loading remains true until both streams have emitted at least once so the
     // screen can initialize with complete data.
-    val isLoading: StateFlow<Boolean> = combine(historyLoaded, monthClosesLoaded) { historyReady, monthClosesReady ->
-        !historyReady || !monthClosesReady
+    val isLoading: StateFlow<Boolean> = combine(
+        currentMonthHistoryLoaded,
+        previousMonthHistoryLoaded,
+        hasAnyAssetsLoaded,
+        monthClosesLoaded,
+    ) { currentReady, previousReady, hasAnyReady, monthClosesReady ->
+        !currentReady || !previousReady || !hasAnyReady || !monthClosesReady
     }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    private val _uiState = MutableStateFlow(AssetsUiState())
-    val uiState: StateFlow<AssetsUiState> = _uiState.asStateFlow()
+    private data class AssetHistoryWindow(
+        val selectedMonth: String,
+        val currentHistory: List<AssetHistoryEntry>,
+        val previousHistory: List<AssetHistoryEntry>,
+    )
 
-    val renderState: StateFlow<AssetsRenderState> = combine(assetHistory, monthCloses, householdCurrency, uiState) { history, monthCloses, householdCurrency, uiState ->
-        val selectedMonth = uiState.selectedMonth ?: defaultSelectedMonth
+    val renderState: StateFlow<AssetsRenderState> = combine(
+        combine(selectedMonth, currentMonthAssetHistory, previousMonthAssetHistory) { selectedMonth, currentHistory, previousHistory ->
+            AssetHistoryWindow(
+                selectedMonth = selectedMonth,
+                currentHistory = currentHistory,
+                previousHistory = previousHistory,
+            )
+        },
+        monthCloses,
+        householdCurrency,
+        uiState,
+        hasAnyAssets,
+    ) { window, monthCloses, householdCurrency, uiState, hasAnyAssets ->
+        val selectedMonth = window.selectedMonth
         val isMonthClosed = monthCloses.any { it.period == selectedMonth && it.status == "closed" }
-        val monthAssets = buildAssetsSnapshotForMonth(history, selectedMonth)
+        val monthAssets = buildAssetsSnapshotForMonth(window.currentHistory, selectedMonth)
         val filteredAssets = monthAssets
             .filter { asset ->
                 val query = uiState.searchQuery.trim()
@@ -80,12 +123,15 @@ class AssetsViewModel @Inject constructor(
             .map { asset ->
                 AssetListItem(
                     asset = asset,
-                    change = calculateAssetChange(history, asset.name, selectedMonth),
+                    change = calculateAssetChange(window.currentHistory, window.previousHistory, asset.name, selectedMonth),
                 )
             }
         val totalAssets = monthAssets.filter { it.type == "asset" }.sumOf { it.value }
         val totalLiabilities = monthAssets.filter { it.type == "liability" }.sumOf { it.value }
-        val previousMonthAssets = buildAssetsSnapshotForMonth(history, YearMonth.parse(selectedMonth).minusMonths(1).toString())
+        val previousMonthAssets = buildAssetsSnapshotForMonth(
+            window.previousHistory,
+            YearMonth.parse(selectedMonth).minusMonths(1).toString(),
+        )
         val currentNames = monthAssets.mapTo(mutableSetOf()) { normalizeAssetName(it.name) }
 
         AssetsRenderState(
@@ -97,7 +143,7 @@ class AssetsViewModel @Inject constructor(
             totalLiabilities = totalLiabilities,
             netWorth = totalAssets - totalLiabilities,
             canCopyPreviousMonth = previousMonthAssets.any { normalizeAssetName(it.name) !in currentNames },
-            hasAnyAssets = monthAssets.isNotEmpty() || history.isNotEmpty(),
+            hasAnyAssets = monthAssets.isNotEmpty() || hasAnyAssets,
         )
     }.stateIn(
         viewModelScope,
@@ -313,8 +359,8 @@ class AssetsViewModel @Inject constructor(
     private fun copyPreviousMonth() {
         val selectedMonth = selectedMonthOrDefault(_uiState.value)
         val previousMonth = java.time.YearMonth.parse(selectedMonth).minusMonths(1).toString()
-        val currentAssets = buildAssetsSnapshotForMonth(assetHistory.value, selectedMonth)
-        val previousAssets = buildAssetsSnapshotForMonth(assetHistory.value, previousMonth)
+        val currentAssets = buildAssetsSnapshotForMonth(currentMonthAssetHistory.value, selectedMonth)
+        val previousAssets = buildAssetsSnapshotForMonth(previousMonthAssetHistory.value, previousMonth)
 
         // Nothing to copy means there is no useful user-visible action to run.
         if (previousAssets.isEmpty()) return

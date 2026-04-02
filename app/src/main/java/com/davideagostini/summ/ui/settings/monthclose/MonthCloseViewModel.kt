@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
-import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.repository.AssetRepository
 import com.davideagostini.summ.data.repository.EntryRepository
