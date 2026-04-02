@@ -149,11 +149,6 @@ class EntryDao @Inject constructor(
         }
     }
 
-    fun getBalance(): Flow<Double> =
-        getAllEntries().map { entries ->
-            entries.sumOf { entry -> if (entry.type == "income") entry.price else -entry.price }
-        }
-
     private fun observeEntriesBetween(
         db: FirebaseFirestore,
         startDate: String,

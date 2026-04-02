@@ -63,6 +63,7 @@ Esito:
 **6. Assets**
 
 - month picker mostra snapshot corretto
+- cambio mese resta fluido anche con storico asset lungo
 - summary card asset/liabilities/net worth corretta
 - search funziona
 - add asset funziona
@@ -70,7 +71,7 @@ Esito:
 - delete asset funziona
 - `Copy previous month` copia solo gli asset mancanti
 - mese chiuso rende la schermata read-only
-- change percent per asset ancora coerente
+- change percent per asset coerente rispetto al mese precedente
 - nessuna regressione nel fullscreen editor
 
 **7. Recurring**

@@ -225,8 +225,10 @@ Key files:
 Responsibility:
 
 - monthly asset snapshot browsing
+- query only the selected month plus previous month for the main screen
 - asset/liability CRUD
 - copy previous month snapshot
+- compute change as a month-over-month comparison
 - action sheet, editor flow, delete confirmation, and success states
 - inherit the household currency instead of asking for per-asset currency input
 

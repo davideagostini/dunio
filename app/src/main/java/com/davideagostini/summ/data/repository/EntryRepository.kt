@@ -16,7 +16,6 @@ class EntryRepository @Inject constructor(
 ) {
 
     val allEntries: Flow<List<Entry>> = entryDao.getAllEntries()
-    val balance: Flow<Double> = entryDao.getBalance()
 
     fun observeEntriesForMonth(period: String): Flow<List<Entry>> = entryDao.getEntriesForMonth(period)
 
