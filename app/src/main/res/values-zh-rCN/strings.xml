@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">Dunio 快速入口</string>
     <string name="widget_quick_entry_label">快速记录</string>
     <string name="widget_spending_name">Dunio 支出</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">快速记账</string>
+    <string name="tile_subtitle">添加一笔交易</string>
+    <string name="settings_quick_tile_title">快捷设置磁贴</string>
+    <string name="settings_quick_tile_subtitle">打开系统提示以添加快速记账</string>
+    <string name="settings_quick_tile_added">快捷设置磁贴已添加</string>
+    <string name="settings_quick_tile_not_added">快捷设置磁贴未添加</string>
+    <string name="settings_quick_tile_not_supported">仅支持 Android 13 及以上版本</string>
     <string name="content_desc_back">返回</string>
     <string name="content_desc_close">关闭</string>
     <string name="content_desc_add_category">添加分类</string>

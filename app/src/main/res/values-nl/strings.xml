@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">Snelle toegang Dunio</string>
     <string name="widget_quick_entry_label">Snelle invoer</string>
     <string name="widget_spending_name">Uitgaven Dunio</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">Snelle invoer</string>
+    <string name="tile_subtitle">Transactie toevoegen</string>
+    <string name="settings_quick_tile_title">Quick settings-tegel</string>
+    <string name="settings_quick_tile_subtitle">Open de systeemvraag om de snelle invoer toe te voegen</string>
+    <string name="settings_quick_tile_added">Quick settings-tegel toegevoegd</string>
+    <string name="settings_quick_tile_not_added">Quick settings-tegel niet toegevoegd</string>
+    <string name="settings_quick_tile_not_supported">Beschikbaar vanaf Android 13</string>
     <string name="content_desc_back">Terug</string>
     <string name="content_desc_close">Sluiten</string>
     <string name="content_desc_add_category">Categorie toevoegen</string>

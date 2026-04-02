@@ -11,6 +11,8 @@ import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
+import com.davideagostini.summ.ui.format.formatEditableAmount
+import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -118,7 +120,7 @@ class RecurringViewModel @Inject constructor(
                     it.copy(
                         sheetMode = RecurringSheetMode.Edit,
                         description = recurring.description,
-                        amount = recurring.amount.toString(),
+                        amount = formatEditableAmount(recurring.amount),
                         type = recurring.type,
                         category = recurring.category,
                         categoryKey = recurring.categoryKey,
@@ -215,7 +217,7 @@ class RecurringViewModel @Inject constructor(
 
     private fun buildRecurring(id: String = "", lastAppliedDate: String? = null): RecurringTransaction? {
         val state = _uiState.value
-        val amount = state.amount.replace(',', '.').toDoubleOrNull()
+        val amount = parseAmount(state.amount)
         val day = state.dayOfMonth.toIntOrNull()
         var valid = true
 

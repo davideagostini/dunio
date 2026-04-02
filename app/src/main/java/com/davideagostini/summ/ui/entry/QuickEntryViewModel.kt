@@ -10,6 +10,7 @@ import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.EntryRepository
+import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
@@ -90,7 +91,7 @@ class QuickEntryViewModel @Inject constructor(
                 }
             }
             3 -> {
-                val parsed = state.price.toDoubleOrNull()
+                val parsed = parseAmount(state.price)
                 val error = when {
                     state.price.isBlank()             -> appContext.getString(R.string.quick_entry_validation_amount_required)
                     parsed == null || parsed <= 0     -> appContext.getString(R.string.quick_entry_validation_amount_positive)
@@ -112,7 +113,7 @@ class QuickEntryViewModel @Inject constructor(
 
     private fun save() {
         val state = _uiState.value
-        val parsedPrice = state.price.toDoubleOrNull() ?: return
+        val parsedPrice = parseAmount(state.price) ?: return
         val category    = state.selectedCategory ?: return
 
         // Quick entry runs as a fast-path form, but Firestore failures still need the same graceful handling.

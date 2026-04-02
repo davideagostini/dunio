@@ -4,8 +4,8 @@
     <string name="widget_quick_access_name">Dunio quick access</string>
     <string name="widget_quick_entry_label">Quick entry</string>
     <string name="widget_spending_name">Dunio spending</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">Quick entry</string>
+    <string name="tile_subtitle">Add transaction</string>
     <string name="content_desc_back">Back</string>
     <string name="content_desc_close">Close</string>
     <string name="content_desc_add_category">Add category</string>
@@ -197,6 +197,11 @@
     <string name="settings_recurring_subtitle">Manage recurring income and expenses</string>
     <string name="settings_month_close_title">Month close</string>
     <string name="settings_month_close_subtitle">Review readiness and close a month</string>
+    <string name="settings_quick_tile_title">Quick Settings tile</string>
+    <string name="settings_quick_tile_subtitle">Open the system prompt to add quick entry</string>
+    <string name="settings_quick_tile_added">Quick Settings tile added</string>
+    <string name="settings_quick_tile_not_added">Quick Settings tile not added</string>
+    <string name="settings_quick_tile_not_supported">Available on Android 13 or later</string>
     <string name="settings_export_title">Export data</string>
     <string name="settings_export_subtitle">Save household data as CSV or JSON</string>
     <string name="settings_export_screen_message">Export the current household using the system file picker. CSV files are useful for spreadsheets, while the JSON backup includes the full household snapshot.</string>

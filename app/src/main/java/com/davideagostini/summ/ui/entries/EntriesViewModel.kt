@@ -19,7 +19,8 @@ import com.davideagostini.summ.domain.usecase.GetHomeDataUseCase
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
-import com.davideagostini.summ.ui.format.formatAmount
+import com.davideagostini.summ.ui.format.formatEditableAmount
+import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -167,12 +168,13 @@ class EntriesViewModel @Inject constructor(
                         sheetMode        = EntrySheetMode.Edit,
                         editType         = entry.type,
                         editDescription  = entry.description,
-                        editPrice        = formatAmount(entry.price),
+                        editPrice        = formatEditableAmount(entry.price),
                         editDate         = entry.date,
                         editCategory     = cat,
                         descriptionError = null,
                         priceError       = null,
                         operationErrorMessage = null,
+                        isSaving         = false,
                     )
                 }
             }
@@ -200,7 +202,7 @@ class EntriesViewModel @Inject constructor(
             _uiState.update { it.copy(descriptionError = appContext.getString(R.string.entries_validation_description_required)) }
             hasError = true
         }
-        val price = state.editPrice.toDoubleOrNull()
+        val price = parseAmount(state.editPrice)
         if (price == null || price <= 0) {
             _uiState.update { it.copy(priceError = appContext.getString(R.string.entries_validation_amount_valid)) }
             hasError = true
@@ -208,6 +210,7 @@ class EntriesViewModel @Inject constructor(
         if (hasError) return
 
         // Edit is a Firestore write, so we surface backend permission problems inline in the sheet.
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 entryRepository.update(
@@ -227,7 +230,12 @@ class EntriesViewModel @Inject constructor(
                 // After the success toast-equivalent window, return to the neutral screen state.
                 _uiState.update { it.clearTransientState() }
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
             }
         }
     }
@@ -259,6 +267,7 @@ class EntriesViewModel @Inject constructor(
                 // Failed deletes return to the action flow and surface the translated backend message.
                 _uiState.update {
                     it.copy(
+                        isSaving = false,
                         showDeleteDialog = false,
                         operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
                     )
@@ -280,6 +289,7 @@ class EntriesViewModel @Inject constructor(
             descriptionError = null,
             priceError = null,
             operationErrorMessage = null,
+            isSaving = false,
             showDeleteDialog = false,
         )
 }

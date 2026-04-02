@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">الوصول السريع في Dunio</string>
     <string name="widget_quick_entry_label">إدخال سريع</string>
     <string name="widget_spending_name">مصروفات Dunio</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">إدخال سريع</string>
+    <string name="tile_subtitle">إضافة معاملة</string>
+    <string name="settings_quick_tile_title">لوحة الإعدادات السريعة</string>
+    <string name="settings_quick_tile_subtitle">افتح رسالة النظام لإضافة الإدخال السريع</string>
+    <string name="settings_quick_tile_added">تمت إضافة لوحة الإعدادات السريعة</string>
+    <string name="settings_quick_tile_not_added">لم تتم إضافة لوحة الإعدادات السريعة</string>
+    <string name="settings_quick_tile_not_supported">متاح على Android 13 أو أحدث</string>
     <string name="content_desc_back">رجوع</string>
     <string name="content_desc_close">إغلاق</string>
     <string name="content_desc_add_category">إضافة فئة</string>

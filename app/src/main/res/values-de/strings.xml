@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">Dunio quick access</string>
     <string name="widget_quick_entry_label">Quick entry</string>
     <string name="widget_spending_name">Dunio spending</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">Schnelleingabe</string>
+    <string name="tile_subtitle">Transaktion hinzufügen</string>
+    <string name="settings_quick_tile_title">Schnelleinstellungen-Kachel</string>
+    <string name="settings_quick_tile_subtitle">Systemdialog zum Hinzufügen der Schnelleingabe öffnen</string>
+    <string name="settings_quick_tile_added">Schnelleinstellungen-Kachel hinzugefügt</string>
+    <string name="settings_quick_tile_not_added">Schnelleinstellungen-Kachel nicht hinzugefügt</string>
+    <string name="settings_quick_tile_not_supported">Verfügbar ab Android 13</string>
     <string name="content_desc_back">Zurück</string>
     <string name="content_desc_close">Schließen</string>
     <string name="content_desc_add_category">Add category</string>

@@ -1,6 +1,12 @@
 package com.davideagostini.summ.ui.settings
 
+import android.app.StatusBarManager
 import android.content.ClipData
+import android.content.ComponentName
+import android.content.Context
+import android.graphics.drawable.Icon
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Category
@@ -46,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.davideagostini.summ.BuildConfig
 import com.davideagostini.summ.R
+import com.davideagostini.summ.tile.QuickEntryTileService
 import com.davideagostini.summ.ui.settings.components.SettingsInfoItem
 import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.settings.components.SettingsSectionLabel
@@ -84,6 +93,7 @@ fun SettingsScreen(
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
     val clipboard = LocalClipboard.current
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val currentLanguage by AppLanguageManager.currentLanguage.collectAsStateWithLifecycle()
     val currentLanguageName = AppLanguageManager.displayName(currentLanguage.tag)
@@ -207,6 +217,17 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_month_close_title),
                     subtitle = stringResource(R.string.settings_month_close_subtitle),
                     onClick = onNavigateMonthClose,
+                )
+            }
+
+            item {
+                SettingsNavItem(
+                    icon = Icons.Default.Add,
+                    title = stringResource(R.string.settings_quick_tile_title),
+                    subtitle = stringResource(R.string.settings_quick_tile_subtitle),
+                    onClick = {
+                        requestQuickSettingsTile(context)
+                    },
                 )
             }
 
@@ -370,6 +391,35 @@ private fun AccountInfoBlock(
             }
         }
     }
+}
+
+private fun requestQuickSettingsTile(context: Context) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        Toast.makeText(context, context.getString(R.string.settings_quick_tile_not_supported), Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val statusBarManager = context.getSystemService(StatusBarManager::class.java)
+    if (statusBarManager == null) {
+        Toast.makeText(context, context.getString(R.string.settings_quick_tile_not_supported), Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    statusBarManager.requestAddTileService(
+        ComponentName(context, QuickEntryTileService::class.java),
+        context.getString(R.string.tile_label),
+        Icon.createWithResource(context, R.drawable.ic_wallet),
+        context.mainExecutor,
+        { result ->
+            val message = when (result) {
+                StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED,
+                StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> R.string.settings_quick_tile_added
+                StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED -> R.string.settings_quick_tile_not_added
+                else -> R.string.settings_quick_tile_not_added
+            }
+            Toast.makeText(context, context.getString(message), Toast.LENGTH_SHORT).show()
+        }
+    )
 }
 
 @Composable

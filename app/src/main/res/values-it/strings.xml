@@ -4,8 +4,8 @@
     <string name="widget_quick_access_name">Accesso rapido Dunio</string>
     <string name="widget_quick_entry_label">Voce rapida</string>
     <string name="widget_spending_name">Spese Dunio</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">Voce rapida</string>
+    <string name="tile_subtitle">Aggiungi movimento</string>
     <string name="content_desc_back">Indietro</string>
     <string name="content_desc_close">Chiudi</string>
     <string name="content_desc_add_category">Aggiungi categoria</string>
@@ -188,6 +188,11 @@
     <string name="settings_recurring_subtitle">Gestisci entrate e spese ricorrenti</string>
     <string name="settings_month_close_title">Chiusura mese</string>
     <string name="settings_month_close_subtitle">Controlla la preparazione e chiudi un mese</string>
+    <string name="settings_quick_tile_title">Tile impostazioni rapide</string>
+    <string name="settings_quick_tile_subtitle">Apri il messaggio di sistema per aggiungere la voce rapida</string>
+    <string name="settings_quick_tile_added">Tile impostazioni rapide aggiunto</string>
+    <string name="settings_quick_tile_not_added">Tile impostazioni rapide non aggiunto</string>
+    <string name="settings_quick_tile_not_supported">Disponibile da Android 13 in poi</string>
     <string name="settings_export_title">Esporta dati</string>
     <string name="settings_export_subtitle">Salva i dati dell’household in CSV o JSON</string>
     <string name="settings_export_screen_message">Esporta l’household corrente usando il file picker di sistema. I file CSV sono utili per fogli di calcolo, mentre il backup JSON include uno snapshot completo dell’household.</string>

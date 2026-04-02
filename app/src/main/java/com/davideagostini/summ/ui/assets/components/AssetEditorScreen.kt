@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,11 +68,12 @@ internal fun AssetEditorScreen(
                 .padding(horizontal = 24.dp, vertical = 24.dp)
                 .systemBarsPadding(),
         ) {
+            val closeEnabled = !uiState.isSaving
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
             ) {
-                IconButton(onClick = onDismiss) {
+                IconButton(onClick = onDismiss, enabled = closeEnabled) {
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }
@@ -119,6 +121,8 @@ private fun AssetFormContent(
     onCancel: () -> Unit,
 ) {
     // The asset editor now matches the entry editor: scrollable content with a fixed bottom action row.
+    val controlsEnabled = !readOnly && !uiState.isSaving
+    val cancelEnabled = !uiState.isSaving
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -145,6 +149,7 @@ private fun AssetFormContent(
 
             AssetTypeButtonGroup(
                 selectedType = uiState.editType,
+                enabled = controlsEnabled,
                 onSelectType = { onEvent(AssetsEvent.UpdateType(it)) },
             )
 
@@ -201,6 +206,7 @@ private fun AssetFormContent(
             ) {
                 OutlinedButton(
                     onClick = onCancel,
+                    enabled = cancelEnabled,
                     modifier = Modifier.weight(1f),
                     shape = AppButtonShape,
                 ) {
@@ -208,11 +214,14 @@ private fun AssetFormContent(
                 }
                 Button(
                     onClick = onSave,
-                    enabled = !readOnly,
+                    enabled = controlsEnabled,
                     modifier = Modifier.weight(1f),
                     shape = AppButtonShape,
                 ) {
-                    Text(confirmLabel)
+                    SaveActionContent(
+                        label = confirmLabel,
+                        isSaving = uiState.isSaving,
+                    )
                 }
             }
         }
@@ -257,6 +266,7 @@ private fun AssetEditorSuccessContent() {
 @Composable
 private fun AssetTypeButtonGroup(
     selectedType: String,
+    enabled: Boolean,
     onSelectType: (String) -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -267,6 +277,7 @@ private fun AssetTypeButtonGroup(
             val selected = selectedType == item.first
             Button(
                 onClick = { onSelectType(item.first) },
+                enabled = enabled,
                 modifier = Modifier.weight(1f),
                 shape = when (index) {
                     0 -> RoundedCornerShape(topStart = 18.dp, bottomStart = 18.dp, topEnd = 6.dp, bottomEnd = 6.dp)
@@ -280,5 +291,22 @@ private fun AssetTypeButtonGroup(
                 Text(item.second)
             }
         }
+    }
+}
+
+@Composable
+private fun SaveActionContent(
+    label: String,
+    isSaving: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (isSaving) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Spacer(Modifier.size(8.dp))
+        }
+        Text(label)
     }
 }

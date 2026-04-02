@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">Acesso rápido Dunio</string>
     <string name="widget_quick_entry_label">Lançamento rápido</string>
     <string name="widget_spending_name">Gastos Dunio</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">Entrada rápida</string>
+    <string name="tile_subtitle">Adicionar movimento</string>
+    <string name="settings_quick_tile_title">Tile de configurações rápidas</string>
+    <string name="settings_quick_tile_subtitle">Abrir o aviso do sistema para adicionar a entrada rápida</string>
+    <string name="settings_quick_tile_added">Tile de configurações rápidas adicionado</string>
+    <string name="settings_quick_tile_not_added">Tile de configurações rápidas não adicionado</string>
+    <string name="settings_quick_tile_not_supported">Disponível no Android 13 ou superior</string>
     <string name="content_desc_back">Voltar</string>
     <string name="content_desc_close">Fechar</string>
     <string name="content_desc_add_category">Adicionar categoria</string>

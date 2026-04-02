@@ -2,6 +2,7 @@ package com.davideagostini.summ.tile
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
@@ -12,16 +13,12 @@ import com.davideagostini.summ.ui.entry.QuickEntryActivity
 class QuickEntryTileService : TileService() {
     override fun onTileAdded() {
         super.onTileAdded()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            updateTile()
-        }
+        updateTile()
     }
 
     override fun onStartListening() {
         super.onStartListening()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            updateTile()
-        }
+        updateTile()
     }
 
     override fun onClick() {
@@ -44,9 +41,11 @@ class QuickEntryTileService : TileService() {
     @RequiresApi(Build.VERSION_CODES.R)
     private fun updateTile() {
         val tile = qsTile ?: return
+        tile.icon = Icon.createWithResource(this, R.drawable.ic_wallet)
         tile.label = getString(R.string.tile_label)
         tile.subtitle = getString(R.string.tile_subtitle)
         tile.stateDescription = getString(R.string.tile_subtitle)
+        tile.contentDescription = getString(R.string.tile_label)
         tile.state = Tile.STATE_ACTIVE
         tile.updateTile()
     }

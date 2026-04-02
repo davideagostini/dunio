@@ -37,6 +37,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -129,7 +130,10 @@ internal fun EntryActionSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
             ) {
-                IconButton(onClick = onDismiss) {
+                IconButton(
+                    onClick = onDismiss,
+                    enabled = uiState.sheetMode != EntrySheetMode.Edit || !uiState.isSaving,
+                ) {
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }
@@ -341,6 +345,8 @@ private fun EntryEditForm(
     // The edit form keeps its own local date picker visibility because that state is purely presentational.
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.editDate)
+    val controlsEnabled = !readOnly && !uiState.isSaving
+    val cancelEnabled = !uiState.isSaving
 
     Column(modifier = Modifier.fillMaxSize()) {
         // The scrollable area holds the actual form fields and category list.
@@ -387,6 +393,7 @@ private fun EntryEditForm(
                         val color    = if (value == "income") IncomeGreen else ExpenseRed
                         OutlinedButton(
                             onClick  = { onEvent(EntriesEvent.UpdateType(value)) },
+                            enabled  = controlsEnabled,
                             shape    = AppButtonShape,
                             modifier = Modifier.weight(1f),
                             colors   = if (selected) ButtonDefaults.outlinedButtonColors(
@@ -436,6 +443,7 @@ private fun EntryEditForm(
                 // The date button opens a modal picker; the selected date is written back through the ViewModel.
                 OutlinedButton(
                     onClick = { showDatePicker = true },
+                    enabled = controlsEnabled,
                     shape = AppButtonShape,
                     border = androidx.compose.foundation.BorderStroke(
                         1.dp,
@@ -467,6 +475,7 @@ private fun EntryEditForm(
                     index = index,
                     count = categories.size,
                     selected = uiState.editCategory?.id == category.id,
+                    enabled = controlsEnabled,
                     onClick  = { onEvent(EntriesEvent.UpdateCategory(category)) },
                 )
             }
@@ -494,16 +503,22 @@ private fun EntryEditForm(
             ) {
                 OutlinedButton(
                     onClick  = onCancel,
+                    enabled  = cancelEnabled,
                     shape    = AppButtonShape,
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(R.string.action_cancel)) }
 
                 Button(
                     onClick  = { onEvent(EntriesEvent.SaveEdit) },
-                    enabled = !readOnly,
+                    enabled = controlsEnabled,
                     shape    = AppButtonShape,
                     modifier = Modifier.weight(1f),
-                ) { Text(stringResource(R.string.action_save)) }
+                ) {
+                    SaveActionContent(
+                        label = stringResource(R.string.action_save),
+                        isSaving = uiState.isSaving,
+                    )
+                }
             }
         }
     }
@@ -536,6 +551,7 @@ private fun EditCategoryRow(
     index: Int,
     count: Int,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     // Category rows share the same rounded shape logic used elsewhere in the app's list surfaces.
@@ -551,7 +567,7 @@ private fun EditCategoryRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(verticalPadding)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -581,6 +597,23 @@ private fun EditCategoryRow(
     }
 }
 
+@Composable
+private fun SaveActionContent(
+    label: String,
+    isSaving: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (isSaving) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(label)
+    }
+}
+
 // ── Success ───────────────────────────────────────────────────────────────────
 
 @Composable
@@ -591,33 +624,38 @@ private fun EntrySuccessContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 32.dp),
+            .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
-        // The icon, title, and message are intentionally simple so the success state reads instantly.
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .background(IncomeGreen.copy(alpha = 0.15f), CircleShape),
-            contentAlignment = Alignment.Center,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("✓", fontSize = 36.sp, color = IncomeGreen, fontWeight = FontWeight.Bold)
+        // The icon, title, and message are intentionally simple so the success state reads instantly.
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .background(IncomeGreen.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("✓", fontSize = 36.sp, color = IncomeGreen, fontWeight = FontWeight.Bold)
+            }
+
+            Text(
+                text = stringResource(R.string.done_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Text(
+                text      = stringResource(R.string.entries_done_message),
+                style     = MaterialTheme.typography.bodyMedium,
+                color     = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         }
-
-        Text(
-            text = stringResource(R.string.done_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Text(
-            text      = stringResource(R.string.entries_done_message),
-            style     = MaterialTheme.typography.bodyMedium,
-            color     = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 

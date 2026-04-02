@@ -34,6 +34,7 @@
             android:name=".tile.QuickEntryTileService"
             android:exported="true"
             android:icon="@drawable/ic_wallet"
+            android:description="@string/tile_subtitle"
             android:label="@string/tile_label"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>

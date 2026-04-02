@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">Dunio クイックアクセス</string>
     <string name="widget_quick_entry_label">クイック入力</string>
     <string name="widget_spending_name">Dunio 支出</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">クイック入力</string>
+    <string name="tile_subtitle">取引を追加</string>
+    <string name="settings_quick_tile_title">クイック設定タイル</string>
+    <string name="settings_quick_tile_subtitle">システムの追加ダイアログを開く</string>
+    <string name="settings_quick_tile_added">クイック設定タイルを追加しました</string>
+    <string name="settings_quick_tile_not_added">クイック設定タイルは追加されませんでした</string>
+    <string name="settings_quick_tile_not_supported">Android 13 以降で利用できます</string>
     <string name="content_desc_back">戻る</string>
     <string name="content_desc_close">閉じる</string>
     <string name="content_desc_add_category">カテゴリを追加</string>

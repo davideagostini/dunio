@@ -25,5 +25,6 @@ data class EntriesUiState(
     val descriptionError: String?     = null,
     val priceError: String?           = null,
     val operationErrorMessage: String? = null,
+    val isSaving: Boolean             = false,
     val showDeleteDialog: Boolean     = false,
 )

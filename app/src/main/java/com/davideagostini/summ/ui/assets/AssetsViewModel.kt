@@ -14,6 +14,8 @@ import com.davideagostini.summ.data.repository.AssetRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
+import com.davideagostini.summ.ui.format.formatEditableAmount
+import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -146,11 +148,12 @@ class AssetsViewModel @Inject constructor(
                         sheetMode = AssetSheetMode.Edit,
                         editName = asset.name,
                         editCategory = asset.category,
-                        editValue = if (asset.value == 0.0) "" else asset.value.toPlainString(),
+                        editValue = if (asset.value == 0.0) "" else formatEditableAmount(asset.value),
                         editType = asset.type,
                         nameError = null,
                         valueError = null,
                         operationErrorMessage = null,
+                        isSaving = false,
                     )
                 }
             }
@@ -193,6 +196,7 @@ class AssetsViewModel @Inject constructor(
         }
 
         // Save failures are converted to a friendly inline message so asset writes never crash the screen.
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 repository.insert(
@@ -208,7 +212,12 @@ class AssetsViewModel @Inject constructor(
                 )
                 showSuccess()
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
             }
         }
     }
@@ -222,6 +231,7 @@ class AssetsViewModel @Inject constructor(
             _uiState.update { it.copy(nameError = appContext.getString(R.string.asset_validation_name_required)) }
             return
         }
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 repository.update(
@@ -237,7 +247,12 @@ class AssetsViewModel @Inject constructor(
                 )
                 showSuccess()
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
             }
         }
     }
@@ -266,7 +281,7 @@ class AssetsViewModel @Inject constructor(
     private suspend fun showSuccess() {
         // Success is transient: show the confirmation state, keep it visible for a
         // short interval, then reset the screen back to its initial filters.
-        _uiState.update { it.copy(sheetMode = AssetSheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
+        _uiState.update { it.copy(sheetMode = AssetSheetMode.Success, showDeleteDialog = false, operationErrorMessage = null, isSaving = false) }
         delay(1_500L)
         _uiState.update {
             AssetsUiState(
@@ -278,18 +293,15 @@ class AssetsViewModel @Inject constructor(
     }
 
     private fun validateValue(state: AssetsUiState): Double? {
-        val value = state.editValue.replace(',', '.').toDoubleOrNull()
+        val value = parseAmount(state.editValue)
         if (value == null) {
-            // Localized decimals are normalized before validation so comma input is
-            // accepted where appropriate.
+            // Localized and formatted inputs are normalized before validation so
+            // thousand separators and decimal commas are accepted where appropriate.
             _uiState.update { it.copy(valueError = appContext.getString(R.string.asset_validation_value_required)) }
             return null
         }
         return value
     }
-
-    private fun Double.toPlainString(): String =
-        if (this % 1.0 == 0.0) toInt().toString() else toString()
 
     private fun monthToSnapshotDate(month: String?): String =
         // A monthly asset snapshot always points to the end of the selected month,

@@ -4,8 +4,13 @@
     <string name="widget_quick_access_name">Быстрый доступ Dunio</string>
     <string name="widget_quick_entry_label">Быстрая запись</string>
     <string name="widget_spending_name">Расходы Dunio</string>
-    <string name="tile_label">Add entry</string>
-    <string name="tile_subtitle">Dunio</string>
+    <string name="tile_label">Быстрое добавление</string>
+    <string name="tile_subtitle">Добавить операцию</string>
+    <string name="settings_quick_tile_title">Плитка быстрых настроек</string>
+    <string name="settings_quick_tile_subtitle">Открыть системный запрос для быстрого добавления</string>
+    <string name="settings_quick_tile_added">Плитка быстрых настроек добавлена</string>
+    <string name="settings_quick_tile_not_added">Плитка быстрых настроек не добавлена</string>
+    <string name="settings_quick_tile_not_supported">Доступно на Android 13 и новее</string>
     <string name="content_desc_back">Назад</string>
     <string name="content_desc_close">Закрыть</string>
     <string name="content_desc_add_category">Добавить категорию</string>
