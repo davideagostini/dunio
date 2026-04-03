@@ -74,6 +74,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Screen for reviewing and editing recurring transaction templates.
+ *
+ * It renders the list of recurring items plus the editor sheet used to add or adjust schedules.
+ */
 @Composable
 fun RecurringScreen(
     onBack: () -> Unit,

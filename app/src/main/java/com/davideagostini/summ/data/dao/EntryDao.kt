@@ -32,6 +32,13 @@ private data class TransactionDocument(
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for household transactions.
+ *
+ * This DAO owns the raw transaction queries and keeps them scoped to the active household from
+ * [SessionRepository]. It exposes both broad export-oriented streams and targeted month/range
+ * queries used by the main UI so screens do not need to understand Firestore details.
+ */
 class EntryDao @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val firestore: FirebaseFirestore?,

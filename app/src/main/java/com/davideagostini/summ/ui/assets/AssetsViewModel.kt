@@ -36,6 +36,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * ViewModel for the assets screen.
+ *
+ * The feature works from month-scoped asset snapshots plus the previous month for delta
+ * calculations, which keeps loading bounded while still supporting search, editing, and copy-from-
+ * previous-month flows.
+ */
 class AssetsViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val repository: AssetRepository,

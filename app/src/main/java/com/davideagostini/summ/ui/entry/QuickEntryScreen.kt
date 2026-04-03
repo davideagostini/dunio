@@ -39,6 +39,12 @@ import com.davideagostini.summ.ui.entry.components.StepReview
 import com.davideagostini.summ.ui.entry.components.StepSuccess
 import com.davideagostini.summ.ui.entry.components.StepType
 
+/**
+ * Full-screen guided transaction entry flow.
+ *
+ * The screen breaks expense/income creation into small mobile-first steps and reacts to navigation
+ * events emitted by [QuickEntryViewModel].
+ */
 @Composable
 fun QuickEntryScreen(
     resolvedSessionState: SessionState? = null,

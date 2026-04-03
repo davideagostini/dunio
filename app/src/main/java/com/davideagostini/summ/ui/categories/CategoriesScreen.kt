@@ -53,6 +53,12 @@ import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.theme.SummColors
 import kotlinx.coroutines.launch
 
+/**
+ * Top-level screen for managing custom categories.
+ *
+ * The screen mostly renders the current list and bottom-sheet editor state while the ViewModel
+ * handles validation and persistence.
+ */
 @Composable
 fun CategoriesScreen(
     viewModel: CategoriesViewModel = hiltViewModel(),

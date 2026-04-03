@@ -73,6 +73,12 @@ import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummColors
 import kotlinx.coroutines.launch
 
+/**
+ * Main settings hub for the household.
+ *
+ * This screen groups all secondary flows such as currency, exports, recurring transactions,
+ * members, and month close behind a single mobile-friendly menu.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(

@@ -31,6 +31,12 @@ data class SessionUiState(
 )
 
 @HiltViewModel
+/**
+ * Coordinates the authentication and household onboarding flow.
+ *
+ * The auth gate depends on this ViewModel to expose the current session state, surface sign-in and
+ * household setup errors, and run one-off recurring transaction bootstrap tasks after login.
+ */
 class SessionViewModel @Inject constructor(
     @param:ApplicationContext
     private val appContext: Context,

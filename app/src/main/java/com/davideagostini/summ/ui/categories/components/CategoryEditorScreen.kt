@@ -45,6 +45,9 @@ import com.davideagostini.summ.ui.categories.CategorySheetMode
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.IncomeGreen
 
+/**
+ * Reusable fullscreen editor used for creating or updating categories.
+ */
 @Composable
 internal fun CategoryEditorScreen(
     uiState: CategoriesUiState,

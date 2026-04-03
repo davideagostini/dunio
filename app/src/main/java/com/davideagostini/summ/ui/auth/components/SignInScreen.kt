@@ -38,6 +38,11 @@ import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import com.davideagostini.summ.ui.theme.SummTheme
 
+/**
+ * Sign-in surface shown before the user joins a household.
+ *
+ * It is intentionally presentation-focused and receives all state from the auth gate.
+ */
 @Composable
 fun SignInScreen(
     isSubmitting: Boolean,

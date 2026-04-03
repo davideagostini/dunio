@@ -59,6 +59,12 @@ private data class HouseholdDocument(
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Session source of truth for the Android app.
+ *
+ * It combines Firebase Authentication, user profile documents, and household membership into a
+ * single stream that the rest of the app can observe to know whether finance data is accessible.
+ */
 class SessionRepository @Inject constructor(
     @param:ApplicationContext
     private val appContext: Context,

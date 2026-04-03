@@ -9,6 +9,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for household members.
+ *
+ * The members feature uses this layer to observe the household roster and perform invite/member
+ * actions through a narrow API.
+ */
 class MemberRepository @Inject constructor(
     private val memberDao: MemberDao,
     private val inviteDao: InviteDao,

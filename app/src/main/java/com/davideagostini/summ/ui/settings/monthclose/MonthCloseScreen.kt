@@ -53,6 +53,12 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * Screen for reviewing and closing a month.
+ *
+ * It summarizes the selected month and exposes the controls that make the month read-only once the
+ * household is ready to lock it.
+ */
 @Composable
 fun MonthCloseScreen(
     onBack: () -> Unit,

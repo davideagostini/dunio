@@ -37,6 +37,12 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummTheme
 
+/**
+ * Household onboarding screen shown after authentication.
+ *
+ * Users can create a new shared household or join an existing one before entering the finance
+ * area of the app.
+ */
 @Composable
 fun HouseholdSetupScreen(
     userName: String,

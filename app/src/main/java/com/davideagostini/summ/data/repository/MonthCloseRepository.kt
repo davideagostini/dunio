@@ -7,6 +7,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for month-close state.
+ *
+ * It provides the small set of operations needed to observe and mutate closed months while
+ * keeping the rest of the app unaware of the storage implementation.
+ */
 class MonthCloseRepository @Inject constructor(
     private val dao: MonthCloseDao,
 ) {

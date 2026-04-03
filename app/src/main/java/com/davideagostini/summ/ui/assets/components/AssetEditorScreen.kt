@@ -46,6 +46,9 @@ import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.IncomeGreen
 
+/**
+ * Reusable fullscreen editor for creating and editing asset snapshots.
+ */
 @Composable
 internal fun AssetEditorScreen(
     uiState: AssetsUiState,

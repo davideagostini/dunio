@@ -15,6 +15,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for household invites.
+ *
+ * Invite creation, lookup, and status updates stay here so the settings/members flows can work
+ * with a small API instead of raw document paths.
+ */
 class InviteDao(
     private val db: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,

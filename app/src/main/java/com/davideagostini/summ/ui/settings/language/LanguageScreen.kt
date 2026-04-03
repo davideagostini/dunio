@@ -44,6 +44,12 @@ import com.davideagostini.summ.ui.theme.SummColors
 import com.davideagostini.summ.ui.theme.listItemShape
 import java.util.Locale
 
+/**
+ * Language selection screen.
+ *
+ * It surfaces the available in-app languages and applies the user's choice through the app-level
+ * language manager.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageScreen(

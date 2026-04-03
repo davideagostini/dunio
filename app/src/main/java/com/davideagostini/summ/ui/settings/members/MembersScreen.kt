@@ -57,6 +57,11 @@ import com.davideagostini.summ.ui.theme.SummColors
 import com.davideagostini.summ.ui.theme.listItemShape
 import kotlinx.coroutines.launch
 
+/**
+ * Household members screen.
+ *
+ * It combines the current roster and invite management UI inside one mobile-first settings flow.
+ */
 @Composable
 fun MembersScreen(
     householdId: String,

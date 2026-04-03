@@ -43,6 +43,12 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.SummColors
 import com.davideagostini.summ.ui.theme.listItemShape
 
+/**
+ * Theme selection screen.
+ *
+ * This screen lets users preview and choose the app appearance without carrying any data logic of
+ * its own.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeScreen(

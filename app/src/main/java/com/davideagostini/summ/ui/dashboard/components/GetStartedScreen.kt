@@ -40,6 +40,9 @@ import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.AppButtonShape
 
+/**
+ * Dashboard onboarding state shown when the household is still missing foundational data.
+ */
 @Composable
 internal fun GetStartedScreen(
     hasEntries: Boolean,

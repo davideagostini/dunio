@@ -41,6 +41,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * ViewModel for the transactions screen.
+ *
+ * It loads the selected month for the primary list, keeps a short rolling window for spending
+ * insights, and exposes a render state tailored for the screen composables.
+ */
 class EntriesViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val entryRepository: EntryRepository,

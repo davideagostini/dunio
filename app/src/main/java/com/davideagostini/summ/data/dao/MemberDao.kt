@@ -13,6 +13,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for household membership.
+ *
+ * This DAO is responsible for observing the shared household member list and applying invite or
+ * role changes against the membership subcollection.
+ */
 class MemberDao(
     private val db: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,

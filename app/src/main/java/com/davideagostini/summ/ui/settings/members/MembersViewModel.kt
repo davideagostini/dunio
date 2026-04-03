@@ -21,6 +21,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+/**
+ * ViewModel for household members and invites.
+ *
+ * It coordinates the member roster, pending invites, and invite form state used inside the shared
+ * settings experience.
+ */
 class MembersViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val repository: MemberRepository,

@@ -29,6 +29,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Builds export payloads from the app's source-of-truth streams.
+ *
+ * Export intentionally reads the full transaction and asset history because its job is archival,
+ * not screen rendering. Keeping that broad query surface isolated here prevents UI regressions.
+ */
 class ExportRepository @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val sessionRepository: SessionRepository,

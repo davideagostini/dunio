@@ -26,6 +26,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * ViewModel for month close management.
+ *
+ * It gathers the selected month's transactions, asset snapshot, recurring templates, and existing
+ * month-close markers to decide whether the month can be closed and what guidance to show.
+ */
 class MonthCloseViewModel @Inject constructor(
     @param:ApplicationContext
     private val appContext: Context,

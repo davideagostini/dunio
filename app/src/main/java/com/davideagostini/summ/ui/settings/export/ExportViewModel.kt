@@ -16,6 +16,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+/**
+ * ViewModel for export actions in settings.
+ *
+ * It serializes the UI around long-running export jobs by exposing a single in-flight state and
+ * user-facing success/error feedback for each export type.
+ */
 class ExportViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val exportRepository: ExportRepository,

@@ -26,6 +26,12 @@ private data class MonthCloseDocument(
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for month-close markers.
+ *
+ * Month close documents define which months are frozen/read-only and are observed by several
+ * screens to prevent edits after a close has been confirmed.
+ */
 class MonthCloseDao @Inject constructor(
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,

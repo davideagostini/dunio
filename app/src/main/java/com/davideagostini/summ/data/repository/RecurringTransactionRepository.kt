@@ -7,6 +7,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for recurring transaction schedules.
+ *
+ * This keeps recurring logic easy to consume from settings and month-close flows without exposing
+ * DAO details directly to the UI layer.
+ */
 class RecurringTransactionRepository @Inject constructor(
     private val dao: RecurringTransactionDao,
 ) {

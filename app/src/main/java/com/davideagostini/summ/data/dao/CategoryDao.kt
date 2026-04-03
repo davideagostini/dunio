@@ -32,6 +32,12 @@ private data class CategoryDocument(
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for household categories.
+ *
+ * It merges system defaults with custom category documents and keeps category CRUD isolated from
+ * the rest of the UI stack.
+ */
 class CategoryDao @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val firestore: FirebaseFirestore?,

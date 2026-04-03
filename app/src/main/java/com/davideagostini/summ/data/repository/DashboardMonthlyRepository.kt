@@ -7,6 +7,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for monthly dashboard aggregates.
+ *
+ * Keeping this wrapper separate from the DAO lets the dashboard feature depend on a simple
+ * domain-friendly API without coupling the ViewModel to Firestore query details.
+ */
 class DashboardMonthlyRepository @Inject constructor(
     private val dao: DashboardMonthlyDao,
 ) {

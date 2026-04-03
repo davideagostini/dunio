@@ -56,6 +56,11 @@ private data class CurrencyOption(
     val displayName: String,
 )
 
+/**
+ * Currency selection screen for the active household.
+ *
+ * It is kept stateless so the parent flow can decide how and when the chosen currency is saved.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrencyScreen(

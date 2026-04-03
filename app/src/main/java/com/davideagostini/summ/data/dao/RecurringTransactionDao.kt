@@ -36,6 +36,12 @@ private data class RecurringTransactionDocument(
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for recurring transactions.
+ *
+ * This DAO owns the recurring schedule documents that feed month close suggestions and the
+ * recurring settings screen.
+ */
 class RecurringTransactionDao @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val firestore: FirebaseFirestore?,

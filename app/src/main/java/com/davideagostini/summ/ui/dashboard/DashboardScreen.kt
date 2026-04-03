@@ -1,6 +1,12 @@
 package com.davideagostini.summ.ui.dashboard
 
 // Dashboard screen orchestration: it reads aggregated finance state, syncs the shared month picker, and renders the KPI stack.
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,6 +52,13 @@ import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
 import kotlin.math.abs
 
+/**
+ * Top-level dashboard screen.
+ *
+ * The composable stays intentionally thin: it reads `StateFlow` values from [DashboardViewModel],
+ * decides between loading/Get Started/content states, and delegates KPI rendering to smaller
+ * dashboard components.
+ */
 @Composable
 fun DashboardScreen(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},

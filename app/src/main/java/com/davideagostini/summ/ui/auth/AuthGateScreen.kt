@@ -21,6 +21,12 @@ import com.davideagostini.summ.ui.auth.components.HouseholdSetupScreen
 import com.davideagostini.summ.ui.auth.components.MessageCard
 import com.davideagostini.summ.ui.auth.components.SignInScreen
 
+/**
+ * Entry gate for the entire app.
+ *
+ * It switches between sign-in, household setup, and the authenticated application shell based on
+ * the session state emitted by [SessionViewModel].
+ */
 @Composable
 fun AuthGateScreen(
     viewModel: SessionViewModel = hiltViewModel(),

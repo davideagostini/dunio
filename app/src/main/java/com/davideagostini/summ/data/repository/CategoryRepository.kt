@@ -7,6 +7,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for categories.
+ *
+ * Screens use this layer to observe merged category lists and perform CRUD without reaching into
+ * Firestore-specific concerns.
+ */
 class CategoryRepository @Inject constructor(private val categoryDao: CategoryDao) {
 
     val allCategories: Flow<List<Category>> = categoryDao.getAllCategories()

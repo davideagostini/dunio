@@ -45,6 +45,13 @@ private data class AssetHistoryDocument(
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * Firestore access layer for current assets and monthly asset history snapshots.
+ *
+ * The DAO encapsulates the dual-write asset model used by the app: current values live in the
+ * `assets` collection, while month snapshots are mirrored into `assets/{assetId}/history`.
+ * UI layers consume month-scoped history queries from here instead of walking the full history.
+ */
 class AssetDao @Inject constructor(
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,

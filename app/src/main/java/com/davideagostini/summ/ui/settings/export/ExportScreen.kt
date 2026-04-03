@@ -38,6 +38,12 @@ import com.davideagostini.summ.ui.settings.components.SettingsNavItem
 import com.davideagostini.summ.ui.theme.SummColors
 import java.time.LocalDate
 
+/**
+ * Screen for exporting household data.
+ *
+ * It presents the available export formats and reflects the in-flight export state managed by
+ * [ExportViewModel].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportScreen(

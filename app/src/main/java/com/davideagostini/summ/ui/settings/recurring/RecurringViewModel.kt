@@ -30,6 +30,12 @@ import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
+/**
+ * ViewModel for recurring transactions.
+ *
+ * It maps recurring schedules and category metadata into a UI-friendly state so users can review
+ * and maintain recurring income/expense templates from settings.
+ */
 class RecurringViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     recurringRepository: RecurringTransactionRepository,

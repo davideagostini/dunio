@@ -8,6 +8,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for assets and asset history.
+ *
+ * The assets feature mostly works with month-scoped history snapshots, while export still needs
+ * access to the full history stream. Both entry points live here behind a small API surface.
+ */
 class AssetRepository @Inject constructor(
     private val assetDao: AssetDao,
 ) {

@@ -41,6 +41,12 @@ data class EntryUiState(
 )
 
 @HiltViewModel
+/**
+ * ViewModel behind the quick-entry flow.
+ *
+ * It drives the step-by-step expense/income editor, validates input at each step, and emits
+ * navigation events once a transaction has been saved successfully.
+ */
 class QuickEntryViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val entryRepository: EntryRepository,

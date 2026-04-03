@@ -22,6 +22,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+/**
+ * ViewModel for category management.
+ *
+ * This feature is intentionally small: it observes category data, drives the add/edit/delete sheet
+ * state, and performs validation before delegating persistence to the repository layer.
+ */
 class CategoriesViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val repository: CategoryRepository,

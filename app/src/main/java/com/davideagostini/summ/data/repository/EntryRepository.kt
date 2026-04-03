@@ -10,6 +10,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * Repository facade for transaction data.
+ *
+ * It forwards focused query APIs from [EntryDao] to the UI layer and centralizes the side effect
+ * of refreshing home-screen widgets after every successful transaction mutation.
+ */
 class EntryRepository @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val entryDao: EntryDao,

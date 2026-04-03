@@ -26,6 +26,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
+/**
+ * ViewModel for the household dashboard.
+ *
+ * It combines the backend-generated monthly dashboard summaries with local UI preferences such as
+ * the selected month/range and the Get Started dismissal state. The result is a render model that
+ * keeps the Compose screen lightweight.
+ */
 class DashboardViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     dashboardMonthlyRepository: DashboardMonthlyRepository,
