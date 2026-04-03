@@ -50,6 +50,7 @@ Esito:
 
 - month picker mostra i dati del mese corretto
 - cambio mese non scarica o ricalcola l'intero storico percepibilmente
+- shimmer loading appare su cold load senza restare bloccati sulla dashboard precedente
 - filtro `All / Expenses / Income`
 - search su descrizione/categoria
 - grouping per giorno corretto
@@ -64,6 +65,7 @@ Esito:
 
 - month picker mostra snapshot corretto
 - cambio mese resta fluido anche con storico asset lungo
+- shimmer loading appare su cold load senza overlay full-screen del shell
 - summary card asset/liabilities/net worth corretta
 - search funziona
 - add asset funziona
@@ -73,6 +75,12 @@ Esito:
 - mese chiuso rende la schermata read-only
 - change percent per asset coerente rispetto al mese precedente
 - nessuna regressione nel fullscreen editor
+
+**6b. Dashboard**
+
+- skeleton loading mostra una hero card e due card metriche in verticale
+- il get started continua a comparire solo per household globalmente incompleti
+- cambio tab rapido `Dashboard / Entries / Assets / Settings` ripristina lo stato senza reset evidenti entro pochi secondi
 
 **7. Recurring**
 

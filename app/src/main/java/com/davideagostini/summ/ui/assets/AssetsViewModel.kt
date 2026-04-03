@@ -42,6 +42,7 @@ class AssetsViewModel @Inject constructor(
     sessionRepository: SessionRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
+    private val sharingStarted = SharingStarted.WhileSubscribed(30_000)
     private val defaultSelectedMonth = YearMonth.now().toString()
     private val _uiState = MutableStateFlow(AssetsUiState())
     val uiState: StateFlow<AssetsUiState> = _uiState.asStateFlow()
@@ -55,29 +56,29 @@ class AssetsViewModel @Inject constructor(
 
     private val selectedMonth: StateFlow<String> = uiState
         .map { state -> state.selectedMonth ?: defaultSelectedMonth }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), defaultSelectedMonth)
+        .stateIn(viewModelScope, sharingStarted, defaultSelectedMonth)
 
     private val currentMonthAssetHistory: StateFlow<List<AssetHistoryEntry>> = selectedMonth
         .flatMapLatest { month -> repository.observeAssetHistoryForMonth(month) }
         .onEach { currentMonthHistoryLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val previousMonthAssetHistory: StateFlow<List<AssetHistoryEntry>> = selectedMonth
         .map { month -> YearMonth.parse(month).minusMonths(1).toString() }
         .flatMapLatest { month -> repository.observeAssetHistoryForMonth(month) }
         .onEach { previousMonthHistoryLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val hasAnyAssets: StateFlow<Boolean> = repository.observeHasAnyAssetHistory()
         .onEach { hasAnyAssetsLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        .stateIn(viewModelScope, sharingStarted, false)
 
     private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+        .stateIn(viewModelScope, sharingStarted, DEFAULT_CURRENCY)
 
     // Loading remains true until both streams have emitted at least once so the
     // screen can initialize with complete data.
@@ -89,7 +90,7 @@ class AssetsViewModel @Inject constructor(
     ) { currentReady, previousReady, hasAnyReady, monthClosesReady ->
         !currentReady || !previousReady || !hasAnyReady || !monthClosesReady
     }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+        .stateIn(viewModelScope, sharingStarted, true)
 
     private data class AssetHistoryWindow(
         val selectedMonth: String,
@@ -147,7 +148,7 @@ class AssetsViewModel @Inject constructor(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        sharingStarted,
         AssetsRenderState(
             selectedMonth = defaultSelectedMonth,
             householdCurrency = DEFAULT_CURRENCY,

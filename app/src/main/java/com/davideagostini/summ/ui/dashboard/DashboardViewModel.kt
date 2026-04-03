@@ -31,6 +31,7 @@ class DashboardViewModel @Inject constructor(
     dashboardMonthlyRepository: DashboardMonthlyRepository,
     sessionRepository: SessionRepository,
 ) : ViewModel() {
+    private val sharingStarted = SharingStarted.WhileSubscribed(30_000)
     private val latestSummaryLoaded = MutableStateFlow(false)
     private val windowLoaded = MutableStateFlow(false)
     private val hasTransactionsLoaded = MutableStateFlow(false)
@@ -38,18 +39,18 @@ class DashboardViewModel @Inject constructor(
 
     private val latestSummary: StateFlow<DashboardMonthlySummary?> = dashboardMonthlyRepository.observeLatestSummary()
         .onEach { latestSummaryLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        .stateIn(viewModelScope, sharingStarted, null)
 
     private val hasAnyTransactions: StateFlow<Boolean> = dashboardMonthlyRepository.observeHasAnyTransactions()
         .onEach { hasTransactionsLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        .stateIn(viewModelScope, sharingStarted, false)
 
     private val hasAnyAssets: StateFlow<Boolean> = dashboardMonthlyRepository.observeHasAnyAssets()
         .onEach { hasAssetsLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        .stateIn(viewModelScope, sharingStarted, false)
 
     private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+        .stateIn(viewModelScope, sharingStarted, DEFAULT_CURRENCY)
     private val getStartedPrefs = DashboardGetStartedManager.prefs
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -61,7 +62,7 @@ class DashboardViewModel @Inject constructor(
             ?: YearMonth.now().toString()
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        sharingStarted,
         YearMonth.now().toString(),
     )
 
@@ -78,7 +79,7 @@ class DashboardViewModel @Inject constructor(
         windowLoaded.value = true
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        sharingStarted,
         emptyList(),
     )
 
@@ -168,7 +169,7 @@ class DashboardViewModel @Inject constructor(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        sharingStarted,
         DashboardBaseState(
             selectedMonth = YearMonth.now().toString(),
             householdCurrency = DEFAULT_CURRENCY,
@@ -206,7 +207,7 @@ class DashboardViewModel @Inject constructor(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        sharingStarted,
         DashboardRenderState(
             selectedMonth = YearMonth.now().toString(),
             householdCurrency = DEFAULT_CURRENCY,
@@ -231,7 +232,7 @@ class DashboardViewModel @Inject constructor(
         hasAssetsLoaded,
     ) { latestLoaded, windowReady, transactionsReady, assetsReady ->
         !latestLoaded || !windowReady || !transactionsReady || !assetsReady
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+    }.stateIn(viewModelScope, sharingStarted, true)
 
     init {
         DashboardGetStartedManager.init(appContext)

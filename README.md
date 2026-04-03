@@ -82,6 +82,8 @@ Each household uses one shared currency configured from Settings. The app does n
 - month selector
 - full-screen get-started flow for households missing entries or assets
 
+The dashboard now renders a lightweight skeleton state while its monthly summaries load, so the screen structure appears immediately instead of blocking behind a generic full-screen spinner.
+
 ### Entries
 
 - monthly transaction list
@@ -96,6 +98,7 @@ Each household uses one shared currency configured from Settings. The app does n
 - quick-entry flow
 
 The entries screen now keeps the list and category reports month-scoped, while unusual-spending insights read only a small rolling window around the selected month instead of the full transaction archive.
+It also renders a local shimmer skeleton during cold loads, so tab switches feel immediate even on slower devices.
 
 ### Assets
 
@@ -109,6 +112,7 @@ The entries screen now keeps the list and category reports month-scoped, while u
 - household currency applied automatically to new asset snapshots
 
 The assets screen now reads only the selected month and previous month snapshots so list rendering, month-over-month change, and `Copy previous month` stay responsive without downloading the full asset archive.
+Like Entries, it now uses a local shimmer skeleton during cold loads instead of blocking the whole app shell.
 
 ### Settings
 
@@ -134,6 +138,8 @@ The app also includes a dedicated export screen in Settings. It can export the c
 Recurring transactions can also be auto-applied on app startup. Once per day, after the session is ready, the app checks whether the current household has due recurring items for the current month and materializes them into the entries list without requiring a manual `Apply due` tap.
 
 The month-close screen now reads only the selected month's entries and asset snapshots instead of loading the full transaction and asset history.
+
+Bottom navigation now restores state across the primary tabs (`Dashboard`, `Entries`, `Assets`, `Settings`) so rapid tab switching reuses warm screens more reliably.
 
 Current app-language support includes:
 

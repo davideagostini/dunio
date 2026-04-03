@@ -4,22 +4,39 @@ package com.davideagostini.summ.ui.assets
 // sheet/fullscreen layering, and top-level overlays without owning business logic.
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -31,6 +48,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +67,6 @@ import com.davideagostini.summ.ui.assets.components.AssetsToolbar
 import com.davideagostini.summ.ui.assets.components.EmptyAssetsState
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
-import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
@@ -69,7 +88,10 @@ fun AssetsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (isLoading) {
-        FullScreenLoading()
+        AssetsLoadingContent(
+            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(buildRecentMonthOptions()),
+            uiState = uiState,
+        )
         return
     }
 
@@ -94,6 +116,222 @@ fun AssetsScreen(
             onDismiss = { viewModel.handleEvent(AssetsEvent.DismissDeleteDialog) },
         )
     }
+}
+
+@Composable
+private fun AssetsLoadingContent(
+    selectedMonth: String,
+    uiState: AssetsUiState,
+) {
+    val shimmer = rememberAssetsShimmerBrush()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(bottom = 140.dp),
+        ) {
+            item {
+                Text(
+                    text = stringResource(R.string.dashboard_assets_label),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                )
+            }
+
+            item {
+                AssetsToolbar(
+                    selectedMonth = selectedMonth,
+                    searchVisible = uiState.searchVisible,
+                    searchQuery = uiState.searchQuery,
+                    onOpenMonthPicker = {},
+                    onToggleSearch = {},
+                    onSearchQueryChange = {},
+                )
+            }
+
+            item {
+                SkeletonAssetsSummaryCard(shimmer)
+            }
+
+            items(4) {
+                SkeletonAssetCard(shimmer)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SkeletonAssetsSummaryCard(shimmer: Brush) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(30.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AssetsSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(120.dp)
+                    .size(width = 120.dp, height = 14.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+            AssetsSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(220.dp)
+                    .size(width = 220.dp, height = 40.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.size(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    AssetsSkeletonBlock(
+                        brush = shimmer,
+                        modifier = Modifier
+                            .width(72.dp)
+                            .size(width = 72.dp, height = 12.dp),
+                    )
+                    androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+                    AssetsSkeletonBlock(
+                        brush = shimmer,
+                        modifier = Modifier
+                            .width(96.dp)
+                            .size(width = 96.dp, height = 18.dp),
+                    )
+                }
+                androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                Column(horizontalAlignment = Alignment.End) {
+                    AssetsSkeletonBlock(
+                        brush = shimmer,
+                        modifier = Modifier
+                            .width(84.dp)
+                            .size(width = 84.dp, height = 12.dp),
+                    )
+                    androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+                    AssetsSkeletonBlock(
+                        brush = shimmer,
+                        modifier = Modifier
+                            .width(96.dp)
+                            .size(width = 96.dp, height = 18.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SkeletonAssetCard(shimmer: Brush) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AssetsSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape),
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 14.dp),
+            ) {
+                AssetsSkeletonBlock(
+                    brush = shimmer,
+                    modifier = Modifier
+                        .fillMaxWidth(0.55f)
+                        .size(width = 0.dp, height = 16.dp),
+                )
+                androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+                AssetsSkeletonBlock(
+                    brush = shimmer,
+                    modifier = Modifier
+                        .fillMaxWidth(0.35f)
+                        .size(width = 0.dp, height = 12.dp),
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                AssetsSkeletonBlock(
+                    brush = shimmer,
+                    modifier = Modifier
+                        .width(84.dp)
+                        .size(width = 84.dp, height = 16.dp),
+                )
+                androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+                AssetsSkeletonBlock(
+                    brush = shimmer,
+                    modifier = Modifier
+                        .width(56.dp)
+                        .size(width = 56.dp, height = 12.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AssetsSkeletonBlock(
+    brush: Brush,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(brush),
+    )
+}
+
+@Composable
+private fun rememberAssetsShimmerBrush(): Brush {
+    val base = MaterialTheme.colorScheme.surfaceContainerHighest
+    val highlight = MaterialTheme.colorScheme.surfaceBright
+    val transition = rememberInfiniteTransition(label = "assets_shimmer")
+    val offset by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1100, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "assets_shimmer_offset",
+    )
+    return Brush.linearGradient(
+        colors = listOf(
+            base.copy(alpha = 0.9f),
+            highlight.copy(alpha = 0.65f),
+            base.copy(alpha = 0.9f),
+        ),
+        start = Offset(offset - 220f, offset - 220f),
+        end = Offset(offset, offset),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

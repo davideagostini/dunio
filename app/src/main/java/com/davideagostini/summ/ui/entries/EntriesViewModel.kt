@@ -48,6 +48,7 @@ class EntriesViewModel @Inject constructor(
     sessionRepository: SessionRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
+    private val sharingStarted = SharingStarted.WhileSubscribed(30_000)
     private val defaultSelectedMonth = preferredRecentMonth(buildRecentMonthOptions())
     private val entriesLoaded = MutableStateFlow(false)
     private val insightsLoaded = MutableStateFlow(false)
@@ -57,14 +58,14 @@ class EntriesViewModel @Inject constructor(
 
     val categories: StateFlow<List<Category>> = categoryRepository.allCategories
         .onEach { categoriesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_CURRENCY)
+        .stateIn(viewModelScope, sharingStarted, DEFAULT_CURRENCY)
 
     private val _uiState = MutableStateFlow(EntriesUiState())
     val uiState: StateFlow<EntriesUiState> = _uiState.asStateFlow()
@@ -73,7 +74,7 @@ class EntriesViewModel @Inject constructor(
         .map { state -> state.selectedMonth ?: defaultSelectedMonth }
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
+            sharingStarted,
             defaultSelectedMonth,
         )
 
@@ -82,7 +83,7 @@ class EntriesViewModel @Inject constructor(
     }.flatMapLatest { (month, categories) ->
         entryRepository.observeEntriesForMonth(month).mapToDisplayItems(categories)
     }.onEach { entriesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val insightEntries: StateFlow<List<EntryDisplayItem>> = combine(selectedMonth, categories) { month, categories ->
         val startDate = YearMonth.parse(month).minusMonths(3).atDay(1).toString()
@@ -91,11 +92,11 @@ class EntriesViewModel @Inject constructor(
     }.flatMapLatest { (startDate, endExclusiveDate, categories) ->
         entryRepository.observeEntriesBetween(startDate, endExclusiveDate).mapToDisplayItems(categories)
     }.onEach { insightsLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val hasAnyEntries: StateFlow<Boolean> = entryRepository.observeHasAnyEntries()
         .onEach { hasAnyEntriesLoaded.value = true }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        .stateIn(viewModelScope, sharingStarted, false)
 
     val isLoading: StateFlow<Boolean> = combine(
         entriesLoaded,
@@ -105,7 +106,7 @@ class EntriesViewModel @Inject constructor(
         monthClosesLoaded,
     ) { entriesReady, insightsReady, hasAnyEntriesReady, categoriesReady, monthClosesReady ->
         !entriesReady || !insightsReady || !hasAnyEntriesReady || !categoriesReady || !monthClosesReady
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+    }.stateIn(viewModelScope, sharingStarted, true)
 
     private data class EntriesSourceState(
         val selectedMonth: String,
@@ -152,7 +153,7 @@ class EntriesViewModel @Inject constructor(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        sharingStarted,
         EntriesRenderState(
             selectedMonth = defaultSelectedMonth,
             householdCurrency = DEFAULT_CURRENCY,

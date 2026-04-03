@@ -226,6 +226,7 @@ Responsibility:
 
 - monthly asset snapshot browsing
 - query only the selected month plus previous month for the main screen
+- render a local shimmer skeleton while month snapshots are loading
 - asset/liability CRUD
 - copy previous month snapshot
 - compute change as a month-over-month comparison
@@ -251,6 +252,7 @@ Responsibility:
 - search/filter by month and entry type
 - query only the selected month for the main list and reports
 - query only a short rolling window for unusual spending insights
+- render a local shimmer skeleton while the selected month is loading
 - view/edit/delete existing entries
 - show unusual spending insights and monthly balance summary
 - render amounts using the household currency from session state
@@ -420,6 +422,7 @@ Responsibility:
 
 - auth vs main-app routing
 - bottom navigation container
+- preserve and restore state across the primary tabs
 - screen registration
 - cross-screen overlay coordination such as fullscreen flows and month-picker visibility
 

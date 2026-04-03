@@ -3,28 +3,44 @@ package com.davideagostini.summ.ui.entries
 // EntriesScreen orchestrates the entries feature: it collects state, routes events to the ViewModel,
 // and decides which overlay is visible at any given time without holding business logic itself.
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -34,7 +50,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,10 +64,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
-import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
+import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.entries.components.BalanceCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingBreakdownCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingChartCard
@@ -60,7 +80,11 @@ import com.davideagostini.summ.ui.entries.components.UnusualSpendingCard
 import kotlinx.coroutines.launch
 
 @Composable
-fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
+fun EntriesScreen(
+    viewModel: EntriesViewModel = hiltViewModel(),
+    onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
+) {
     // The screen stays thin: it only observes immutable state and forwards callbacks to the ViewModel.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -69,8 +93,10 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
     val onEvent = viewModel::handleEvent
 
     if (isLoading) {
-        // Keep the user on a single loading surface until all feature data streams are ready.
-        FullScreenLoading()
+        EntriesLoadingContent(
+            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(buildRecentMonthOptions()),
+            uiState = uiState,
+        )
         return
     }
 
@@ -80,8 +106,232 @@ fun EntriesScreen(viewModel: EntriesViewModel = hiltViewModel()) {
         categories = categories,
         uiState = uiState,
         onEvent = onEvent,
-        onFullscreenEditVisibilityChanged = {},
-        onMonthPickerVisibilityChanged = {},
+        onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
+    )
+}
+
+@Composable
+private fun EntriesLoadingContent(
+    selectedMonth: String,
+    uiState: EntriesUiState,
+) {
+    val shimmer = rememberShimmerBrush()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(bottom = 92.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Text(
+                    text = stringResource(R.string.entries_action_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                )
+            }
+
+            item {
+                EntriesToolbar(
+                    selectedMonth = selectedMonth,
+                    contentMode = uiState.contentMode,
+                    searchVisible = uiState.searchVisible,
+                    searchQuery = uiState.searchQuery,
+                    onOpenMonthPicker = {},
+                    onToggleContentMode = {},
+                    onToggleSearch = {},
+                    onSearchQueryChange = {},
+                )
+            }
+
+            item {
+                SkeletonBalanceCard(shimmer)
+            }
+
+            items(4) { index ->
+                SkeletonDaySection(
+                    shimmer = shimmer,
+                    modifier = Modifier.padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = if (index == 0) 4.dp else 0.dp,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SkeletonBalanceCard(shimmer: Brush) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            SkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(14.dp),
+            )
+            SkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(220.dp)
+                    .height(36.dp),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                SkeletonFilterChip(shimmer, Modifier.weight(1f))
+                SkeletonFilterChip(shimmer, Modifier.weight(1f))
+                SkeletonFilterChip(shimmer, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SkeletonFilterChip(
+    shimmer: Brush,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.height(42.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            SkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(56.dp)
+                    .height(12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SkeletonDaySection(
+    shimmer: Brush,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        SkeletonBlock(
+            brush = shimmer,
+            modifier = Modifier
+                .width(96.dp)
+                .height(12.dp),
+        )
+        repeat(2) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                                shape = CircleShape,
+                            ),
+                    ) {
+                        SkeletonBlock(
+                            brush = shimmer,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        SkeletonBlock(
+                            brush = shimmer,
+                            modifier = Modifier
+                                .fillMaxWidth(0.72f)
+                                .height(14.dp),
+                        )
+                        SkeletonBlock(
+                            brush = shimmer,
+                            modifier = Modifier
+                                .fillMaxWidth(0.42f)
+                                .height(12.dp),
+                        )
+                    }
+                    SkeletonBlock(
+                        brush = shimmer,
+                        modifier = Modifier
+                            .width(72.dp)
+                            .height(16.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SkeletonBlock(
+    brush: Brush,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(brush),
+    )
+}
+
+@Composable
+private fun rememberShimmerBrush(): Brush {
+    val base = MaterialTheme.colorScheme.surfaceContainerHighest
+    val highlight = MaterialTheme.colorScheme.surfaceBright
+    val transition = rememberInfiniteTransition(label = "entries_shimmer")
+    val offset by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1100, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "entries_shimmer_offset",
+    )
+    return Brush.linearGradient(
+        colors = listOf(
+            base.copy(alpha = 0.9f),
+            highlight.copy(alpha = 0.65f),
+            base.copy(alpha = 0.9f),
+        ),
+        start = Offset(offset - 220f, offset - 220f),
+        end = Offset(offset, offset),
     )
 }
 

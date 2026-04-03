@@ -6,10 +6,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,15 +31,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
-import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
+import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.dashboard.components.DashboardToolbar
 import com.davideagostini.summ.ui.dashboard.components.GetStartedScreen
 import com.davideagostini.summ.ui.dashboard.components.MetricCard
@@ -50,7 +65,9 @@ fun DashboardScreen(
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
 
     if (isLoading) {
-        FullScreenLoading()
+        DashboardLoadingContent(
+            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(buildRecentMonthOptions()),
+        )
         return
     }
 
@@ -64,6 +81,186 @@ fun DashboardScreen(
         onOpenNewAsset = onOpenNewAsset,
         onGetStartedVisibilityChanged = onGetStartedVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
+    )
+}
+
+@Composable
+private fun DashboardLoadingContent(
+    selectedMonth: String,
+) {
+    val shimmer = rememberDashboardShimmerBrush()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainer),
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+                contentPadding = PaddingValues(bottom = 92.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+            ) {
+                item {
+                    Text(
+                        text = stringResource(R.string.dashboard_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    )
+                }
+
+                item {
+                    DashboardToolbar(
+                        selectedMonth = selectedMonth,
+                        onOpenMonthPicker = {},
+                    )
+                }
+
+                item {
+                    DashboardHeroSkeleton(shimmer)
+                }
+
+                item {
+                    DashboardMetricRowSkeleton(shimmer)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardHeroSkeleton(shimmer: Brush) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        ) {
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(14.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(10.dp))
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(220.dp)
+                    .height(42.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(18.dp))
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DashboardMetricRowSkeleton(shimmer: Brush) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+    ) {
+        DashboardMetricSkeletonCard(
+            shimmer = shimmer,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        DashboardMetricSkeletonCard(
+            shimmer = shimmer,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun DashboardMetricSkeletonCard(
+    shimmer: Brush,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .width(84.dp)
+                    .height(12.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(12.dp))
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(28.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(10.dp))
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .fillMaxWidth(0.55f)
+                    .height(12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DashboardSkeletonBlock(
+    brush: Brush,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(brush),
+    )
+}
+
+@Composable
+private fun rememberDashboardShimmerBrush(): Brush {
+    val base = MaterialTheme.colorScheme.surfaceContainerHighest
+    val highlight = MaterialTheme.colorScheme.surfaceBright
+    val transition = rememberInfiniteTransition(label = "dashboard_shimmer")
+    val offset by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1100, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "dashboard_shimmer_offset",
+    )
+    return Brush.linearGradient(
+        colors = listOf(
+            base.copy(alpha = 0.9f),
+            highlight.copy(alpha = 0.65f),
+            base.copy(alpha = 0.9f),
+        ),
+        start = Offset(offset - 220f, offset - 220f),
+        end = Offset(offset, offset),
     )
 }
 

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -114,6 +115,14 @@ fun AppNavGraph(
 
     fun navigate(route: String) = navController.navigate(route) { launchSingleTop = true }
 
+    fun navigatePrimary(route: String) = navController.navigate(route) {
+        popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // The NavHost keeps feature routes isolated while the shell manages cross-screen overlays.
         NavHost(
@@ -135,7 +144,7 @@ fun AppNavGraph(
                     onOpenQuickEntry = { showEntrySheet = true },
                     onOpenNewAsset = {
                         openAssetsAddOnNextVisit = true
-                        navigate("assets")
+                        navigatePrimary("assets")
                     },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                 )
@@ -234,11 +243,11 @@ fun AppNavGraph(
             ) {
                 SummBottomBar(
                     currentRoute = currentRoute,
-                    onNavigateDashboard = { navigate("dashboard") },
-                    onNavigateEntries = { navigate("entries") },
+                    onNavigateDashboard = { navigatePrimary("dashboard") },
+                    onNavigateEntries = { navigatePrimary("entries") },
                     onAddEntry = { showEntrySheet = true },
-                    onNavigateAssets = { navigate("assets") },
-                    onNavigateSettings = { navigate("settings") },
+                    onNavigateAssets = { navigatePrimary("assets") },
+                    onNavigateSettings = { navigatePrimary("settings") },
                 )
             }
         }
@@ -274,22 +283,8 @@ private fun EntriesScreenWithOverlayState(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
     viewModel: com.davideagostini.summ.ui.entries.EntriesViewModel = hiltViewModel(),
 ) {
-    // The wrapper keeps navigation concerns out of the entries screen while still exposing overlay state to the shell.
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val renderState by viewModel.renderState.collectAsStateWithLifecycle()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    if (isLoading) {
-        com.davideagostini.summ.ui.components.FullScreenLoading()
-        return
-    }
-
-    com.davideagostini.summ.ui.entries.EntriesContent(
-        renderState = renderState,
-        categories = categories,
-        uiState = uiState,
-        onEvent = viewModel::handleEvent,
+    com.davideagostini.summ.ui.entries.EntriesScreen(
+        viewModel = viewModel,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
     )
