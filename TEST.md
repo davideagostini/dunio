@@ -51,11 +51,14 @@ Esito:
 - month picker mostra i dati del mese corretto
 - cambio mese non scarica o ricalcola l'intero storico percepibilmente
 - shimmer loading appare su cold load senza restare bloccati sulla dashboard precedente
+- passaggio `Dashboard -> Entries` non genera ANR o freeze percepibili su device lenti
+- uscita da `Entries` verso altre tab non genera freeze o crash
 - filtro `All / Expenses / Income`
 - search su descrizione/categoria
 - grouping per giorno corretto
 - unusual spending insight ancora coerente
 - report categoria coerente con il solo mese selezionato
+- il tab `Reports` risponde senza blocchi evidenti anche con molti movimenti nel mese
 - edit entry funziona
 - delete entry funziona
 - success state e dismiss sheet corretti

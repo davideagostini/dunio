@@ -33,6 +33,7 @@ internal fun EntryCard(
     index: Int,
     count: Int,
     readOnly: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val shape = listItemShape(index, count)
@@ -44,7 +45,7 @@ internal fun EntryCard(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(verticalPadding)
             .clickable(onClick = onClick),

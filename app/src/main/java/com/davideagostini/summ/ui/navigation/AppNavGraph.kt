@@ -61,6 +61,7 @@ import com.davideagostini.summ.ui.auth.SessionViewModel
 import com.davideagostini.summ.ui.categories.CategoriesScreen
 import com.davideagostini.summ.ui.dashboard.DashboardScreen
 import com.davideagostini.summ.ui.entry.QuickEntryScreen
+import com.davideagostini.summ.ui.entries.EntriesRouteScreen
 import com.davideagostini.summ.ui.settings.SettingsScreen
 import com.davideagostini.summ.ui.settings.currency.CurrencyScreen
 import com.davideagostini.summ.ui.settings.export.ExportScreen
@@ -131,8 +132,9 @@ fun AppNavGraph(
             modifier = Modifier.matchParentSize(),
         ) {
             composable("entries") {
-                // Entries reports overlay visibility so the shell can hide the bottom bar when needed.
-                EntriesScreenWithOverlayState(
+                // Entries uses a lightweight route placeholder first so tab switches remain immediate
+                // on older devices before the full screen ViewModel tree is mounted.
+                EntriesRouteScreen(
                     onFullscreenEditVisibilityChanged = { showEntriesFullscreenEditor = it },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                 )
@@ -275,19 +277,6 @@ fun AppNavGraph(
             )
         }
     }
-}
-
-@Composable
-private fun EntriesScreenWithOverlayState(
-    onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
-    onMonthPickerVisibilityChanged: (Boolean) -> Unit,
-    viewModel: com.davideagostini.summ.ui.entries.EntriesViewModel = hiltViewModel(),
-) {
-    com.davideagostini.summ.ui.entries.EntriesScreen(
-        viewModel = viewModel,
-        onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
-        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
-    )
 }
 
 @Composable

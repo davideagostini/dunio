@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,6 +69,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
 
@@ -81,6 +83,7 @@ fun DashboardScreen(
     DashboardContent(
         renderState = renderState,
         uiState = uiState,
+        isMonthRefreshing = isMonthRefreshing,
         onSelectMonth = viewModel::selectMonth,
         onSelectRange = viewModel::selectRange,
         onDismissGetStarted = viewModel::dismissGetStarted,
@@ -275,6 +278,7 @@ private fun rememberDashboardShimmerBrush(): Brush {
 private fun DashboardContent(
     renderState: DashboardRenderState,
     uiState: DashboardUiState,
+    isMonthRefreshing: Boolean,
     onSelectMonth: (String) -> Unit,
     onSelectRange: (DashboardRange) -> Unit,
     onDismissGetStarted: () -> Unit,
@@ -341,6 +345,16 @@ private fun DashboardContent(
                         selectedMonth = selectedMonth,
                         onOpenMonthPicker = { showMonthPicker = true },
                     )
+                }
+
+                if (isMonthRefreshing) {
+                    item {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
+                        )
+                    }
                 }
 
                 item {

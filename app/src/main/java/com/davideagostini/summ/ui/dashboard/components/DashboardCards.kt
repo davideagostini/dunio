@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.dashboard.ChartPoint
@@ -87,27 +90,41 @@ fun NetWorthCard(
             Spacer(Modifier.height(6.dp))
             if (monthlyChangePercent != null) {
                 val changeColor = if (monthlyChangePercent >= 0) IncomeGreen else ExpenseRed
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        imageVector = if (monthlyChangePercent >= 0) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
-                        contentDescription = null,
-                        tint = changeColor,
-                    )
-                    Text(
-                        text = stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(monthlyChangePercent))),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = changeColor,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = if (monthlyChangePercent >= 0) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
+                            contentDescription = null,
+                            tint = changeColor,
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .size(14.dp),
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.dashboard_change_vs_previous_month,
+                                formatPercent(abs(monthlyChangePercent)),
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = changeColor,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(Modifier.width(14.dp))
+                    }
                 }
             } else {
                 Text(
                     text = stringResource(R.string.dashboard_no_previous_month),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
             }
             Spacer(Modifier.height(20.dp))

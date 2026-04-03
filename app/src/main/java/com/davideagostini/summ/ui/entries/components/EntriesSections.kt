@@ -18,11 +18,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
-import com.davideagostini.summ.domain.model.EntryDisplayItem
-import com.davideagostini.summ.ui.entries.EntryDayGroup
 import com.davideagostini.summ.ui.entries.UnusualSpendingInsight
 import com.davideagostini.summ.ui.entries.formatDayLabel
 import com.davideagostini.summ.ui.format.formatCurrency
+import java.time.LocalDate
 import java.util.Locale
 
 @Composable
@@ -90,50 +89,35 @@ internal fun UnusualSpendingCard(
 }
 
 @Composable
-internal fun DayGroupSection(
+internal fun DayGroupHeader(
     currency: String,
-    group: EntryDayGroup,
-    readOnly: Boolean,
-    onEntryClick: (EntryDisplayItem) -> Unit,
+    date: LocalDate,
+    expenseTotal: Double,
+    modifier: Modifier = Modifier,
 ) {
-    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
-        val dayLabel = formatDayLabel(
-            date = group.key,
-            todayLabel = stringResource(R.string.entries_today),
-            yesterdayLabel = stringResource(R.string.entries_yesterday),
+    val dayLabel = formatDayLabel(
+        date = date,
+        todayLabel = stringResource(R.string.entries_today),
+        yesterdayLabel = stringResource(R.string.entries_yesterday),
+    )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = dayLabel.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f),
         )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 2.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = dayLabel.uppercase(Locale.getDefault()),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = formatCurrency(group.expenseTotal, currency),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                fontWeight = FontWeight.Medium,
-            )
-        }
-
-        Column {
-            group.entries.forEachIndexed { index, entry ->
-                EntryCard(
-                    item = entry,
-                    currency = currency,
-                    index = index,
-                    count = group.entries.size,
-                    readOnly = readOnly,
-                    onClick = { onEntryClick(entry) },
-                )
-            }
-        }
+        Text(
+            text = formatCurrency(expenseTotal, currency),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            fontWeight = FontWeight.Medium,
+        )
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.firebase.FirestorePaths
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
@@ -44,7 +45,6 @@ class EntryDao @Inject constructor(
     private val firestore: FirebaseFirestore?,
     private val sessionRepository: SessionRepository,
 ) {
-
     suspend fun insert(entry: Entry) {
         val db = requireNotNull(firestore) { "Firestore is not available." }
         val householdId = sessionRepository.requireHouseholdId()
@@ -102,7 +102,7 @@ class EntryDao @Inject constructor(
                 firestoreFlow<List<Entry>> { emit ->
                     db.collection(FirestorePaths.transactions(householdId))
                         .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(
@@ -145,7 +145,7 @@ class EntryDao @Inject constructor(
                 firestoreFlow<Boolean> { emit ->
                     db.collection(FirestorePaths.transactions(householdId))
                         .limit(1)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(Result.success(!snapshot.isEmpty))
@@ -172,7 +172,7 @@ class EntryDao @Inject constructor(
                         .whereGreaterThanOrEqualTo("date", startDate)
                         .whereLessThan("date", endExclusiveDate)
                         .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(

@@ -2,6 +2,7 @@ package com.davideagostini.summ.data.dao
 
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
@@ -123,7 +124,7 @@ class AssetDao @Inject constructor(
                 firestoreFlow<List<AssetHistoryEntry>> { emit ->
                     db.collectionGroup("history")
                         .whereEqualTo("householdId", householdId)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(
@@ -152,7 +153,7 @@ class AssetDao @Inject constructor(
                     db.collectionGroup("history")
                         .whereEqualTo("householdId", householdId)
                         .whereEqualTo("period", period)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(
@@ -181,7 +182,7 @@ class AssetDao @Inject constructor(
                     db.collectionGroup("history")
                         .whereEqualTo("householdId", householdId)
                         .limit(1)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(Result.success(!snapshot.isEmpty))

@@ -3,6 +3,7 @@ package com.davideagostini.summ.data.dao
 import android.content.Context
 import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.RecurringTransaction
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
@@ -57,7 +58,7 @@ class RecurringTransactionDao @Inject constructor(
                 firestoreFlow<List<RecurringTransaction>> { emit ->
                     db.collection(FirestorePaths.recurringTransactions(readyState.household.id))
                         .orderBy("description", Query.Direction.ASCENDING)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(

@@ -99,6 +99,7 @@ The dashboard now renders a lightweight skeleton state while its monthly summari
 
 The entries screen now keeps the list and category reports month-scoped, while unusual-spending insights read only a small rolling window around the selected month instead of the full transaction archive.
 It also renders a local shimmer skeleton during cold loads, so tab switches feel immediate even on slower devices.
+To reduce ANR risk on older phones, Firestore transaction listeners now dispatch off the main thread and the visible ledger list is flattened into truly lazy day headers plus entry rows instead of rendering whole day groups in one composed block.
 
 ### Assets
 
@@ -140,6 +141,8 @@ Recurring transactions can also be auto-applied on app startup. Once per day, af
 The month-close screen now reads only the selected month's entries and asset snapshots instead of loading the full transaction and asset history.
 
 Bottom navigation now restores state across the primary tabs (`Dashboard`, `Entries`, `Assets`, `Settings`) so rapid tab switching reuses warm screens more reliably.
+
+Realtime Firestore DAO listeners now use a shared background executor for snapshot callbacks, which keeps document deserialization and mapping away from the UI thread across dashboard, entries, assets, members, invites, recurring, categories, and month close.
 
 Current app-language support includes:
 

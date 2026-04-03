@@ -252,10 +252,16 @@ Responsibility:
 - search/filter by month and entry type
 - query only the selected month for the main list and reports
 - query only a short rolling window for unusual spending insights
+- keep category reports on-demand instead of blocking the initial list render
+- flatten grouped entries into lazy day headers plus lazy entry rows
 - render a local shimmer skeleton while the selected month is loading
 - view/edit/delete existing entries
 - show unusual spending insights and monthly balance summary
 - render amounts using the household currency from session state
+
+Cross-cutting performance note:
+
+- Firestore snapshot listeners in realtime DAOs dispatch on a shared background executor so snapshot parsing does not run on the main thread by default.
 
 ### `ui/settings/currency`
 

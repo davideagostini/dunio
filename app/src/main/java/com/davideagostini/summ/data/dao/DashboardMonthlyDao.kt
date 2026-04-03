@@ -1,6 +1,7 @@
 package com.davideagostini.summ.data.dao
 
 import com.davideagostini.summ.data.entity.DashboardMonthlySummary
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
@@ -52,7 +53,7 @@ class DashboardMonthlyDao @Inject constructor(
                 firestoreFlow<Boolean> { emit ->
                     db.collection(FirestorePaths.transactions(readyState.household.id))
                         .limit(1)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(Result.success(!snapshot.isEmpty))
@@ -73,7 +74,7 @@ class DashboardMonthlyDao @Inject constructor(
                 firestoreFlow<Boolean> { emit ->
                     db.collection(FirestorePaths.assets(readyState.household.id))
                         .limit(1)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(Result.success(!snapshot.isEmpty))
@@ -95,7 +96,7 @@ class DashboardMonthlyDao @Inject constructor(
                     db.collection(FirestorePaths.dashboardMonthly(readyState.household.id))
                         .orderBy("period", Query.Direction.DESCENDING)
                         .limit(1)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> {
@@ -121,7 +122,7 @@ class DashboardMonthlyDao @Inject constructor(
                     db.collection(FirestorePaths.dashboardMonthly(readyState.household.id))
                         .orderBy("period", Query.Direction.DESCENDING)
                         .limit(limit)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(
@@ -150,7 +151,7 @@ class DashboardMonthlyDao @Inject constructor(
                         .whereGreaterThanOrEqualTo("period", startPeriod)
                         .whereLessThanOrEqualTo("period", endPeriod)
                         .orderBy("period", Query.Direction.ASCENDING)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(

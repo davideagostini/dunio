@@ -43,6 +43,7 @@ class DashboardViewModel @Inject constructor(
     private val windowLoaded = MutableStateFlow(false)
     private val hasTransactionsLoaded = MutableStateFlow(false)
     private val hasAssetsLoaded = MutableStateFlow(false)
+    private val pendingMonthRefresh = MutableStateFlow<String?>(null)
 
     private val latestSummary: StateFlow<DashboardMonthlySummary?> = dashboardMonthlyRepository.observeLatestSummary()
         .onEach { latestSummaryLoaded.value = true }
@@ -82,13 +83,21 @@ class DashboardViewModel @Inject constructor(
         monthWindow.last() to monthWindow.first()
     }.flatMapLatest { (startMonth, endMonth) ->
         dashboardMonthlyRepository.observeSummaryWindow(startMonth, endMonth)
-    }.onEach {
+    }.onEach { summaries ->
         windowLoaded.value = true
+        val pendingMonth = pendingMonthRefresh.value
+        if (pendingMonth != null && summaries.any { it.period == pendingMonth }) {
+            pendingMonthRefresh.value = null
+        }
     }.stateIn(
         viewModelScope,
         sharingStarted,
         emptyList(),
     )
+
+    val isMonthRefreshing: StateFlow<Boolean> = pendingMonthRefresh
+        .map { pendingMonth -> pendingMonth != null }
+        .stateIn(viewModelScope, sharingStarted, false)
 
     private val dashboardBaseState: StateFlow<DashboardBaseState> = combine(
         dashboardWindow,
@@ -260,6 +269,9 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun selectMonth(month: String) {
+        if (month != effectiveSelectedMonth.value) {
+            pendingMonthRefresh.value = month
+        }
         _uiState.update { it.copy(selectedMonth = month) }
     }
 

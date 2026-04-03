@@ -1,6 +1,7 @@
 package com.davideagostini.summ.data.dao
 
 import com.davideagostini.summ.data.entity.Invite
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
@@ -32,7 +33,7 @@ class InviteDao(
                 is SessionState.Ready -> {
                     firestoreFlow<List<Invite>> { emit ->
                         firestore.collection(FirestorePaths.invites(state.household.id))
-                            .addSnapshotListener { snapshot, error ->
+                            .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                                 when {
                                     error != null -> emit(Result.failure(error))
                                     snapshot != null -> emit(

@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
@@ -88,6 +89,7 @@ fun AssetsScreen(
     // Collect the feature state with lifecycle awareness so the UI only observes
     // active screens and avoids leaking recompositions in the background.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -102,6 +104,7 @@ fun AssetsScreen(
     AssetsContent(
         renderState = renderState,
         uiState = uiState,
+        isMonthRefreshing = isMonthRefreshing,
         onEvent = viewModel::handleEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
@@ -343,6 +346,7 @@ private fun rememberAssetsShimmerBrush(): Brush {
 private fun AssetsContent(
     renderState: AssetsRenderState,
     uiState: AssetsUiState,
+    isMonthRefreshing: Boolean,
     onEvent: (AssetsEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
@@ -441,18 +445,19 @@ private fun AssetsContent(
                 )
             }
 
-            item {
-                AssetsSummaryCard(
-                    currency = renderState.householdCurrency,
-                    totalAssets = renderState.totalAssets,
-                    totalLiabilities = renderState.totalLiabilities,
-                    netWorth = renderState.netWorth,
-                )
+            if (isMonthRefreshing) {
+                item {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                    )
+                }
             }
 
             if (isMonthClosed) {
                 item {
-                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                    Box(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 8.dp)) {
                         MonthCloseReadOnlyBanner(
                             message = stringResource(
                                 R.string.month_close_read_only_message,
@@ -461,6 +466,15 @@ private fun AssetsContent(
                         )
                     }
                 }
+            }
+
+            item {
+                AssetsSummaryCard(
+                    currency = renderState.householdCurrency,
+                    totalAssets = renderState.totalAssets,
+                    totalLiabilities = renderState.totalLiabilities,
+                    netWorth = renderState.netWorth,
+                )
             }
 
             if (uiState.operationErrorMessage != null && uiState.sheetMode == AssetSheetMode.Hidden) {

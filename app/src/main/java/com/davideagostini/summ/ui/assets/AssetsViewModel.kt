@@ -53,6 +53,7 @@ class AssetsViewModel @Inject constructor(
     private val defaultSelectedMonth = YearMonth.now().toString()
     private val _uiState = MutableStateFlow(AssetsUiState())
     val uiState: StateFlow<AssetsUiState> = _uiState.asStateFlow()
+    private val pendingMonthRefresh = MutableStateFlow<String?>(null)
 
     // These flags gate the initial loading state until each data source has
     // emitted at least once.
@@ -67,7 +68,12 @@ class AssetsViewModel @Inject constructor(
 
     private val currentMonthAssetHistory: StateFlow<List<AssetHistoryEntry>> = selectedMonth
         .flatMapLatest { month -> repository.observeAssetHistoryForMonth(month) }
-        .onEach { currentMonthHistoryLoaded.value = true }
+        .onEach {
+            currentMonthHistoryLoaded.value = true
+            if (pendingMonthRefresh.value == selectedMonth.value) {
+                pendingMonthRefresh.value = null
+            }
+        }
         .stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val previousMonthAssetHistory: StateFlow<List<AssetHistoryEntry>> = selectedMonth
@@ -78,6 +84,10 @@ class AssetsViewModel @Inject constructor(
 
     private val hasAnyAssets: StateFlow<Boolean> = repository.observeHasAnyAssetHistory()
         .onEach { hasAnyAssetsLoaded.value = true }
+        .stateIn(viewModelScope, sharingStarted, false)
+
+    val isMonthRefreshing: StateFlow<Boolean> = pendingMonthRefresh
+        .map { pendingMonth -> pendingMonth != null }
         .stateIn(viewModelScope, sharingStarted, false)
 
     private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
@@ -226,7 +236,12 @@ class AssetsViewModel @Inject constructor(
                     searchQuery = it.searchQuery,
                 )
             }
-            is AssetsEvent.SelectMonth -> _uiState.update { it.copy(selectedMonth = event.month) }
+            is AssetsEvent.SelectMonth -> {
+                if (event.month != selectedMonth.value) {
+                    pendingMonthRefresh.value = event.month
+                }
+                _uiState.update { it.copy(selectedMonth = event.month) }
+            }
             AssetsEvent.ToggleSearch -> _uiState.update {
                 it.copy(searchVisible = !it.searchVisible)
             }

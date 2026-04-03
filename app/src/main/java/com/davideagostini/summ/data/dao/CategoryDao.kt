@@ -3,6 +3,7 @@ package com.davideagostini.summ.data.dao
 import android.content.Context
 import com.davideagostini.summ.data.category.SystemCategories
 import com.davideagostini.summ.data.entity.Category
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
@@ -101,7 +102,7 @@ class CategoryDao @Inject constructor(
                 firestoreFlow<List<Category>> { emit ->
                     db.collection(FirestorePaths.categories(householdId))
                         .orderBy("name", Query.Direction.ASCENDING)
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(

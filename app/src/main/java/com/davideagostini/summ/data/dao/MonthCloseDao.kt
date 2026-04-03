@@ -1,6 +1,7 @@
 package com.davideagostini.summ.data.dao
 
 import com.davideagostini.summ.data.entity.MonthClose
+import com.davideagostini.summ.data.firebase.FirestoreExecutors
 import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
@@ -45,7 +46,7 @@ class MonthCloseDao @Inject constructor(
             } else {
                 firestoreFlow<List<MonthClose>> { emit ->
                     db.collection(FirestorePaths.monthCloses(readyState.household.id))
-                        .addSnapshotListener { snapshot, error ->
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
                             when {
                                 error != null -> emit(Result.failure(error))
                                 snapshot != null -> emit(

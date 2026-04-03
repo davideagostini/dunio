@@ -17,6 +17,28 @@ data class EntryDayGroup(
 )
 
 @Immutable
+sealed interface EntriesListItem {
+    val key: String
+}
+
+@Immutable
+data class EntriesDayHeaderItem(
+    val date: LocalDate,
+    val expenseTotal: Double,
+) : EntriesListItem {
+    override val key: String = "header:$date"
+}
+
+@Immutable
+data class EntriesRowItem(
+    val entry: EntryDisplayItem,
+    val groupIndex: Int,
+    val groupCount: Int,
+) : EntriesListItem {
+    override val key: String = "entry:${entry.id}"
+}
+
+@Immutable
 data class UnusualSpendingInsight(
     val category: String,
     val currentAmount: Double,
@@ -41,6 +63,7 @@ data class EntriesRenderState(
     val isMonthClosed: Boolean,
     val monthEntries: List<EntryDisplayItem>,
     val visibleEntries: List<EntryDisplayItem>,
+    val listItems: List<EntriesListItem>,
     val dayGroups: List<EntryDayGroup>,
     val unusualSpendingInsights: List<UnusualSpendingInsight>,
     val categorySpendingBreakdown: List<CategorySpendingBreakdownItem>,
@@ -77,6 +100,27 @@ internal fun buildDayGroups(entries: List<EntryDisplayItem>): List<EntryDayGroup
                 entries = dayEntries.sortedByDescending { it.date },
             )
         }
+
+internal fun buildEntriesListItems(dayGroups: List<EntryDayGroup>): List<EntriesListItem> =
+    buildList {
+        dayGroups.forEach { group ->
+            add(
+                EntriesDayHeaderItem(
+                    date = group.key,
+                    expenseTotal = group.expenseTotal,
+                )
+            )
+            group.entries.forEachIndexed { index, entry ->
+                add(
+                    EntriesRowItem(
+                        entry = entry,
+                        groupIndex = index,
+                        groupCount = group.entries.size,
+                    )
+                )
+            }
+        }
+    }
 
 internal fun buildUnusualSpendingInsights(
     entries: List<EntryDisplayItem>,

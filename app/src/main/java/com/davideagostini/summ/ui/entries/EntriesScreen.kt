@@ -37,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
@@ -50,6 +51,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,12 +75,49 @@ import com.davideagostini.summ.ui.entries.components.BalanceCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingBreakdownCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingChartCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingSummaryCard
-import com.davideagostini.summ.ui.entries.components.DayGroupSection
+import com.davideagostini.summ.ui.entries.components.DayGroupHeader
 import com.davideagostini.summ.ui.entries.components.EmptyState
 import com.davideagostini.summ.ui.entries.components.EntriesToolbar
 import com.davideagostini.summ.ui.entries.components.EntryActionSheet
+import com.davideagostini.summ.ui.entries.components.EntryCard
 import com.davideagostini.summ.ui.entries.components.UnusualSpendingCard
 import kotlinx.coroutines.launch
+
+/**
+ * Top-level transactions screen.
+ *
+ * This composable owns visual orchestration only: loading skeleton, list/report modes, sheets, and
+ * dialogs. Business rules stay inside [EntriesViewModel].
+ */
+@Composable
+fun EntriesRouteScreen(
+    onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
+) {
+    var mountContent by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!mountContent) {
+            // Let navigation commit one frame with a lightweight placeholder first so older devices
+            // do not keep the previous tab visually frozen underneath while Entries initializes.
+            withFrameNanos { }
+            mountContent = true
+        }
+    }
+
+    if (!mountContent) {
+        EntriesLoadingContent(
+            selectedMonth = preferredRecentMonth(buildRecentMonthOptions()),
+            uiState = EntriesUiState(),
+        )
+        return
+    }
+
+    EntriesScreen(
+        onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
+    )
+}
 
 /**
  * Top-level transactions screen.
@@ -93,6 +133,7 @@ fun EntriesScreen(
 ) {
     // The screen stays thin: it only observes immutable state and forwards callbacks to the ViewModel.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -111,6 +152,7 @@ fun EntriesScreen(
         renderState = renderState,
         categories = categories,
         uiState = uiState,
+        isMonthRefreshing = isMonthRefreshing,
         onEvent = onEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
@@ -347,6 +389,7 @@ internal fun EntriesContent(
     renderState: EntriesRenderState,
     categories: List<Category>,
     uiState: EntriesUiState,
+    isMonthRefreshing: Boolean,
     onEvent: (EntriesEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
@@ -364,7 +407,6 @@ internal fun EntriesContent(
     val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = renderState.selectedMonth
     val isMonthClosed = renderState.isMonthClosed
-    val dayGroups = renderState.dayGroups
     val unusualSpendingInsights = renderState.unusualSpendingInsights
     val monthLabel = renderState.monthLabel
     val isReportsMode = uiState.contentMode == EntriesContentMode.Reports
@@ -445,7 +487,17 @@ internal fun EntriesContent(
                     )
                 }
 
-                if (isMonthClosed) {
+                if (isMonthRefreshing) {
+                    item {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
+                        )
+                    }
+                }
+
+                if (isMonthClosed && !isMonthRefreshing) {
                     item {
                         MonthCloseReadOnlyBanner(
                             message = stringResource(
@@ -479,7 +531,7 @@ internal fun EntriesContent(
                         }
                     }
 
-                    if (dayGroups.isEmpty()) {
+                    if (renderState.listItems.isEmpty()) {
                         // Empty state changes its copy depending on whether the month has data at all or only filters hide it.
                         item {
                             EmptyState(
@@ -491,13 +543,24 @@ internal fun EntriesContent(
                             )
                         }
                     } else {
-                        items(dayGroups, key = { it.key.toString() }) { group ->
-                            DayGroupSection(
-                                currency = renderState.householdCurrency,
-                                group = group,
-                                readOnly = isMonthClosed,
-                                onEntryClick = { onEvent(EntriesEvent.Select(it)) },
-                            )
+                        items(renderState.listItems, key = { it.key }) { item ->
+                            when (item) {
+                                is EntriesDayHeaderItem -> DayGroupHeader(
+                                    currency = renderState.householdCurrency,
+                                    date = item.date,
+                                    expenseTotal = item.expenseTotal,
+                                    modifier = Modifier.padding(horizontal = 20.dp),
+                                )
+                                is EntriesRowItem -> EntryCard(
+                                    item = item.entry,
+                                    currency = renderState.householdCurrency,
+                                    index = item.groupIndex,
+                                    count = item.groupCount,
+                                    readOnly = isMonthClosed,
+                                    modifier = Modifier.padding(horizontal = 20.dp),
+                                    onClick = { onEvent(EntriesEvent.Select(item.entry)) },
+                                )
+                            }
                         }
                     }
                 } else if (renderState.categorySpendingBreakdown.isEmpty()) {

@@ -22,6 +22,7 @@ import com.davideagostini.summ.ui.format.formatEditableAmount
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -32,10 +33,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.YearMonth
 import javax.inject.Inject
 
@@ -57,10 +60,10 @@ class EntriesViewModel @Inject constructor(
     private val sharingStarted = SharingStarted.WhileSubscribed(30_000)
     private val defaultSelectedMonth = preferredRecentMonth(buildRecentMonthOptions())
     private val entriesLoaded = MutableStateFlow(false)
-    private val insightsLoaded = MutableStateFlow(false)
     private val hasAnyEntriesLoaded = MutableStateFlow(false)
     private val categoriesLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
+    private val pendingMonthRefresh = MutableStateFlow<String?>(null)
 
     val categories: StateFlow<List<Category>> = categoryRepository.allCategories
         .onEach { categoriesLoaded.value = true }
@@ -84,21 +87,44 @@ class EntriesViewModel @Inject constructor(
             defaultSelectedMonth,
         )
 
+    val isMonthRefreshing: StateFlow<Boolean> = pendingMonthRefresh
+        .map { pendingMonth -> pendingMonth != null }
+        .stateIn(viewModelScope, sharingStarted, false)
+
     private val monthEntries: StateFlow<List<EntryDisplayItem>> = combine(selectedMonth, categories) { month, categories ->
         month to categories
     }.flatMapLatest { (month, categories) ->
-        entryRepository.observeEntriesForMonth(month).mapToDisplayItems(categories)
-    }.onEach { entriesLoaded.value = true }
+        entryRepository.observeEntriesForMonth(month)
+            .mapToDisplayItems(categories)
+            .map { entries -> month to entries }
+    }.onEach { (month, _) ->
+        entriesLoaded.value = true
+        if (pendingMonthRefresh.value == month) {
+            pendingMonthRefresh.value = null
+        }
+    }.map { (_, entries) -> entries }
         .stateIn(viewModelScope, sharingStarted, emptyList())
 
-    private val insightEntries: StateFlow<List<EntryDisplayItem>> = combine(selectedMonth, categories) { month, categories ->
-        val startDate = YearMonth.parse(month).minusMonths(3).atDay(1).toString()
-        val endExclusiveDate = YearMonth.parse(month).plusMonths(1).atDay(1).toString()
-        Triple(startDate, endExclusiveDate, categories)
-    }.flatMapLatest { (startDate, endExclusiveDate, categories) ->
-        entryRepository.observeEntriesBetween(startDate, endExclusiveDate).mapToDisplayItems(categories)
-    }.onEach { insightsLoaded.value = true }
-        .stateIn(viewModelScope, sharingStarted, emptyList())
+    private val insightEntries: StateFlow<List<EntryDisplayItem>> = combine(
+        entriesLoaded,
+        selectedMonth,
+        categories,
+    ) { monthEntriesReady, month, categories ->
+        if (!monthEntriesReady) {
+            null
+        } else {
+            val startDate = YearMonth.parse(month).minusMonths(3).atDay(1).toString()
+            val endExclusiveDate = YearMonth.parse(month).plusMonths(1).atDay(1).toString()
+            Triple(startDate, endExclusiveDate, categories)
+        }
+    }.flatMapLatest { request ->
+        if (request == null) {
+            kotlinx.coroutines.flow.flowOf(emptyList())
+        } else {
+            val (startDate, endExclusiveDate, categories) = request
+            entryRepository.observeEntriesBetween(startDate, endExclusiveDate).mapToDisplayItems(categories)
+        }
+    }.stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val hasAnyEntries: StateFlow<Boolean> = entryRepository.observeHasAnyEntries()
         .onEach { hasAnyEntriesLoaded.value = true }
@@ -106,18 +132,26 @@ class EntriesViewModel @Inject constructor(
 
     val isLoading: StateFlow<Boolean> = combine(
         entriesLoaded,
-        insightsLoaded,
         hasAnyEntriesLoaded,
         categoriesLoaded,
         monthClosesLoaded,
-    ) { entriesReady, insightsReady, hasAnyEntriesReady, categoriesReady, monthClosesReady ->
-        !entriesReady || !insightsReady || !hasAnyEntriesReady || !categoriesReady || !monthClosesReady
+    ) { entriesReady, hasAnyEntriesReady, categoriesReady, monthClosesReady ->
+        !entriesReady || !hasAnyEntriesReady || !categoriesReady || !monthClosesReady
     }.stateIn(viewModelScope, sharingStarted, true)
 
     private data class EntriesSourceState(
         val selectedMonth: String,
         val monthEntries: List<EntryDisplayItem>,
         val insightEntries: List<EntryDisplayItem>,
+    )
+
+    private data class EntriesRenderInputs(
+        val source: EntriesSourceState,
+        val closes: List<MonthClose>,
+        val currency: String,
+        val state: EntriesUiState,
+        val hasAnyEntries: Boolean,
+        val uncategorizedLabel: String,
     )
 
     val renderState: StateFlow<EntriesRenderState> = combine(
@@ -133,30 +167,59 @@ class EntriesViewModel @Inject constructor(
         uiState,
         hasAnyEntries,
     ) { source, closes, currency, state, hasAnyEntries ->
-        val visibleEntries = source.monthEntries.filter { entry ->
-            matchesFilter(entry, state.filterType) && matchesSearch(entry, state.searchQuery)
-        }
-        val categorySpendingBreakdown = buildCategorySpendingBreakdown(
-            entries = source.monthEntries,
+        EntriesRenderInputs(
+            source = source,
+            closes = closes,
+            currency = currency,
+            state = state,
+            hasAnyEntries = hasAnyEntries,
             uncategorizedLabel = appContext.getString(R.string.entries_reports_uncategorized),
         )
+    }.mapLatest { inputs ->
+        withContext(Dispatchers.Default) {
+            val visibleEntries = inputs.source.monthEntries.filter { entry ->
+                matchesFilter(entry, inputs.state.filterType) &&
+                    matchesSearch(entry, inputs.state.searchQuery)
+            }
+            val categorySpendingBreakdown = if (inputs.state.contentMode == EntriesContentMode.Reports) {
+                buildCategorySpendingBreakdown(
+                    entries = inputs.source.monthEntries,
+                    uncategorizedLabel = inputs.uncategorizedLabel,
+                )
+            } else {
+                emptyList()
+            }
+            val unusualSpendingInsights = if (inputs.state.contentMode == EntriesContentMode.Entries) {
+                buildUnusualSpendingInsights(inputs.source.insightEntries, inputs.source.selectedMonth)
+            } else {
+                emptyList()
+            }
+            val dayGroups = buildDayGroups(visibleEntries)
 
-        EntriesRenderState(
-            selectedMonth = source.selectedMonth,
-            householdCurrency = currency,
-            isMonthClosed = closes.any { it.period == source.selectedMonth && it.status == "closed" },
-            monthEntries = source.monthEntries,
-            visibleEntries = visibleEntries,
-            dayGroups = buildDayGroups(visibleEntries),
-            unusualSpendingInsights = buildUnusualSpendingInsights(source.insightEntries, source.selectedMonth),
-            categorySpendingBreakdown = categorySpendingBreakdown,
-            categorySpendingTotal = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::totalAmount),
-            categorySpendingTransactionCount = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::transactionCount),
-            totalExpenses = source.monthEntries.sumOf { entry -> if (entry.type == "expense") entry.price else 0.0 },
-            totalIncome = source.monthEntries.sumOf { entry -> if (entry.type == "income") entry.price else 0.0 },
-            monthLabel = formatMonthLabel(source.selectedMonth),
-            hasAnyEntries = hasAnyEntries,
-        )
+            EntriesRenderState(
+                selectedMonth = inputs.source.selectedMonth,
+                householdCurrency = inputs.currency,
+                isMonthClosed = inputs.closes.any { close ->
+                    close.period == inputs.source.selectedMonth && close.status == "closed"
+                },
+                monthEntries = inputs.source.monthEntries,
+                visibleEntries = visibleEntries,
+                listItems = buildEntriesListItems(dayGroups),
+                dayGroups = dayGroups,
+                unusualSpendingInsights = unusualSpendingInsights,
+                categorySpendingBreakdown = categorySpendingBreakdown,
+                categorySpendingTotal = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::totalAmount),
+                categorySpendingTransactionCount = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::transactionCount),
+                totalExpenses = inputs.source.monthEntries.sumOf { entry ->
+                    if (entry.type == "expense") entry.price else 0.0
+                },
+                totalIncome = inputs.source.monthEntries.sumOf { entry ->
+                    if (entry.type == "income") entry.price else 0.0
+                },
+                monthLabel = formatMonthLabel(inputs.source.selectedMonth),
+                hasAnyEntries = inputs.hasAnyEntries,
+            )
+        }
     }.stateIn(
         viewModelScope,
         sharingStarted,
@@ -166,6 +229,7 @@ class EntriesViewModel @Inject constructor(
             isMonthClosed = false,
             monthEntries = emptyList(),
             visibleEntries = emptyList(),
+            listItems = emptyList(),
             dayGroups = emptyList(),
             unusualSpendingInsights = emptyList(),
             categorySpendingBreakdown = emptyList(),
@@ -180,7 +244,13 @@ class EntriesViewModel @Inject constructor(
 
     fun handleEvent(event: EntriesEvent) {
         when (event) {
-            is EntriesEvent.SelectMonth -> _uiState.update { it.copy(selectedMonth = event.monthKey) }
+            is EntriesEvent.SelectMonth -> {
+                val currentMonth = selectedMonth.value
+                if (event.monthKey != currentMonth) {
+                    pendingMonthRefresh.value = event.monthKey
+                }
+                _uiState.update { it.copy(selectedMonth = event.monthKey) }
+            }
             is EntriesEvent.SelectFilter -> _uiState.update { it.copy(filterType = event.filter) }
             EntriesEvent.ToggleContentMode -> _uiState.update {
                 val nextMode = if (it.contentMode == EntriesContentMode.Entries) {
@@ -332,7 +402,11 @@ class EntriesViewModel @Inject constructor(
         )
 
     private fun Flow<List<Entry>>.mapToDisplayItems(categories: List<Category>): Flow<List<EntryDisplayItem>> =
-        map { entries -> entries.toDisplayItems(categories) }
+        mapLatest { entries ->
+            withContext(Dispatchers.Default) {
+                entries.toDisplayItems(categories)
+            }
+        }
 
     private fun List<Entry>.toDisplayItems(categories: List<Category>): List<EntryDisplayItem> {
         val categoriesBySystemKey = categories.mapNotNull { category ->
