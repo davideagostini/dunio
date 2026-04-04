@@ -44,7 +44,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,6 +73,45 @@ import com.davideagostini.summ.ui.components.MonthPickerOverlay
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import kotlinx.coroutines.launch
+
+/**
+ * Top-level assets screen.
+ *
+ * It coordinates loading placeholders, the list/summary content, and edit or action overlays while
+ * delegating month logic and mutations to [AssetsViewModel].
+ */
+@Composable
+fun AssetsRouteScreen(
+    onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
+    onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
+    openAddOnLaunch: Boolean = false,
+    onOpenAddConsumed: () -> Unit = {},
+) {
+    var mountContent by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!mountContent) {
+            withFrameNanos { }
+            withFrameNanos { }
+            mountContent = true
+        }
+    }
+
+    if (!mountContent) {
+        AssetsLoadingContent(
+            selectedMonth = preferredRecentMonth(buildRecentMonthOptions()),
+            uiState = AssetsUiState(),
+        )
+        return
+    }
+
+    AssetsScreen(
+        onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
+        onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
+        openAddOnLaunch = openAddOnLaunch,
+        onOpenAddConsumed = onOpenAddConsumed,
+    )
+}
 
 /**
  * Top-level assets screen.
@@ -366,6 +407,15 @@ private fun AssetsContent(
     val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = renderState.selectedMonth.ifBlank { preferredRecentMonth(monthOptions) }
     val isMonthClosed = renderState.isMonthClosed
+    val shimmer = rememberAssetsShimmerBrush()
+    var showHeavyBody by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!showHeavyBody) {
+            withFrameNanos { }
+            showHeavyBody = true
+        }
+    }
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
@@ -468,41 +518,51 @@ private fun AssetsContent(
                 }
             }
 
-            item {
-                AssetsSummaryCard(
-                    currency = renderState.householdCurrency,
-                    totalAssets = renderState.totalAssets,
-                    totalLiabilities = renderState.totalLiabilities,
-                    netWorth = renderState.netWorth,
-                )
-            }
-
-            if (uiState.operationErrorMessage != null && uiState.sheetMode == AssetSheetMode.Hidden) {
+            if (!showHeavyBody) {
                 item {
-                    // Top-level actions such as "Copy previous month" are not tied to a sheet, so show the same
-                    // error card directly in the screen content when a write fails.
-                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
-                        AuthErrorCard(uiState.operationErrorMessage)
-                    }
+                    SkeletonAssetsSummaryCard(shimmer)
                 }
-            }
 
-            if (renderState.filteredAssets.isEmpty()) {
-                item {
-                    EmptyAssetsState(hasAssets = renderState.hasAnyAssets)
+                items(4) {
+                    SkeletonAssetCard(shimmer)
                 }
             } else {
-                items(renderState.filteredAssets.size, key = { index -> renderState.filteredAssets[index].asset.id }) { index ->
-                    val item = renderState.filteredAssets[index]
-                    AssetCard(
-                        asset = item.asset,
+                item {
+                    AssetsSummaryCard(
                         currency = renderState.householdCurrency,
-                        index = index,
-                        count = renderState.filteredAssets.size,
-                        change = item.change,
-                        readOnly = isMonthClosed,
-                        onClick = { onEvent(AssetsEvent.Select(item.asset)) },
+                        totalAssets = renderState.totalAssets,
+                        totalLiabilities = renderState.totalLiabilities,
+                        netWorth = renderState.netWorth,
                     )
+                }
+
+                if (uiState.operationErrorMessage != null && uiState.sheetMode == AssetSheetMode.Hidden) {
+                    item {
+                        // Top-level actions such as "Copy previous month" are not tied to a sheet, so show the same
+                        // error card directly in the screen content when a write fails.
+                        Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                            AuthErrorCard(uiState.operationErrorMessage)
+                        }
+                    }
+                }
+
+                if (renderState.filteredAssets.isEmpty()) {
+                    item {
+                        EmptyAssetsState(hasAssets = renderState.hasAnyAssets)
+                    }
+                } else {
+                    items(renderState.filteredAssets.size, key = { index -> renderState.filteredAssets[index].asset.id }) { index ->
+                        val item = renderState.filteredAssets[index]
+                        AssetCard(
+                            asset = item.asset,
+                            currency = renderState.householdCurrency,
+                            index = index,
+                            count = renderState.filteredAssets.size,
+                            change = item.change,
+                            readOnly = isMonthClosed,
+                            onClick = { onEvent(AssetsEvent.Select(item.asset)) },
+                        )
+                    }
                 }
             }
         }

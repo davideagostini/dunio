@@ -97,8 +97,8 @@ The dashboard now renders a lightweight skeleton state while its monthly summari
 - entry edit and delete flow
 - quick-entry flow
 
-The entries screen now keeps the list and category reports month-scoped, while unusual-spending insights read only a small rolling window around the selected month instead of the full transaction archive.
-It also renders a local shimmer skeleton during cold loads, so tab switches feel immediate even on slower devices.
+The entries screen now keeps the list month-scoped, loads category reports only when the user opens `Reports`, and limits unusual-spending insights to a small rolling window around the selected month instead of the full transaction archive.
+It also renders a local shimmer skeleton during cold loads and uses a lightweight route shell plus progressive body mount so the first tab switch feels more immediate on slower devices.
 To reduce ANR risk on older phones, Firestore transaction listeners now dispatch off the main thread and the visible ledger list is flattened into truly lazy day headers plus entry rows instead of rendering whole day groups in one composed block.
 
 ### Assets
@@ -113,7 +113,7 @@ To reduce ANR risk on older phones, Firestore transaction listeners now dispatch
 - household currency applied automatically to new asset snapshots
 
 The assets screen now reads only the selected month and previous month snapshots so list rendering, month-over-month change, and `Copy previous month` stay responsive without downloading the full asset archive.
-Like Entries, it now uses a local shimmer skeleton during cold loads instead of blocking the whole app shell.
+Like Entries, it now uses a local shimmer skeleton during cold loads plus a lightweight route shell/progressive body mount instead of blocking the whole app shell.
 
 ### Settings
 

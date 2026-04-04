@@ -66,13 +66,19 @@ data class EntriesRenderState(
     val listItems: List<EntriesListItem>,
     val dayGroups: List<EntryDayGroup>,
     val unusualSpendingInsights: List<UnusualSpendingInsight>,
-    val categorySpendingBreakdown: List<CategorySpendingBreakdownItem>,
-    val categorySpendingTotal: Double,
-    val categorySpendingTransactionCount: Int,
     val totalExpenses: Double,
     val totalIncome: Double,
     val monthLabel: String,
     val hasAnyEntries: Boolean,
+)
+
+@Immutable
+data class EntriesReportState(
+    val selectedMonth: String,
+    val householdCurrency: String,
+    val categorySpendingBreakdown: List<CategorySpendingBreakdownItem>,
+    val categorySpendingTotal: Double,
+    val categorySpendingTransactionCount: Int,
 )
 
 internal fun matchesFilter(entry: EntryDisplayItem, filterType: EntriesFilterType): Boolean =

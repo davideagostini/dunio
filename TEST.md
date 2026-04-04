@@ -53,11 +53,13 @@ Esito:
 - shimmer loading appare su cold load senza restare bloccati sulla dashboard precedente
 - passaggio `Dashboard -> Entries` non genera ANR o freeze percepibili su device lenti
 - uscita da `Entries` verso altre tab non genera freeze o crash
+- il primo ingresso a freddo mostra prima la shell/skeleton e poi il body reale
 - filtro `All / Expenses / Income`
 - search su descrizione/categoria
 - grouping per giorno corretto
 - unusual spending insight ancora coerente
 - report categoria coerente con il solo mese selezionato
+- il report categoria viene caricato solo quando si apre il tab `Reports`
 - il tab `Reports` risponde senza blocchi evidenti anche con molti movimenti nel mese
 - edit entry funziona
 - delete entry funziona
@@ -69,6 +71,7 @@ Esito:
 - month picker mostra snapshot corretto
 - cambio mese resta fluido anche con storico asset lungo
 - shimmer loading appare su cold load senza overlay full-screen del shell
+- il primo ingresso a freddo mostra prima la shell/skeleton e poi summary/lista reali
 - summary card asset/liabilities/net worth corretta
 - search funziona
 - add asset funziona

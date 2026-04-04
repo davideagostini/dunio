@@ -64,6 +64,7 @@ class EntriesViewModel @Inject constructor(
     private val categoriesLoaded = MutableStateFlow(false)
     private val monthClosesLoaded = MutableStateFlow(false)
     private val pendingMonthRefresh = MutableStateFlow<String?>(null)
+    private val pendingReportRefresh = MutableStateFlow<String?>(null)
 
     val categories: StateFlow<List<Category>> = categoryRepository.allCategories
         .onEach { categoriesLoaded.value = true }
@@ -88,6 +89,10 @@ class EntriesViewModel @Inject constructor(
         )
 
     val isMonthRefreshing: StateFlow<Boolean> = pendingMonthRefresh
+        .map { pendingMonth -> pendingMonth != null }
+        .stateIn(viewModelScope, sharingStarted, false)
+
+    val isReportRefreshing: StateFlow<Boolean> = pendingReportRefresh
         .map { pendingMonth -> pendingMonth != null }
         .stateIn(viewModelScope, sharingStarted, false)
 
@@ -151,6 +156,12 @@ class EntriesViewModel @Inject constructor(
         val currency: String,
         val state: EntriesUiState,
         val hasAnyEntries: Boolean,
+    )
+
+    private data class EntriesReportInputs(
+        val selectedMonth: String,
+        val currency: String,
+        val monthEntries: List<EntryDisplayItem>,
         val uncategorizedLabel: String,
     )
 
@@ -173,21 +184,12 @@ class EntriesViewModel @Inject constructor(
             currency = currency,
             state = state,
             hasAnyEntries = hasAnyEntries,
-            uncategorizedLabel = appContext.getString(R.string.entries_reports_uncategorized),
         )
     }.mapLatest { inputs ->
         withContext(Dispatchers.Default) {
             val visibleEntries = inputs.source.monthEntries.filter { entry ->
                 matchesFilter(entry, inputs.state.filterType) &&
                     matchesSearch(entry, inputs.state.searchQuery)
-            }
-            val categorySpendingBreakdown = if (inputs.state.contentMode == EntriesContentMode.Reports) {
-                buildCategorySpendingBreakdown(
-                    entries = inputs.source.monthEntries,
-                    uncategorizedLabel = inputs.uncategorizedLabel,
-                )
-            } else {
-                emptyList()
             }
             val unusualSpendingInsights = if (inputs.state.contentMode == EntriesContentMode.Entries) {
                 buildUnusualSpendingInsights(inputs.source.insightEntries, inputs.source.selectedMonth)
@@ -207,9 +209,6 @@ class EntriesViewModel @Inject constructor(
                 listItems = buildEntriesListItems(dayGroups),
                 dayGroups = dayGroups,
                 unusualSpendingInsights = unusualSpendingInsights,
-                categorySpendingBreakdown = categorySpendingBreakdown,
-                categorySpendingTotal = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::totalAmount),
-                categorySpendingTransactionCount = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::transactionCount),
                 totalExpenses = inputs.source.monthEntries.sumOf { entry ->
                     if (entry.type == "expense") entry.price else 0.0
                 },
@@ -232,13 +231,66 @@ class EntriesViewModel @Inject constructor(
             listItems = emptyList(),
             dayGroups = emptyList(),
             unusualSpendingInsights = emptyList(),
-            categorySpendingBreakdown = emptyList(),
-            categorySpendingTotal = 0.0,
-            categorySpendingTransactionCount = 0,
             totalExpenses = 0.0,
             totalIncome = 0.0,
             monthLabel = formatMonthLabel(defaultSelectedMonth),
             hasAnyEntries = false,
+        ),
+    )
+
+    val reportState: StateFlow<EntriesReportState> = combine(
+        uiState.map { state -> state.contentMode == EntriesContentMode.Reports },
+        selectedMonth,
+        monthEntries,
+        householdCurrency,
+    ) { isReportsMode, selectedMonth, monthEntries, currency ->
+        if (!isReportsMode) {
+            null
+        } else {
+            EntriesReportInputs(
+                selectedMonth = selectedMonth,
+                currency = currency,
+                monthEntries = monthEntries,
+                uncategorizedLabel = appContext.getString(R.string.entries_reports_uncategorized),
+            )
+        }
+    }.mapLatest { inputs ->
+        withContext(Dispatchers.Default) {
+            if (inputs == null) {
+                EntriesReportState(
+                    selectedMonth = selectedMonth.value,
+                    householdCurrency = householdCurrency.value,
+                    categorySpendingBreakdown = emptyList(),
+                    categorySpendingTotal = 0.0,
+                    categorySpendingTransactionCount = 0,
+                )
+            } else {
+                val categorySpendingBreakdown = buildCategorySpendingBreakdown(
+                    entries = inputs.monthEntries,
+                    uncategorizedLabel = inputs.uncategorizedLabel,
+                )
+                EntriesReportState(
+                    selectedMonth = inputs.selectedMonth,
+                    householdCurrency = inputs.currency,
+                    categorySpendingBreakdown = categorySpendingBreakdown,
+                    categorySpendingTotal = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::totalAmount),
+                    categorySpendingTransactionCount = categorySpendingBreakdown.sumOf(CategorySpendingBreakdownItem::transactionCount),
+                )
+            }
+        }
+    }.onEach { report ->
+        if (pendingReportRefresh.value == report.selectedMonth) {
+            pendingReportRefresh.value = null
+        }
+    }.stateIn(
+        viewModelScope,
+        sharingStarted,
+        EntriesReportState(
+            selectedMonth = defaultSelectedMonth,
+            householdCurrency = DEFAULT_CURRENCY,
+            categorySpendingBreakdown = emptyList(),
+            categorySpendingTotal = 0.0,
+            categorySpendingTransactionCount = 0,
         ),
     )
 
@@ -248,6 +300,9 @@ class EntriesViewModel @Inject constructor(
                 val currentMonth = selectedMonth.value
                 if (event.monthKey != currentMonth) {
                     pendingMonthRefresh.value = event.monthKey
+                    if (_uiState.value.contentMode == EntriesContentMode.Reports) {
+                        pendingReportRefresh.value = event.monthKey
+                    }
                 }
                 _uiState.update { it.copy(selectedMonth = event.monthKey) }
             }
@@ -257,6 +312,11 @@ class EntriesViewModel @Inject constructor(
                     EntriesContentMode.Reports
                 } else {
                     EntriesContentMode.Entries
+                }
+                if (nextMode == EntriesContentMode.Reports) {
+                    pendingReportRefresh.value = selectedMonth.value
+                } else {
+                    pendingReportRefresh.value = null
                 }
                 it.copy(
                     contentMode = nextMode,

@@ -51,8 +51,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,6 +82,7 @@ import com.davideagostini.summ.ui.entries.components.EntryActionSheet
 import com.davideagostini.summ.ui.entries.components.EntryCard
 import com.davideagostini.summ.ui.entries.components.UnusualSpendingCard
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 /**
  * Top-level transactions screen.
@@ -98,9 +99,11 @@ fun EntriesRouteScreen(
 
     LaunchedEffect(Unit) {
         if (!mountContent) {
-            // Let navigation commit one frame with a lightweight placeholder first so older devices
-            // do not keep the previous tab visually frozen underneath while Entries initializes.
+            // Let navigation commit a couple of lightweight frames first so older devices can swap
+            // tabs immediately before the full Entries tree, ViewModel, and collectors come online.
             withFrameNanos { }
+            withFrameNanos { }
+            delay(48)
             mountContent = true
         }
     }
@@ -134,8 +137,10 @@ fun EntriesScreen(
     // The screen stays thin: it only observes immutable state and forwards callbacks to the ViewModel.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
+    val isReportRefreshing by viewModel.isReportRefreshing.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
+    val reportState by viewModel.reportState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onEvent = viewModel::handleEvent
 
@@ -150,9 +155,11 @@ fun EntriesScreen(
     // All feature overlays are rendered from the same screen scope so their z-order stays predictable.
     EntriesContent(
         renderState = renderState,
+        reportState = reportState,
         categories = categories,
         uiState = uiState,
         isMonthRefreshing = isMonthRefreshing,
+        isReportRefreshing = isReportRefreshing,
         onEvent = onEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
@@ -387,9 +394,11 @@ private fun rememberShimmerBrush(): Brush {
 @Composable
 internal fun EntriesContent(
     renderState: EntriesRenderState,
+    reportState: EntriesReportState,
     categories: List<Category>,
     uiState: EntriesUiState,
     isMonthRefreshing: Boolean,
+    isReportRefreshing: Boolean,
     onEvent: (EntriesEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
@@ -410,6 +419,17 @@ internal fun EntriesContent(
     val unusualSpendingInsights = renderState.unusualSpendingInsights
     val monthLabel = renderState.monthLabel
     val isReportsMode = uiState.contentMode == EntriesContentMode.Reports
+    val shimmer = rememberShimmerBrush()
+    var showHeavyBody by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!showHeavyBody) {
+            // First render: keep only the shell visible, then mount the heavier list/report body
+            // on the next frame so older devices can acknowledge the tab switch immediately.
+            withFrameNanos { }
+            showHeavyBody = true
+        }
+    }
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
     LaunchedEffect(showMonthPicker) {
@@ -509,7 +529,22 @@ internal fun EntriesContent(
                     }
                 }
 
-                if (!isReportsMode) {
+                if (!showHeavyBody) {
+                    item {
+                        SkeletonBalanceCard(shimmer)
+                    }
+
+                    items(4) { index ->
+                        SkeletonDaySection(
+                            shimmer = shimmer,
+                            modifier = Modifier.padding(
+                                start = 20.dp,
+                                end = 20.dp,
+                                top = if (index == 0) 4.dp else 0.dp,
+                            ),
+                        )
+                    }
+                } else if (!isReportsMode) {
                     item {
                         BalanceCard(
                             currency = renderState.householdCurrency,
@@ -563,7 +598,18 @@ internal fun EntriesContent(
                             }
                         }
                     }
-                } else if (renderState.categorySpendingBreakdown.isEmpty()) {
+                } else if (isReportRefreshing || reportState.selectedMonth != selectedMonth) {
+                    item {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
+                        )
+                    }
+                    item {
+                        SkeletonBalanceCard(shimmer)
+                    }
+                } else if (reportState.categorySpendingBreakdown.isEmpty()) {
                     item {
                         EmptyState(
                             message = stringResource(R.string.entries_reports_empty_message),
@@ -572,17 +618,17 @@ internal fun EntriesContent(
                 } else {
                     item {
                         CategorySpendingSummaryCard(
-                            currency = renderState.householdCurrency,
-                            totalExpenses = renderState.categorySpendingTotal,
-                            categoryCount = renderState.categorySpendingBreakdown.size,
-                            transactionCount = renderState.categorySpendingTransactionCount,
+                            currency = reportState.householdCurrency,
+                            totalExpenses = reportState.categorySpendingTotal,
+                            categoryCount = reportState.categorySpendingBreakdown.size,
+                            transactionCount = reportState.categorySpendingTransactionCount,
                         )
                     }
 
                     item {
                         CategorySpendingChartCard(
-                            currency = renderState.householdCurrency,
-                            items = renderState.categorySpendingBreakdown,
+                            currency = reportState.householdCurrency,
+                            items = reportState.categorySpendingBreakdown,
                         )
                     }
 
@@ -592,8 +638,8 @@ internal fun EntriesContent(
 
                     item {
                         CategorySpendingBreakdownCard(
-                            currency = renderState.householdCurrency,
-                            items = renderState.categorySpendingBreakdown,
+                            currency = reportState.householdCurrency,
+                            items = reportState.categorySpendingBreakdown,
                         )
                     }
                 }

@@ -315,7 +315,9 @@ The entries screen also includes a secondary reports presentation mode for the s
 Responsibility:
 
 - reuse the existing entries screen shell instead of introducing a separate navigation destination
+- mount a lightweight route shell first, then progressively attach the heavier list/report body on the next frame
 - let the toolbar toggle between the standard grouped transaction list and the reports view
+- keep reports in a dedicated state branch so category aggregation only starts when the user opens `Reports`
 - show a compact horizontal bar chart for the top expense categories of the selected month
 - summarize expense categories for the selected month with totals, averages, percentages, and transaction counts
 - keep the visual treatment aligned with the existing entries cards and settings surfaces

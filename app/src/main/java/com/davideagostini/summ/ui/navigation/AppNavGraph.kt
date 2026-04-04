@@ -55,7 +55,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.session.SessionState
-import com.davideagostini.summ.ui.assets.AssetsScreen
+import com.davideagostini.summ.ui.assets.AssetsRouteScreen
 import com.davideagostini.summ.ui.auth.AuthGateScreen
 import com.davideagostini.summ.ui.auth.SessionViewModel
 import com.davideagostini.summ.ui.categories.CategoriesScreen
@@ -153,7 +153,7 @@ fun AppNavGraph(
             }
             composable("assets") {
                 // Assets also participates in the shared overlay state because it uses fullscreen editing.
-                AssetsScreen(
+                AssetsRouteScreen(
                     onFullscreenEditVisibilityChanged = { showAssetsFullscreenEditor = it },
                     onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
                     openAddOnLaunch = openAssetsAddOnNextVisit,
