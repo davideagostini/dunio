@@ -2,8 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/widget_preview_outer"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,17 +28,13 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:text="€428.90"
             android:textColor="@color/widget_preview_text_primary"
-            android:textSize="35sp"
+            android:textSize="30sp"
             android:textStyle="bold" />
 
         <TextView
@@ -45,20 +42,15 @@
             android:layout_height="wrap_content"
             android:text="↓ 8% vs previous month"
             android:textColor="@color/widget_preview_delta_positive"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:text="Today €18.50 · This week €92.40"
             android:textColor="@color/widget_preview_text_secondary"
-            android:textSize="14sp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:textSize="13sp" />
     </LinearLayout>
 </LinearLayout>

@@ -112,7 +112,6 @@ internal fun CategorySpendingChartCard(
     items: List<CategorySpendingBreakdownItem>,
 ) {
     val chartItems = items.take(5)
-    val maxAmount = chartItems.maxOfOrNull(CategorySpendingBreakdownItem::totalAmount) ?: 0.0
     var animateBars by remember(chartItems) { mutableStateOf(false) }
 
     LaunchedEffect(chartItems) {
@@ -134,9 +133,8 @@ internal fun CategorySpendingChartCard(
         )
 
         chartItems.forEachIndexed { index, item ->
-            val fraction = if (maxAmount > 0.0) (item.totalAmount / maxAmount).toFloat() else 0f
             val animatedFraction = animateFloatAsState(
-                targetValue = if (animateBars) fraction.coerceIn(0f, 1f) else 0f,
+                targetValue = if (animateBars) item.percentage.toFloat().coerceIn(0f, 1f) else 0f,
                 animationSpec = tween(
                     durationMillis = 700,
                     delayMillis = index * 90,
@@ -190,7 +188,7 @@ internal fun CategorySpendingChartCard(
                     )
                     Surface(
                         modifier = Modifier
-                            .fillMaxWidth(animatedFraction.value.coerceIn(0.06f, 1f))
+                            .fillMaxWidth(animatedFraction.value.coerceIn(0f, 1f))
                             .height(12.dp),
                         color = fillColor,
                         content = {},

@@ -108,6 +108,10 @@
     <string name="widget_household_required">Créez ou rejoignez un foyer pour utiliser ce widget.</string>
     <string name="widget_loading_error">Impossible de charger les données du widget.</string>
     <string name="widget_no_spending">Aucune dépense enregistrée pour le moment.</string>
+    <string name="widget_top_categories_name">Dunio top catégories</string>
+    <string name="widget_top_categories_title">Principales catégories de dépenses</string>
+    <string name="widget_top_categories_empty">Aucune dépense par catégorie pour le moment.</string>
+    <string name="widget_top_categories_share">%1$d%% des dépenses de ce mois-ci</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">Rechercher un actif ou une catégorie</string>

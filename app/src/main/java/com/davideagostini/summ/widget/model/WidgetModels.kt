@@ -26,3 +26,26 @@ sealed interface SpendingSummaryWidgetState {
     // Any Firestore/parsing failure falls back to a safe generic error state.
     data object Error : SpendingSummaryWidgetState
 }
+
+@androidx.compose.runtime.Immutable
+data class TopCategoryWidgetItem(
+    val label: String,
+    val emoji: String,
+    val amount: Double,
+    val shareOfMonth: Float,
+)
+
+// Cache-friendly state for the category breakdown widget.
+// It mirrors the spending widget states so launcher rendering remains predictable.
+sealed interface TopCategoriesWidgetState {
+    data object Loading : TopCategoriesWidgetState
+    data object SignedOut : TopCategoriesWidgetState
+    data object NeedsHousehold : TopCategoriesWidgetState
+
+    data class Ready(
+        val categories: List<TopCategoryWidgetItem>,
+        val currency: String,
+    ) : TopCategoriesWidgetState
+
+    data object Error : TopCategoriesWidgetState
+}

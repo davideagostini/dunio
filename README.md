@@ -163,9 +163,14 @@ Current app-language support includes:
 - Quick Settings tile
 - home-screen quick-entry widget
 - home-screen spending summary widget
+- home-screen top categories widget
 
 The spending widget now renders from a tiny local cache first and refreshes remotely afterward.
 This avoids the launcher getting stuck on the static preview while Firebase work is still in flight.
+
+The top-categories widget follows the same cache-first pattern. It shows the top three expense
+categories for the selected month and renders each share as a horizontal meter that uses the same
+percentage semantics as the in-app category spending report.
 
 ## Tech stack
 

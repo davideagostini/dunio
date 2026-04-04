@@ -108,6 +108,10 @@
     <string name="widget_household_required">请先创建或加入 household，才能使用此小组件。</string>
     <string name="widget_loading_error">无法加载小组件数据。</string>
     <string name="widget_no_spending">还没有记录任何支出。</string>
+    <string name="widget_top_categories_name">Dunio 热门分类</string>
+    <string name="widget_top_categories_title">支出最高的分类</string>
+    <string name="widget_top_categories_empty">目前还没有按分类统计的支出。</string>
+    <string name="widget_top_categories_share">占本月支出的 %1$d%%</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">搜索资产或分类</string>

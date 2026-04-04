@@ -63,8 +63,8 @@ fun SummWidgetScaffold(
     // Keeping this shell centralized means spacing/radius tweaks hit every widget at once.
     Box(
         modifier = GlanceModifier
-            .fillMaxSize()
-            .padding(8.dp),
+            .fillMaxSize(),
+            //.padding(8.dp),
         contentAlignment = Alignment.TopStart,
     ) {
         Column(
@@ -79,7 +79,7 @@ fun SummWidgetScaffold(
                         GlanceModifier
                     },
                 )
-                .padding(12.dp),
+                .padding(16.dp),
         ) {
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
@@ -94,8 +94,7 @@ fun SummWidgetScaffold(
                         text = title,
                         style = TextStyle(
                             color = widgetOnSurface,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp,
                         ),
                     )
                 }

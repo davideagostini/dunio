@@ -108,6 +108,10 @@
     <string name="widget_household_required">このウィジェットを使うには household を作成するか参加してください。</string>
     <string name="widget_loading_error">ウィジェットのデータを読み込めませんでした。</string>
     <string name="widget_no_spending">まだ支出は記録されていません。</string>
+    <string name="widget_top_categories_name">Dunio 上位カテゴリ</string>
+    <string name="widget_top_categories_title">支出の多いカテゴリ</string>
+    <string name="widget_top_categories_empty">カテゴリ別の支出はまだありません。</string>
+    <string name="widget_top_categories_share">今月の支出の%1$d%%</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">資産またはカテゴリを検索</string>

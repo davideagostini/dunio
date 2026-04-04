@@ -108,6 +108,10 @@
     <string name="widget_household_required">Maak een huishouden aan of sluit je aan om deze widget te gebruiken.</string>
     <string name="widget_loading_error">Widgetgegevens konden niet worden geladen.</string>
     <string name="widget_no_spending">Nog geen uitgaven geregistreerd.</string>
+    <string name="widget_top_categories_name">Dunio topcategorieën</string>
+    <string name="widget_top_categories_title">Top uitgavencategorieën</string>
+    <string name="widget_top_categories_empty">Nog geen uitgaven per categorie.</string>
+    <string name="widget_top_categories_share">%1$d%% van de uitgaven deze maand</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">Zoek asset of categorie</string>

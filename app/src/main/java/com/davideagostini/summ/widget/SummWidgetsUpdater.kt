@@ -3,6 +3,7 @@ package com.davideagostini.summ.widget
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import com.davideagostini.summ.widget.data.SpendingSummaryWidgetDataSource
+import com.davideagostini.summ.widget.data.TopCategoriesWidgetDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,6 +22,8 @@ object SummWidgetsUpdater {
         QuickAccessWidget().updateAll(appContext)
         SpendingSummaryWidgetDataSource().refreshAndCache(appContext)
         SpendingSummaryWidget().updateAll(appContext)
+        TopCategoriesWidgetDataSource().refreshAndCache(appContext)
+        TopCategoriesWidget().updateAll(appContext)
     }
 
     // Convenience wrapper for call sites that are already on a suspend boundary later or

@@ -108,6 +108,10 @@
     <string name="widget_household_required">أنشئ household أو انضم إليه لاستخدام هذا الودجت.</string>
     <string name="widget_loading_error">تعذر تحميل بيانات الودجت.</string>
     <string name="widget_no_spending">لا توجد مصروفات مسجلة بعد.</string>
+    <string name="widget_top_categories_name">Dunio أعلى الفئات</string>
+    <string name="widget_top_categories_title">أعلى فئات الإنفاق</string>
+    <string name="widget_top_categories_empty">لا توجد مصروفات حسب الفئة حتى الآن.</string>
+    <string name="widget_top_categories_share">%1$d%% من إنفاق هذا الشهر</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">ابحث عن أصل أو فئة</string>

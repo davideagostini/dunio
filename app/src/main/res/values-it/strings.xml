@@ -103,6 +103,10 @@
     <string name="widget_household_required">Crea o unisciti a un nucleo familiare per usare questo widget.</string>
     <string name="widget_loading_error">Impossibile caricare i dati del widget.</string>
     <string name="widget_no_spending">Nessuna spesa registrata finora.</string>
+    <string name="widget_top_categories_name">Dunio top categorie</string>
+    <string name="widget_top_categories_title">Top categorie di spesa</string>
+    <string name="widget_top_categories_empty">Nessuna spesa per categoria al momento.</string>
+    <string name="widget_top_categories_share">%1$d%% della spesa di questo mese</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">Cerca asset o categoria</string>

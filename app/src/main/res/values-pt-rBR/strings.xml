@@ -108,6 +108,10 @@
     <string name="widget_household_required">Crie ou entre em uma casa compartilhada para usar este widget.</string>
     <string name="widget_loading_error">Não foi possível carregar os dados do widget.</string>
     <string name="widget_no_spending">Nenhuma despesa registrada ainda.</string>
+    <string name="widget_top_categories_name">Dunio principais categorias</string>
+    <string name="widget_top_categories_title">Principais categorias de gastos</string>
+    <string name="widget_top_categories_empty">Ainda não há gastos por categoria.</string>
+    <string name="widget_top_categories_share">%1$d%% dos gastos deste mês</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">Buscar ativo ou categoria</string>

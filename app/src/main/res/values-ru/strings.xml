@@ -108,6 +108,10 @@
     <string name="widget_household_required">Создайте household или присоединитесь к нему, чтобы использовать этот виджет.</string>
     <string name="widget_loading_error">Не удалось загрузить данные виджета.</string>
     <string name="widget_no_spending">Пока нет записанных расходов.</string>
+    <string name="widget_top_categories_name">Dunio топ-категории</string>
+    <string name="widget_top_categories_title">Топ категорий расходов</string>
+    <string name="widget_top_categories_empty">Пока нет расходов по категориям.</string>
+    <string name="widget_top_categories_share">%1$d%% расходов этого месяца</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">Искать актив или категорию</string>

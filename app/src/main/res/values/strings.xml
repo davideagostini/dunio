@@ -110,6 +110,10 @@
     <string name="widget_household_required">Create or join a household to use this widget.</string>
     <string name="widget_loading_error">Unable to load widget data.</string>
     <string name="widget_no_spending">No expenses recorded yet.</string>
+    <string name="widget_top_categories_name">Dunio top categories</string>
+    <string name="widget_top_categories_title">Top spending categories</string>
+    <string name="widget_top_categories_empty">No category spending yet.</string>
+    <string name="widget_top_categories_share">%1$d%% of spending this month</string>
 
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>

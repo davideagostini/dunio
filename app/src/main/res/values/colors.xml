@@ -6,4 +6,5 @@
     <color name="widget_preview_text_primary">#111418</color>
     <color name="widget_preview_text_secondary">#5F6368</color>
     <color name="widget_preview_delta_positive">#006B5E</color>
+    <color name="widget_preview_card_stroke">#E6E9ED</color>
 </resources>

@@ -8,6 +8,7 @@
     android:minResizeHeight="56dp"
     android:maxResizeWidth="109dp"
     android:maxResizeHeight="56dp"
+    android:previewImage="@drawable/widget_quick_access_preview_image"
     android:previewLayout="@layout/widget_quick_access_preview"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"

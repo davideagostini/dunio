@@ -167,6 +167,8 @@ Widget follow-up note:
 - `SpendingSummaryWidget.kt` renders immediately from local cached state (or a runtime loading state) instead of blocking on the first remote fetch.
 - `SummWidgetsUpdater.kt` refreshes remote data, stores the latest resolved state, then updates the Glance widget so launcher installs and refreshes are more reliable.
 - Widget visuals were also aligned to a neutral light/dark surface so previews and runtime cards stay visually consistent.
+- `TopCategoriesWidget.kt` adds a second cache-first home-screen widget for the top three monthly expense categories.
+- Its meter widths are based on each category's share of the month's total spend, matching the in-app `Entries` report percentages.
 
 ---
 

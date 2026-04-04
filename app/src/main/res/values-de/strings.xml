@@ -108,6 +108,10 @@
     <string name="widget_household_required">Erstelle einen Haushalt oder tritt einem bei, um dieses Widget zu verwenden.</string>
     <string name="widget_loading_error">Widget-Daten konnten nicht geladen werden.</string>
     <string name="widget_no_spending">Noch keine Ausgaben erfasst.</string>
+    <string name="widget_top_categories_name">Dunio Top-Kategorien</string>
+    <string name="widget_top_categories_title">Top-Ausgabenkategorien</string>
+    <string name="widget_top_categories_empty">Noch keine Ausgaben nach Kategorie.</string>
+    <string name="widget_top_categories_share">%1$d%% der Ausgaben dieses Monats</string>
     <string name="assets_delete_title">Delete \"%1$s\"?</string>
     <string name="assets_delete_message">This will permanently delete the asset.</string>
     <string name="assets_search_placeholder">Asset oder Kategorie suchen</string>

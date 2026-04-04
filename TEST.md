@@ -115,6 +115,10 @@ Esito:
 - spending summary widget mostra dati coerenti
 - spending summary widget esce dalla preview launcher e mostra subito contenuto runtime/cache-first
 - spending summary widget continua ad aggiornarsi dopo insert/update/delete entry
+- top categories widget mostra le top 3 categorie del mese corretto
+- top categories widget usa emoji/nome categoria corretti
+- top categories widget mostra barre coerenti con le percentuali del report categorie in `Entries`
+- top categories widget rispetta il resize minimo senza tagliare testo o barre
 - widget non crasha con utente signed out / senza household
 - refresh action del widget resta centrata e senza background visivo residuo
 
