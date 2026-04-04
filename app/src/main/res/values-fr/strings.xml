@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">Accès rapide</string>
     <string name="widget_quick_access_body">Ajoutez une écriture sans ouvrir le flux complet de l’application.</string>
     <string name="widget_quick_access_action">Ajouter une écriture</string>
-    <string name="widget_spending_title">Dépenses</string>
+    <string name="widget_spending_title">Dépenses ce mois-ci</string>
     <string name="widget_spending_this_month">Dépensé ce mois-ci</string>
     <string name="widget_spending_today">Aujourd’hui</string>
     <string name="widget_spending_week">Cette semaine</string>

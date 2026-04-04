@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">クイックアクセス</string>
     <string name="widget_quick_access_body">アプリ全体の入力フローを開かずに記録を追加できます。</string>
     <string name="widget_quick_access_action">記録を追加</string>
-    <string name="widget_spending_title">支出</string>
+    <string name="widget_spending_title">今月の支出</string>
     <string name="widget_spending_this_month">今月の支出</string>
     <string name="widget_spending_today">今日</string>
     <string name="widget_spending_week">今週</string>

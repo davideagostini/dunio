@@ -1,6 +1,7 @@
 package com.davideagostini.summ.widget
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -22,7 +23,6 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.surfaceContainerLowDark
-import com.davideagostini.summ.ui.theme.surfaceContainerLowestLight
 import com.davideagostini.summ.widget.components.quickEntryAction
 
 // Small action-first widget that mirrors the Quick Settings tile.
@@ -30,23 +30,17 @@ import com.davideagostini.summ.widget.components.quickEntryAction
 class QuickAccessWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            // Outer background matches the other widget containers so the launcher sees
-            // a consistent card silhouette even before the user interacts with it.
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(ColorProvider(surfaceContainerLowestLight, surfaceContainerLowDark))
                     .padding(8.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                // Inner white card is the real interaction surface. We keep it full-size
-                // so the widget reads as a compact square action instead of a tiny chip
-                // floating inside a larger launcher cell.
                 Column(
                     modifier = GlanceModifier
                         .fillMaxSize()
                         .cornerRadius(28.dp)
-                        .background(ColorProvider(androidx.compose.ui.graphics.Color.White, surfaceContainerLowDark))
+                        .background(ColorProvider(Color.White, surfaceContainerLowDark))
                         .clickable(quickEntryAction(context))
                         .padding(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,

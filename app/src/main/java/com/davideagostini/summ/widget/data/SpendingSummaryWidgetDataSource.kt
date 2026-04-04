@@ -31,7 +31,16 @@ class SpendingSummaryWidgetDataSource @Inject constructor() {
     private val firestore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private val zoneId: ZoneId = ZoneId.systemDefault()
 
-    suspend fun load(): SpendingSummaryWidgetState {
+    fun loadCached(context: android.content.Context): SpendingSummaryWidgetState? =
+        SpendingSummaryWidgetCache.read(context)
+
+    suspend fun refreshAndCache(context: android.content.Context): SpendingSummaryWidgetState {
+        val state = loadRemote()
+        SpendingSummaryWidgetCache.write(context, state)
+        return state
+    }
+
+    private suspend fun loadRemote(): SpendingSummaryWidgetState {
         // Keep the signed-out case explicit so the widget can guide the user instead
         // of silently showing zeros.
         val currentUser = auth.currentUser ?: return SpendingSummaryWidgetState.SignedOut

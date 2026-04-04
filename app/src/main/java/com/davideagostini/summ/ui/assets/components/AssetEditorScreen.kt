@@ -60,16 +60,15 @@ internal fun AssetEditorScreen(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .navigationBarsPadding()
-            .imePadding(),
+            .background(MaterialTheme.colorScheme.surfaceContainerLow),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp, vertical = 24.dp)
-                .systemBarsPadding(),
+                .systemBarsPadding()
+                .navigationBarsPadding(),
         ) {
             val closeEnabled = !uiState.isSaving
             Row(

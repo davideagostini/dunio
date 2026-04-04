@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">وصول سريع</string>
     <string name="widget_quick_access_body">أضف عملية من دون فتح المسار الكامل داخل التطبيق.</string>
     <string name="widget_quick_access_action">إضافة عملية</string>
-    <string name="widget_spending_title">المصروفات</string>
+    <string name="widget_spending_title">المصروفات هذا الشهر</string>
     <string name="widget_spending_this_month">المنفق هذا الشهر</string>
     <string name="widget_spending_today">اليوم</string>
     <string name="widget_spending_week">هذا الأسبوع</string>

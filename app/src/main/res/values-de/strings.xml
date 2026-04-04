@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">Schnellzugriff</string>
     <string name="widget_quick_access_body">Füge einen Eintrag hinzu, ohne den vollständigen App-Ablauf zu öffnen.</string>
     <string name="widget_quick_access_action">Eintrag hinzufügen</string>
-    <string name="widget_spending_title">Ausgaben</string>
+    <string name="widget_spending_title">Ausgaben diesen Monat</string>
     <string name="widget_spending_this_month">Diesen Monat ausgegeben</string>
     <string name="widget_spending_today">Heute</string>
     <string name="widget_spending_week">Diese Woche</string>

@@ -2,6 +2,7 @@ package com.davideagostini.summ.widget
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
+import com.davideagostini.summ.widget.data.SpendingSummaryWidgetDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,6 +19,7 @@ object SummWidgetsUpdater {
         // onto a short-lived Activity or Service reference.
         val appContext = context.applicationContext
         QuickAccessWidget().updateAll(appContext)
+        SpendingSummaryWidgetDataSource().refreshAndCache(appContext)
         SpendingSummaryWidget().updateAll(appContext)
     }
 

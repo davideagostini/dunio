@@ -164,6 +164,9 @@ Current app-language support includes:
 - home-screen quick-entry widget
 - home-screen spending summary widget
 
+The spending widget now renders from a tiny local cache first and refreshes remotely afterward.
+This avoids the launcher getting stuck on the static preview while Firebase work is still in flight.
+
 ## Tech stack
 
 - Kotlin

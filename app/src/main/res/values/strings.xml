@@ -97,7 +97,7 @@
     <string name="widget_quick_access_title">Quick access</string>
     <string name="widget_quick_access_body">Add an entry without opening the full app flow.</string>
     <string name="widget_quick_access_action">Add entry</string>
-    <string name="widget_spending_title">Spending</string>
+    <string name="widget_spending_title">Spending this month</string>
     <string name="widget_spending_this_month">Spent this month</string>
     <string name="widget_spending_today">Today</string>
     <string name="widget_spending_week">This week</string>
@@ -105,6 +105,7 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">vs previous month</string>
     <string name="widget_open_app">Open app</string>
+    <string name="widget_loading">Loading widget data…</string>
     <string name="widget_sign_in_required">Sign in to load household data.</string>
     <string name="widget_household_required">Create or join a household to use this widget.</string>
     <string name="widget_loading_error">Unable to load widget data.</string>

@@ -2,6 +2,7 @@ package com.davideagostini.summ.widget.components
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -34,11 +35,10 @@ import com.davideagostini.summ.ui.theme.primaryDark
 import com.davideagostini.summ.ui.theme.primaryLight
 import com.davideagostini.summ.ui.theme.surfaceContainerDark
 import com.davideagostini.summ.ui.theme.surfaceContainerLowDark
-import com.davideagostini.summ.ui.theme.surfaceContainerLowLight
-import com.davideagostini.summ.ui.theme.surfaceContainerLowestLight
+import com.davideagostini.summ.ui.theme.surfaceContainerLowestDark
 
-private val widgetBackground = ColorProvider(surfaceContainerLowestLight, surfaceContainerLowDark)
-private val widgetSurface = ColorProvider(surfaceContainerLowLight, surfaceContainerDark)
+private val widgetBackground = ColorProvider(Color(0xFFF7F7F7), surfaceContainerDark)
+private val widgetSurface = ColorProvider(Color.White, surfaceContainerLowDark)
 private val widgetPrimary = ColorProvider(primaryLight, primaryDark)
 private val widgetOnSurface = ColorProvider(onSurfaceLight, onSurfaceDark)
 
@@ -64,7 +64,6 @@ fun SummWidgetScaffold(
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(widgetBackground)
             .padding(8.dp),
         contentAlignment = Alignment.TopStart,
     ) {
@@ -167,9 +166,9 @@ fun WidgetIconAction(
     // Compact trailing control used for manual widget refreshes and similar utility actions.
     Box(
         modifier = GlanceModifier
+            .width(28.dp)
+            .height(28.dp)
             .cornerRadius(999.dp)
-            .background(widgetBackground)
-            .padding(horizontal = 10.dp, vertical = 6.dp)
             .clickable(action),
         contentAlignment = Alignment.Center,
     ) {
@@ -177,7 +176,7 @@ fun WidgetIconAction(
             text = symbol,
             style = TextStyle(
                 color = widgetOnSurface,
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Medium,
             ),
         )

@@ -12,6 +12,7 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.text.FontWeight
@@ -47,8 +48,10 @@ class SpendingSummaryWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        // Load data before composition so the widget body stays a pure state -> UI mapping.
-        val state = SpendingSummaryWidgetDataSource().load()
+        // Render from local cache first so the launcher never gets stuck on the static preview
+        // while Firebase work is still in flight.
+        val state = SpendingSummaryWidgetDataSource().loadCached(context)
+            ?: SpendingSummaryWidgetState.Loading
 
         provideContent {
             SummWidgetScaffold(
@@ -57,6 +60,12 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                 trailingAction = actionRunCallback<RefreshSpendingWidgetAction>(),
             ) {
                 when (state) {
+                    SpendingSummaryWidgetState.Loading -> {
+                        WidgetInfoState(
+                            message = context.getString(R.string.widget_loading),
+                            action = quickEntryAction(context),
+                        )
+                    }
                     SpendingSummaryWidgetState.SignedOut -> {
                         WidgetInfoState(
                             message = context.getString(R.string.widget_sign_in_required),
@@ -92,27 +101,20 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                             "${context.getString(R.string.widget_spending_today)} ${formatCurrency(state.todayAmount, state.currency)}",
                             "${context.getString(R.string.widget_spending_week)} ${formatCurrency(state.weekAmount, state.currency)}",
                         )
-                        Column(modifier = GlanceModifier.fillMaxWidth()) {
-                            Text(
-                                text = context.getString(R.string.widget_spending_this_month),
-                                style = TextStyle(
-                                    color = neutralTextColor,
-                                    fontSize = 12.sp,
-                                ),
-                            )
-                            Spacer(modifier = GlanceModifier.height(6.dp))
+                        Column(modifier = GlanceModifier.fillMaxSize()) {
+                            Spacer(modifier = GlanceModifier.defaultWeight())
                             Text(
                                 text = formatCurrency(state.monthAmount, state.currency),
                                 style = TextStyle(
                                     color = neutralTextColor,
-                                    fontSize = 28.sp,
+                                    fontSize = 35.sp,
                                     fontWeight = FontWeight.Bold,
                                 ),
                             )
                             if (deltaText != null) {
                                 // The delta only appears once there is enough room to keep
                                 // the primary monthly amount visually dominant.
-                                Spacer(modifier = GlanceModifier.height(3.dp))
+                                Spacer(modifier = GlanceModifier.height(4.dp))
                                 Text(
                                     text = deltaText.value,
                                     style = TextStyle(
@@ -121,19 +123,20 @@ class SpendingSummaryWidget : GlanceAppWidget() {
                                             SpendingDeltaTone.Negative -> negativeDeltaColor
                                             SpendingDeltaTone.Neutral -> neutralTextColor
                                         },
-                                        fontSize = 12.sp,
+                                        fontSize = 13.sp,
                                         fontWeight = FontWeight.Medium,
                                     ),
                                 )
                             }
-                            Spacer(modifier = GlanceModifier.height(8.dp))
+                            Spacer(modifier = GlanceModifier.height(12.dp))
                             Text(
                                 text = secondaryLine,
                                 style = TextStyle(
                                     color = neutralTextColor,
-                                    fontSize = 12.sp,
+                                    fontSize = 13.sp,
                                 ),
                             )
+                            Spacer(modifier = GlanceModifier.defaultWeight())
                         }
                     }
                 }

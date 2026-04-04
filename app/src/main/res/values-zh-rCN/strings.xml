@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">快速入口</string>
     <string name="widget_quick_access_body">无需打开完整流程即可添加一条记录。</string>
     <string name="widget_quick_access_action">添加记录</string>
-    <string name="widget_spending_title">支出</string>
+    <string name="widget_spending_title">本月支出</string>
     <string name="widget_spending_this_month">本月支出</string>
     <string name="widget_spending_today">今天</string>
     <string name="widget_spending_week">本周</string>

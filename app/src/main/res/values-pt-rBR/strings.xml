@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">Acesso rápido</string>
     <string name="widget_quick_access_body">Adicione um lançamento sem abrir todo o fluxo do app.</string>
     <string name="widget_quick_access_action">Adicionar lançamento</string>
-    <string name="widget_spending_title">Gastos</string>
+    <string name="widget_spending_title">Gastos neste mês</string>
     <string name="widget_spending_this_month">Gasto neste mês</string>
     <string name="widget_spending_today">Hoje</string>
     <string name="widget_spending_week">Esta semana</string>

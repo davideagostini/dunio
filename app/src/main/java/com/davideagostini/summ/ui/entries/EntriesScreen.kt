@@ -77,6 +77,7 @@ import com.davideagostini.summ.ui.entries.components.CategorySpendingChartCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingSummaryCard
 import com.davideagostini.summ.ui.entries.components.DayGroupHeader
 import com.davideagostini.summ.ui.entries.components.EmptyState
+import com.davideagostini.summ.ui.entries.components.EntryEditorScreen
 import com.davideagostini.summ.ui.entries.components.EntriesToolbar
 import com.davideagostini.summ.ui.entries.components.EntryActionSheet
 import com.davideagostini.summ.ui.entries.components.EntryCard
@@ -437,9 +438,9 @@ internal fun EntriesContent(
     }
 
     // Fullscreen edit is a separate presentation mode from the compact action sheet.
+    // Once edit starts, the edit/success sequence stays in the fullscreen editor until dismissed.
     LaunchedEffect(uiState.sheetMode) {
         if (uiState.sheetMode == EntrySheetMode.Edit) {
-            // Once edit starts, the whole edit/success flow stays fullscreen until it is fully dismissed.
             isFullscreenEditFlow = true
             showFullScreenEdit = true
         } else if (uiState.sheetMode == EntrySheetMode.Hidden) {
@@ -701,7 +702,7 @@ internal fun EntriesContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)),
         ) {
-            EntryActionSheet(
+            EntryEditorScreen(
                 uiState = uiState,
                 categories = categories,
                 currency = renderState.householdCurrency,
@@ -712,7 +713,6 @@ internal fun EntriesContent(
                 ),
                 onEvent = onEvent,
                 onDismiss = dismissFullscreenEdit,
-                fullScreen = true,
             )
         }
     }

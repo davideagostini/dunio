@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">Быстрый доступ</string>
     <string name="widget_quick_access_body">Добавьте операцию, не открывая полный сценарий приложения.</string>
     <string name="widget_quick_access_action">Добавить операцию</string>
-    <string name="widget_spending_title">Расходы</string>
+    <string name="widget_spending_title">Расходы в этом месяце</string>
     <string name="widget_spending_this_month">Потрачено в этом месяце</string>
     <string name="widget_spending_today">Сегодня</string>
     <string name="widget_spending_week">На этой неделе</string>

@@ -163,9 +163,10 @@ This is already part of the current product, not future roadmap work.
 
 Widget follow-up note:
 
-- The widget area should be re-reviewed before the next release iteration.
-- Recent attempts to make widget refresh more aggressive/automatic were intentionally reverted because they added too much complexity and made behavior less predictable.
-- Any future widget work should stay conservative, avoid extra infrastructure unless clearly justified, and start from the current simple baseline.
+- The spending widget now follows a cache-first rendering path.
+- `SpendingSummaryWidget.kt` renders immediately from local cached state (or a runtime loading state) instead of blocking on the first remote fetch.
+- `SummWidgetsUpdater.kt` refreshes remote data, stores the latest resolved state, then updates the Glance widget so launcher installs and refreshes are more reliable.
+- Widget visuals were also aligned to a neutral light/dark surface so previews and runtime cards stay visually consistent.
 
 ---
 

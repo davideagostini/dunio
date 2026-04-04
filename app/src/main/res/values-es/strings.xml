@@ -96,7 +96,7 @@
     <string name="widget_quick_access_title">Acceso rápido</string>
     <string name="widget_quick_access_body">Añade un movimiento sin abrir todo el flujo de la app.</string>
     <string name="widget_quick_access_action">Añadir movimiento</string>
-    <string name="widget_spending_title">Gastos</string>
+    <string name="widget_spending_title">Gastos este mes</string>
     <string name="widget_spending_this_month">Gastado este mes</string>
     <string name="widget_spending_today">Hoy</string>
     <string name="widget_spending_week">Esta semana</string>

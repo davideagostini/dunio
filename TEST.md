@@ -113,8 +113,16 @@ Esito:
 - Quick Entry flow salva correttamente
 - widget quick entry apre il flow
 - spending summary widget mostra dati coerenti
+- spending summary widget esce dalla preview launcher e mostra subito contenuto runtime/cache-first
 - spending summary widget continua ad aggiornarsi dopo insert/update/delete entry
 - widget non crasha con utente signed out / senza household
+- refresh action del widget resta centrata e senza background visivo residuo
+
+**11. Editor/sheet consistency**
+
+- delete entry mostra conferma/success in bottom sheet compatto
+- edit entry usa fullscreen editor dedicato
+- success fullscreen di entry e asset copre correttamente anche la navigation bar
 
 **10. Regressioni tecniche minime**
 

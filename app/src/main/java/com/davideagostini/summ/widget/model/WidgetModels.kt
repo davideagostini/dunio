@@ -4,6 +4,9 @@ package com.davideagostini.summ.widget.model
 // We keep this separate from screen state because widgets have a much narrower
 // rendering contract: either we can show numbers, or we need to explain why we cannot.
 sealed interface SpendingSummaryWidgetState {
+    // The launcher should still receive real runtime content even before Firebase returns.
+    data object Loading : SpendingSummaryWidgetState
+
     // No Firebase user on device.
     data object SignedOut : SpendingSummaryWidgetState
 
