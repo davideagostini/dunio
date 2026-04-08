@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -72,7 +73,7 @@ internal fun CategoryEditorScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
             ) {
-                IconButton(onClick = onDismiss) {
+                IconButton(onClick = onDismiss, enabled = !uiState.isSaving) {
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }
@@ -116,6 +117,8 @@ private fun CategoryFormContent(
     // Let the emoji grid consume the leftover space so the form does not leave a dead area
     // between the picker content and the fixed bottom actions.
     Column(modifier = Modifier.fillMaxSize()) {
+        val controlsEnabled = !uiState.isSaving
+        val cancelEnabled = !uiState.isSaving
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -132,6 +135,7 @@ private fun CategoryFormContent(
         OutlinedTextField(
             value = uiState.editName,
             onValueChange = { onEvent(CategoriesEvent.UpdateFormName(it)) },
+            enabled = controlsEnabled,
             label = { Text(stringResource(R.string.category_name_label)) },
             isError = uiState.nameError != null,
             supportingText = uiState.nameError?.let { msg -> { Text(msg) } },
@@ -204,6 +208,7 @@ private fun CategoryFormContent(
             ) {
                 OutlinedButton(
                     onClick = onCancel,
+                    enabled = cancelEnabled,
                     shape = AppButtonShape,
                     modifier = Modifier.weight(1f),
                 ) {
@@ -212,10 +217,14 @@ private fun CategoryFormContent(
 
                 Button(
                     onClick = onSave,
+                    enabled = controlsEnabled,
                     shape = AppButtonShape,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text(confirmLabel)
+                    SaveActionContent(
+                        label = confirmLabel,
+                        isSaving = uiState.isSaving,
+                    )
                 }
             }
         }
@@ -255,5 +264,22 @@ private fun CategoryEditorSuccessContent() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+    }
+}
+
+@Composable
+private fun SaveActionContent(
+    label: String,
+    isSaving: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (isSaving) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Spacer(Modifier.size(8.dp))
+        }
+        Text(label)
     }
 }

@@ -38,6 +38,7 @@ data class EntryUiState(
     val descriptionError: String?   = null,
     val priceError: String?         = null,
     val operationErrorMessage: String? = null,
+    val isSaving: Boolean           = false,
 )
 
 @HiltViewModel
@@ -119,10 +120,12 @@ class QuickEntryViewModel @Inject constructor(
 
     private fun save() {
         val state = _uiState.value
+        if (state.isSaving) return
         val parsedPrice = parseAmount(state.price) ?: return
         val category    = state.selectedCategory ?: return
 
         // Quick entry runs as a fast-path form, but Firestore failures still need the same graceful handling.
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 entryRepository.insert(
@@ -135,11 +138,16 @@ class QuickEntryViewModel @Inject constructor(
                         date        = state.date,
                     )
                 )
-                _uiState.update { it.copy(step = 6, operationErrorMessage = null) }
+                _uiState.update { it.copy(step = 6, operationErrorMessage = null, isSaving = false) }
                 delay(1_500L)
                 _navEvents.send(EntryNavEvent.Saved)
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
             }
         }
     }

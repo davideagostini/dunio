@@ -570,8 +570,9 @@ So `project_overview.md` should be read as documentation of an already fairly br
 
 The following additions would improve product polish and feedback loops without changing the core household-finance scope:
 
-- add a theme toggle for `light` / `dark` / `system` mode and persist the user preference
-- implement reports or summaries for monthly review, category spending, and higher-level household trends
+- add on-device AI category suggestion during quick entry
+- add on-device monthly summaries from aggregated household finance data
+- add receipt or invoice scan to create a prefilled draft entry after OCR + field extraction + category suggestion
 - add a user feedback mechanism so people can quickly send bug reports, improvement ideas, or general product feedback from inside the app
 
 ---

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -16,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,15 +105,22 @@ internal fun StepReview(
         ) {
             OutlinedButton(
                 onClick  = onCancel,
+                enabled  = !uiState.isSaving,
                 shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.action_cancel)) }
 
             Button(
                 onClick  = { onEvent(EntryEvent.Save) },
+                enabled  = !uiState.isSaving,
                 shape    = AppButtonShape,
                 modifier = Modifier.weight(1f),
-            ) { Text(stringResource(R.string.action_confirm)) }
+            ) {
+                SaveActionContent(
+                    label = stringResource(R.string.action_confirm),
+                    isSaving = uiState.isSaving,
+                )
+            }
         }
     }
 }
@@ -142,4 +151,21 @@ private fun ReviewDivider() {
             .height(1.dp)
             .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     )
+}
+
+@Composable
+private fun SaveActionContent(
+    label: String,
+    isSaving: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (isSaving) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(label)
+    }
 }

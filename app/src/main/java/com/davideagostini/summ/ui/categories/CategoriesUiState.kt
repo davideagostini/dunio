@@ -14,4 +14,5 @@ data class CategoriesUiState(
     val nameError: String?            = null,
     val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean     = false,
+    val isSaving: Boolean             = false,
 )

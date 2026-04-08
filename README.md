@@ -432,6 +432,7 @@ git rm --cached app/google-services.json
 - budgets with weekly, monthly, and yearly spending limits by category
 - reports and summaries for monthly review
 - notifications and reminders
+- on-device AI category suggestion during quick entry
 
 ### Future Additions · Higher Effort
 
@@ -439,7 +440,8 @@ git rm --cached app/google-services.json
 - bank CSV import support
 - better backup and migration flows
 - Wear OS support
-- AI-powered finance features
+- on-device monthly financial summaries
+- receipt or invoice scan to draft an entry with description, amount, date, and category
 
 ## Support the project
 

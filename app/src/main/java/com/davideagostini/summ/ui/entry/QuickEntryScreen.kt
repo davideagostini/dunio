@@ -114,11 +114,12 @@ fun QuickEntryScreen(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)) {
+            val closeEnabled = !uiState.isSaving
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
             ) {
-                IconButton(onClick = onDismiss) {
+                IconButton(onClick = onDismiss, enabled = closeEnabled) {
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }

@@ -88,39 +88,53 @@ class CategoriesViewModel @Inject constructor(
 
     private fun saveAdd() {
         val state = _uiState.value
+        if (state.isSaving) return
         if (state.editName.isBlank()) {
             _uiState.update { it.copy(nameError = appContext.getString(R.string.category_validation_name_required)) }
             return
         }
 
         // Firestore write rejections must be translated into UI state instead of bubbling up as a crash.
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 repository.insert(Category(name = state.editName.trim(), emoji = state.editEmoji.trim().ifEmpty { "📦" }))
-                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, operationErrorMessage = null) }
+                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, operationErrorMessage = null, isSaving = false) }
                 delay(1_500L)
                 _uiState.update { CategoriesUiState() }
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
             }
         }
     }
 
     private fun saveEdit() {
         val state = _uiState.value
+        if (state.isSaving) return
         val cat   = state.selectedCategory ?: return
         if (state.editName.isBlank()) {
             _uiState.update { it.copy(nameError = appContext.getString(R.string.category_validation_name_required)) }
             return
         }
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 repository.update(cat.copy(name = state.editName.trim(), emoji = state.editEmoji.trim().ifEmpty { "📦" }))
-                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, operationErrorMessage = null) }
+                _uiState.update { it.copy(sheetMode = CategorySheetMode.Success, operationErrorMessage = null, isSaving = false) }
                 delay(1_500L)
                 _uiState.update { CategoriesUiState() }
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(appContext)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(appContext),
+                    )
+                }
             }
         }
     }
