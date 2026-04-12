@@ -201,6 +201,27 @@ img {
   margin-top: 20px;
 }
 
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.trust-strip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(65, 91, 170, 0.14);
+  border-radius: 999px;
+  background: rgba(65, 91, 170, 0.06);
+  color: var(--accent);
+  font-size: 0.83rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 .callout-actions {
   display: flex;
   width: 100%;
@@ -388,8 +409,28 @@ img {
   line-height: 1.7;
 }
 
+.faq-item p a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  transition:
+    color 0.18s ease,
+    text-decoration-color 0.18s ease;
+}
+
+.faq-item p a:hover {
+  color: var(--accent-strong);
+  text-decoration-color: rgba(50, 71, 147, 0.72);
+}
+
 .feature-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.guides-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .feature-card h3,
@@ -793,6 +834,10 @@ img {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .guides-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .workflow-grid {
     grid-template-columns: 1fr;
   }
@@ -863,6 +908,10 @@ img {
   .hero-points,
   .feature-grid,
   .screenshot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guides-grid {
     grid-template-columns: 1fr;
   }
 
