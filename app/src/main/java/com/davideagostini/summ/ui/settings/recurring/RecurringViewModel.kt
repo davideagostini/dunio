@@ -167,14 +167,22 @@ class RecurringViewModel @Inject constructor(
 
     private fun saveAdd() {
         val recurring = buildRecurring() ?: return
+        val state = _uiState.value
+        if (state.isSaving) return
 
         // Permission errors on recurring writes are shown inline so the full-screen form stays recoverable.
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 recurringRepositoryRef.insert(recurring)
                 _uiState.update { RecurringUiState(searchVisible = it.searchVisible, searchQuery = it.searchQuery) }
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(context)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(context),
+                    )
+                }
             }
         }
     }
@@ -182,12 +190,20 @@ class RecurringViewModel @Inject constructor(
     private fun saveEdit() {
         val selected = _uiState.value.selectedRecurring ?: return
         val recurring = buildRecurring(id = selected.id, lastAppliedDate = selected.lastAppliedDate) ?: return
+        val state = _uiState.value
+        if (state.isSaving) return
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 recurringRepositoryRef.update(recurring)
                 _uiState.update { RecurringUiState(searchVisible = it.searchVisible, searchQuery = it.searchQuery) }
             } catch (throwable: Throwable) {
-                _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(context)) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        operationErrorMessage = throwable.toFirestoreUserMessage(context),
+                    )
+                }
             }
         }
     }

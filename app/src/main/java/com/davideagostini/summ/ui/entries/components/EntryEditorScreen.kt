@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
@@ -50,10 +48,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
+import com.davideagostini.summ.data.category.stableUsageId
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
@@ -73,6 +71,7 @@ import java.util.Locale
 internal fun EntryEditorScreen(
     uiState: EntriesUiState,
     categories: List<Category>,
+    mostUsedCategories: List<Category>,
     currency: String,
     readOnly: Boolean,
     readOnlyMessage: String,
@@ -106,6 +105,7 @@ internal fun EntryEditorScreen(
                 EntrySheetMode.Edit -> EntryEditForm(
                     uiState = uiState,
                     categories = categories,
+                    mostUsedCategories = mostUsedCategories,
                     currency = currency,
                     readOnly = readOnly,
                     readOnlyMessage = readOnlyMessage,
@@ -130,6 +130,7 @@ internal fun EntryEditorScreen(
 private fun EntryEditForm(
     uiState: EntriesUiState,
     categories: List<Category>,
+    mostUsedCategories: List<Category>,
     currency: String,
     readOnly: Boolean,
     readOnlyMessage: String,
@@ -259,11 +260,33 @@ private fun EntryEditForm(
                 )
                 Spacer(Modifier.height(6.dp))
             }
-            itemsIndexed(categories, key = { _, category -> category.id }) { index, category ->
+            val availableCategories = categories.filter { category -> category.type == uiState.editType }
+            val mostUsedStableIds = mostUsedCategories.map { category -> category.stableUsageId() }.toSet()
+            val allCategories = availableCategories.filterNot { category -> category.stableUsageId() in mostUsedStableIds }
+
+            if (mostUsedCategories.isNotEmpty()) {
+                item {
+                    CategorySectionHeader(text = stringResource(R.string.category_picker_most_used))
+                }
+                itemsIndexed(mostUsedCategories, key = { _, category -> "most-${category.id}" }) { index, category ->
+                    EditCategoryRow(
+                        category = category,
+                        index = index,
+                        count = mostUsedCategories.size,
+                        selected = uiState.editCategory?.id == category.id,
+                        enabled = controlsEnabled,
+                        onClick = { onEvent(EntriesEvent.UpdateCategory(category)) },
+                    )
+                }
+                item {
+                    CategorySectionHeader(text = stringResource(R.string.category_picker_all_categories))
+                }
+            }
+            itemsIndexed(allCategories, key = { _, category -> "all-${category.id}" }) { index, category ->
                 EditCategoryRow(
                     category = category,
                     index = index,
-                    count = categories.size,
+                    count = allCategories.size,
                     selected = uiState.editCategory?.id == category.id,
                     enabled = controlsEnabled,
                     onClick = { onEvent(EntriesEvent.UpdateCategory(category)) },
@@ -333,6 +356,17 @@ private fun EntryEditForm(
             DatePicker(state = datePickerState)
         }
     }
+}
+
+@Composable
+private fun CategorySectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 12.dp, bottom = 6.dp),
+    )
 }
 
 @Composable

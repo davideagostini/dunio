@@ -67,6 +67,8 @@
     <string name="entry_success_message">Il movimento è stato salvato.</string>
     <string name="entries_balance_spent_in">Speso in %1$s</string>
     <string name="entries_balance_income">Entrate %1$s</string>
+    <string name="entries_balance_income_label">Entrate</string>
+    <string name="entries_balance_cash_flow_label">Flusso</string>
     <string name="entries_balance_positive">In positivo %1$s</string>
     <string name="entries_balance_negative">Oltre il budget %1$s</string>
     <string name="entries_filter_all">Tutti</string>
@@ -83,6 +85,8 @@
     <string name="entry_review_description">Descrizione</string>
     <string name="entry_review_amount">Importo</string>
     <string name="entry_review_category">Categoria</string>
+    <string name="category_picker_most_used">Più usate</string>
+    <string name="category_picker_all_categories">Tutte le categorie</string>
     <string name="entry_type_income">💰  Entrata</string>
     <string name="entry_type_expense">💸  Spesa</string>
     <string name="entry_type_income_plain">Entrata</string>

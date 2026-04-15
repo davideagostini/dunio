@@ -217,6 +217,7 @@ private fun CategoriesContent(
         DeleteConfirmationDialog(
             title = stringResource(R.string.category_delete_title, catName),
             message = stringResource(R.string.category_delete_message),
+            isLoading = uiState.isSaving,
             onConfirm = { onEvent(CategoriesEvent.ConfirmDelete) },
             onDismiss = { onEvent(CategoriesEvent.DismissDeleteDialog) },
         )

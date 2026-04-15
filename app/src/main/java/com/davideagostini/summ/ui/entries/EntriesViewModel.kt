@@ -11,9 +11,11 @@ import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.entity.MonthClose
 import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
+import com.davideagostini.summ.data.repository.CategoryUsageRepository
 import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
 import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.data.session.SessionState
 import com.davideagostini.summ.domain.model.EntryDisplayItem
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
@@ -22,6 +24,7 @@ import com.davideagostini.summ.ui.format.formatEditableAmount
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -31,7 +34,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -54,7 +59,8 @@ class EntriesViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
-    sessionRepository: SessionRepository,
+    private val categoryUsageRepository: CategoryUsageRepository,
+    private val sessionRepository: SessionRepository,
     monthCloseRepository: MonthCloseRepository,
 ) : ViewModel() {
     private val sharingStarted = SharingStarted.WhileSubscribed(30_000)
@@ -65,10 +71,39 @@ class EntriesViewModel @Inject constructor(
     private val monthClosesLoaded = MutableStateFlow(false)
     private val pendingMonthRefresh = MutableStateFlow<String?>(null)
     private val pendingReportRefresh = MutableStateFlow<String?>(null)
+    private val _uiState = MutableStateFlow(EntriesUiState())
+    val uiState: StateFlow<EntriesUiState> = _uiState.asStateFlow()
 
     val categories: StateFlow<List<Category>> = categoryRepository.allCategories
         .onEach { categoriesLoaded.value = true }
         .stateIn(viewModelScope, sharingStarted, emptyList())
+
+    val mostUsedEditCategories: StateFlow<List<Category>> = combine(
+        sessionRepository.sessionState,
+        uiState.map { state -> state.editType },
+        categories,
+    ) { sessionState, type, categories ->
+        val householdId = (sessionState as? SessionState.Ready)?.household?.id
+        if (householdId == null) {
+            null
+        } else {
+            CategoryUsageRequest(
+                householdId = householdId,
+                type = type,
+                categories = categories,
+            )
+        }
+    }.flatMapLatest { request ->
+        if (request == null) {
+            flowOf(emptyList())
+        } else {
+            categoryUsageRepository.observeMostUsedCategories(
+                householdId = request.householdId,
+                type = request.type,
+                categories = request.categories,
+            )
+        }
+    }.stateIn(viewModelScope, sharingStarted, emptyList())
 
     private val monthCloses: StateFlow<List<MonthClose>> = monthCloseRepository.allMonthCloses
         .onEach { monthClosesLoaded.value = true }
@@ -76,9 +111,6 @@ class EntriesViewModel @Inject constructor(
 
     private val householdCurrency: StateFlow<String> = sessionRepository.householdCurrency
         .stateIn(viewModelScope, sharingStarted, DEFAULT_CURRENCY)
-
-    private val _uiState = MutableStateFlow(EntriesUiState())
-    val uiState: StateFlow<EntriesUiState> = _uiState.asStateFlow()
 
     private val selectedMonth: StateFlow<String> = uiState
         .map { state -> state.selectedMonth ?: defaultSelectedMonth }
@@ -163,6 +195,12 @@ class EntriesViewModel @Inject constructor(
         val currency: String,
         val monthEntries: List<EntryDisplayItem>,
         val uncategorizedLabel: String,
+    )
+
+    private data class CategoryUsageRequest(
+        val householdId: String,
+        val type: String,
+        val categories: List<Category>,
     )
 
     val renderState: StateFlow<EntriesRenderState> = combine(
@@ -342,7 +380,10 @@ class EntriesViewModel @Inject constructor(
             }
             EntriesEvent.StartEdit -> {
                 val entry = _uiState.value.selectedEntry ?: return
-                val cat = categories.value.firstOrNull { it.name == entry.category }
+                val cat = categories.value.firstOrNull { category ->
+                    category.type == entry.type &&
+                        (category.systemKey == entry.categoryKey || category.name == entry.category)
+                }
                 _uiState.update {
                     it.copy(
                         sheetMode = EntrySheetMode.Edit,
@@ -360,7 +401,13 @@ class EntriesViewModel @Inject constructor(
             }
             EntriesEvent.RequestDelete -> _uiState.update { it.copy(showDeleteDialog = true, operationErrorMessage = null) }
             EntriesEvent.DismissSheet -> _uiState.update { it.clearTransientState() }
-            is EntriesEvent.UpdateType -> _uiState.update { it.copy(editType = event.value, operationErrorMessage = null) }
+            is EntriesEvent.UpdateType -> _uiState.update {
+                it.copy(
+                    editType = event.value,
+                    editCategory = it.editCategory?.takeIf { category -> category.type == event.value },
+                    operationErrorMessage = null,
+                )
+            }
             is EntriesEvent.UpdateDescription -> _uiState.update { it.copy(editDescription = event.value, descriptionError = null, operationErrorMessage = null) }
             is EntriesEvent.UpdatePrice -> _uiState.update { it.copy(editPrice = event.value, priceError = null, operationErrorMessage = null) }
             is EntriesEvent.UpdateDate -> _uiState.update { it.copy(editDate = event.value, operationErrorMessage = null) }
@@ -401,6 +448,12 @@ class EntriesViewModel @Inject constructor(
                         date = state.editDate,
                     ),
                 )
+                state.editCategory?.let { category ->
+                    markCategoryUsedSafely(
+                        type = state.editType,
+                        category = category,
+                    )
+                }
                 _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, operationErrorMessage = null) }
                 delay(1_500L)
                 _uiState.update { it.clearTransientState() }
@@ -415,8 +468,28 @@ class EntriesViewModel @Inject constructor(
         }
     }
 
+    private suspend fun currentHouseholdId(): String =
+        (sessionRepository.sessionState.first() as? SessionState.Ready)?.household?.id
+            ?: sessionRepository.requireHouseholdId()
+
+    private suspend fun markCategoryUsedSafely(
+        type: String,
+        category: Category,
+    ) {
+        try {
+            categoryUsageRepository.markUsed(
+                householdId = currentHouseholdId(),
+                type = type,
+                category = category,
+            )
+        } catch (throwable: Throwable) {
+            if (throwable is CancellationException) throw throwable
+        }
+    }
+
     private fun confirmDelete() {
         val entry = _uiState.value.selectedEntry ?: return
+        _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
                 entryRepository.delete(
@@ -430,7 +503,14 @@ class EntriesViewModel @Inject constructor(
                         date = entry.date,
                     ),
                 )
-                _uiState.update { it.copy(sheetMode = EntrySheetMode.Success, showDeleteDialog = false, operationErrorMessage = null) }
+                _uiState.update {
+                    it.copy(
+                        sheetMode = EntrySheetMode.Success,
+                        showDeleteDialog = false,
+                        operationErrorMessage = null,
+                        isSaving = false,
+                    )
+                }
                 delay(1_500L)
                 _uiState.update { it.clearTransientState() }
             } catch (throwable: Throwable) {

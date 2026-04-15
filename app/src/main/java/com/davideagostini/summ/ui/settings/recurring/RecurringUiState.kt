@@ -24,6 +24,7 @@ data class RecurringUiState(
     val dayError: String? = null,
     val operationErrorMessage: String? = null,
     val showDeleteDialog: Boolean = false,
+    val isSaving: Boolean = false,
 )
 
 @Immutable

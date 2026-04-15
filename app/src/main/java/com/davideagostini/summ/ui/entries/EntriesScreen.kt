@@ -50,8 +50,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,13 +77,13 @@ import com.davideagostini.summ.ui.entries.components.CategorySpendingChartCard
 import com.davideagostini.summ.ui.entries.components.CategorySpendingSummaryCard
 import com.davideagostini.summ.ui.entries.components.DayGroupHeader
 import com.davideagostini.summ.ui.entries.components.EmptyState
-import com.davideagostini.summ.ui.entries.components.EntryEditorScreen
 import com.davideagostini.summ.ui.entries.components.EntriesToolbar
 import com.davideagostini.summ.ui.entries.components.EntryActionSheet
 import com.davideagostini.summ.ui.entries.components.EntryCard
+import com.davideagostini.summ.ui.entries.components.EntryEditorScreen
 import com.davideagostini.summ.ui.entries.components.UnusualSpendingCard
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Top-level transactions screen.
@@ -140,6 +140,7 @@ fun EntriesScreen(
     val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
     val isReportRefreshing by viewModel.isReportRefreshing.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val mostUsedEditCategories by viewModel.mostUsedEditCategories.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val reportState by viewModel.reportState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -158,6 +159,7 @@ fun EntriesScreen(
         renderState = renderState,
         reportState = reportState,
         categories = categories,
+        mostUsedEditCategories = mostUsedEditCategories,
         uiState = uiState,
         isMonthRefreshing = isMonthRefreshing,
         isReportRefreshing = isReportRefreshing,
@@ -185,7 +187,7 @@ private fun EntriesLoadingContent(
                 .statusBarsPadding()
                 .navigationBarsPadding(),
             contentPadding = PaddingValues(bottom = 92.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             item {
                 Text(
@@ -397,6 +399,7 @@ internal fun EntriesContent(
     renderState: EntriesRenderState,
     reportState: EntriesReportState,
     categories: List<Category>,
+    mostUsedEditCategories: List<Category>,
     uiState: EntriesUiState,
     isMonthRefreshing: Boolean,
     isReportRefreshing: Boolean,
@@ -483,7 +486,7 @@ internal fun EntriesContent(
                     .statusBarsPadding()
                     .navigationBarsPadding(),
                 contentPadding = PaddingValues(bottom = 92.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 item {
                     Text(
@@ -705,6 +708,7 @@ internal fun EntriesContent(
             EntryEditorScreen(
                 uiState = uiState,
                 categories = categories,
+                mostUsedCategories = mostUsedEditCategories,
                 currency = renderState.householdCurrency,
                 readOnly = isMonthClosed,
                 readOnlyMessage = stringResource(
@@ -723,6 +727,7 @@ internal fun EntriesContent(
         DeleteConfirmationDialog(
             title = stringResource(R.string.entries_delete_title, desc),
             message = stringResource(R.string.entries_delete_message),
+            isLoading = uiState.isSaving,
             onConfirm = { onEvent(EntriesEvent.ConfirmDelete) },
             onDismiss = { onEvent(EntriesEvent.DismissDeleteDialog) },
         )

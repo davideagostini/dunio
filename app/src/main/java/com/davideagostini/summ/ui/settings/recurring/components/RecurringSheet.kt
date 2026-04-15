@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,8 +103,9 @@ internal fun RecurringSheet(
 
     val content: @Composable () -> Unit = {
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp).statusBarsPadding()) {
+            val closeEnabled = !uiState.isSaving
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                IconButton(onClick = onDismiss) {
+                IconButton(onClick = onDismiss, enabled = closeEnabled) {
                     Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.content_desc_close))
                 }
             }
@@ -156,6 +159,7 @@ internal fun RecurringSheet(
                     }
                 }
                 RecurringSheetMode.Add, RecurringSheetMode.Edit -> {
+                    val controlsEnabled = !uiState.isSaving
                     Column(modifier = Modifier.fillMaxSize()) {
                         LazyColumn(
                             modifier = Modifier
@@ -179,13 +183,18 @@ internal fun RecurringSheet(
                                 }
                             }
                             item {
-                                TypeToggle(selectedType = uiState.type, onSelect = { onEvent(RecurringEvent.UpdateType(it)) })
+                                TypeToggle(
+                                    selectedType = uiState.type,
+                                    enabled = controlsEnabled,
+                                    onSelect = { onEvent(RecurringEvent.UpdateType(it)) },
+                                )
                                 Spacer(Modifier.height(12.dp))
                             }
                             item {
                                 OutlinedTextField(
                                     value = uiState.description,
                                     onValueChange = { onEvent(RecurringEvent.UpdateDescription(it)) },
+                                    enabled = controlsEnabled,
                                     modifier = Modifier.fillMaxWidth(),
                                     label = { Text(stringResource(R.string.entry_description_label)) },
                                     isError = uiState.descriptionError != null,
@@ -199,6 +208,7 @@ internal fun RecurringSheet(
                                 OutlinedTextField(
                                     value = uiState.amount,
                                     onValueChange = { onEvent(RecurringEvent.UpdateAmount(it)) },
+                                    enabled = controlsEnabled,
                                     modifier = Modifier.fillMaxWidth(),
                                     label = { Text(stringResource(R.string.entry_amount_label)) },
                                     isError = uiState.amountError != null,
@@ -213,6 +223,7 @@ internal fun RecurringSheet(
                             item {
                                 OutlinedButton(
                                     onClick = { showDatePicker = true },
+                                    enabled = controlsEnabled,
                                     shape = AppButtonShape,
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                                     modifier = Modifier.fillMaxWidth(),
@@ -240,6 +251,7 @@ internal fun RecurringSheet(
                                     index = index,
                                     count = categories.size,
                                     selected = uiState.category == category.name,
+                                    enabled = controlsEnabled,
                                     onClick = { onEvent(RecurringEvent.UpdateCategory(category)) },
                                 )
                             }
@@ -248,6 +260,7 @@ internal fun RecurringSheet(
                                 OutlinedTextField(
                                     value = uiState.dayOfMonth,
                                     onValueChange = { onEvent(RecurringEvent.UpdateDayOfMonth(it)) },
+                                    enabled = controlsEnabled,
                                     modifier = Modifier.fillMaxWidth(),
                                     label = { Text(stringResource(R.string.recurring_day_label)) },
                                     isError = uiState.dayError != null,
@@ -258,7 +271,11 @@ internal fun RecurringSheet(
                                 Spacer(Modifier.height(12.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(stringResource(R.string.recurring_active), modifier = Modifier.weight(1f))
-                                    Switch(checked = uiState.active, onCheckedChange = { onEvent(RecurringEvent.UpdateActive(it)) })
+                                    Switch(
+                                        checked = uiState.active,
+                                        onCheckedChange = { onEvent(RecurringEvent.UpdateActive(it)) },
+                                        enabled = controlsEnabled,
+                                    )
                                 }
                                 Spacer(Modifier.height(16.dp))
                             }
@@ -279,15 +296,28 @@ internal fun RecurringSheet(
                                     .fillMaxWidth()
                                     .padding(top = 12.dp),
                             ) {
-                                OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f), shape = AppButtonShape) {
+                                OutlinedButton(
+                                    onClick = onDismiss,
+                                    enabled = !uiState.isSaving,
+                                    modifier = Modifier.weight(1f),
+                                    shape = AppButtonShape,
+                                ) {
                                     Text(stringResource(R.string.action_cancel))
                                 }
                                 Button(
                                     onClick = { onEvent(if (uiState.sheetMode == RecurringSheetMode.Add) RecurringEvent.SaveAdd else RecurringEvent.SaveEdit) },
+                                    enabled = !uiState.isSaving,
                                     modifier = Modifier.weight(1f),
                                     shape = AppButtonShape,
                                 ) {
-                                    Text(if (uiState.sheetMode == RecurringSheetMode.Add) stringResource(R.string.action_create) else stringResource(R.string.action_save))
+                                    SaveActionContent(
+                                        label = if (uiState.sheetMode == RecurringSheetMode.Add) {
+                                            stringResource(R.string.action_create)
+                                        } else {
+                                            stringResource(R.string.action_save)
+                                        },
+                                        isSaving = uiState.isSaving,
+                                    )
                                 }
                             }
                         }
@@ -324,7 +354,7 @@ internal fun RecurringSheet(
 }
 
 @Composable
-private fun TypeToggle(selectedType: String, onSelect: (String) -> Unit) {
+private fun TypeToggle(selectedType: String, enabled: Boolean, onSelect: (String) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         listOf(
             "income" to stringResource(R.string.entry_type_income),
@@ -334,6 +364,7 @@ private fun TypeToggle(selectedType: String, onSelect: (String) -> Unit) {
             val color = if (value == "income") IncomeGreen else ExpenseRed
             OutlinedButton(
                 onClick = { onSelect(value) },
+                enabled = enabled,
                 modifier = Modifier.weight(1f),
                 shape = AppButtonShape,
                 colors = if (selected) ButtonDefaults.outlinedButtonColors(
@@ -358,6 +389,7 @@ private fun RecurringCategoryRow(
     index: Int,
     count: Int,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     val shape = listItemShape(index, count)
@@ -371,7 +403,7 @@ private fun RecurringCategoryRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(verticalPadding),
         shape = shape,
         colors = CardDefaults.cardColors(
@@ -394,6 +426,23 @@ private fun RecurringCategoryRow(
                     .padding(horizontal = 12.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun SaveActionContent(
+    label: String,
+    isSaving: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (isSaving) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(label)
     }
 }
 

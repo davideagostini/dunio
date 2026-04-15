@@ -35,7 +35,6 @@ import com.davideagostini.summ.ui.theme.primaryDark
 import com.davideagostini.summ.ui.theme.primaryLight
 import com.davideagostini.summ.ui.theme.surfaceContainerDark
 import com.davideagostini.summ.ui.theme.surfaceContainerLowDark
-import com.davideagostini.summ.ui.theme.surfaceContainerLowestDark
 
 private val widgetBackground = ColorProvider(Color(0xFFF7F7F7), surfaceContainerDark)
 private val widgetSurface = ColorProvider(Color.White, surfaceContainerLowDark)

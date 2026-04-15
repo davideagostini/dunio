@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
+import com.davideagostini.summ.data.category.stableUsageId
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
@@ -31,9 +32,13 @@ import com.davideagostini.summ.ui.entry.EntryUiState
 @Composable
 internal fun StepCategory(
     categories: List<Category>,
+    mostUsedCategories: List<Category>,
     uiState: EntryUiState,
     onEvent: (EntryEvent) -> Unit,
 ) {
+    val mostUsedStableIds = mostUsedCategories.map { category -> category.stableUsageId() }.toSet()
+    val allCategories = categories.filterNot { category -> category.stableUsageId() in mostUsedStableIds }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         StepTitle(stringResource(R.string.entry_step_pick_category))
         Spacer(Modifier.height(12.dp))
@@ -44,7 +49,22 @@ internal fun StepCategory(
                 .height(240.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            items(categories, key = { it.id }) { category ->
+            if (mostUsedCategories.isNotEmpty()) {
+                item {
+                    CategorySectionHeader(text = stringResource(R.string.category_picker_most_used))
+                }
+                itemsIndexed(mostUsedCategories, key = { _, category -> "most-${category.id}" }) { _, category ->
+                    CategoryRow(
+                        category = category,
+                        selected = uiState.selectedCategory?.id == category.id,
+                        onClick  = { onEvent(EntryEvent.SelectCategory(category)) },
+                    )
+                }
+                item {
+                    CategorySectionHeader(text = stringResource(R.string.category_picker_all_categories))
+                }
+            }
+            itemsIndexed(allCategories, key = { _, category -> "all-${category.id}" }) { _, category ->
                 CategoryRow(
                     category = category,
                     selected = uiState.selectedCategory?.id == category.id,
@@ -65,6 +85,17 @@ internal fun StepCategory(
         Spacer(Modifier.height(16.dp))
         StepNavRow(onBack = { onEvent(EntryEvent.Back) }, onNext = { onEvent(EntryEvent.Next) })
     }
+}
+
+@Composable
+private fun CategorySectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+    )
 }
 
 @Composable

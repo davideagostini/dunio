@@ -56,6 +56,7 @@ fun QuickEntryScreen(
     val sessionState = resolvedSessionState ?: observedSessionState
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val mostUsedCategories by viewModel.mostUsedCategories.collectAsStateWithLifecycle()
     val uiState    by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (sessionState is SessionState.Loading) {
@@ -139,7 +140,12 @@ fun QuickEntryScreen(
                     currency = sessionState.household.currency,
                     onEvent = viewModel::handleEvent,
                 )
-                4 -> StepCategory(categories = categories, uiState = uiState, onEvent = viewModel::handleEvent)
+                4 -> StepCategory(
+                    categories = categories,
+                    mostUsedCategories = mostUsedCategories,
+                    uiState = uiState,
+                    onEvent = viewModel::handleEvent,
+                )
                 5 -> StepReview(
                     uiState = uiState,
                     currency = sessionState.household.currency,

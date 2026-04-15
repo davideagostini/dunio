@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -160,6 +161,7 @@ fun AssetsScreen(
         DeleteConfirmationDialog(
             title = stringResource(R.string.assets_delete_title, name),
             message = stringResource(R.string.assets_delete_message),
+            isLoading = uiState.isSaving,
             onConfirm = { viewModel.handleEvent(AssetsEvent.ConfirmDelete) },
             onDismiss = { viewModel.handleEvent(AssetsEvent.DismissDeleteDialog) },
         )
@@ -181,9 +183,10 @@ private fun AssetsLoadingContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding(),
+            .statusBarsPadding()
+            .navigationBarsPadding(),
             contentPadding = PaddingValues(bottom = 140.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
                 Text(

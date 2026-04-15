@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -116,7 +117,7 @@ private fun DashboardLoadingContent(
                     .statusBarsPadding()
                     .navigationBarsPadding(),
                 contentPadding = PaddingValues(bottom = 92.dp),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(0.dp),
             ) {
                 item {
                     Text(
@@ -133,6 +134,10 @@ private fun DashboardLoadingContent(
                         selectedMonth = selectedMonth,
                         onOpenMonthPicker = {},
                     )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 item {
@@ -324,11 +329,11 @@ private fun DashboardContent(
             // The dashboard remains a vertically stacked mobile layout so the KPI cards stay readable on small screens.
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .navigationBarsPadding(),
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
                 contentPadding = PaddingValues(bottom = 92.dp),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(0.dp),
             ) {
                 item {
                     Text(
@@ -345,6 +350,10 @@ private fun DashboardContent(
                         selectedMonth = selectedMonth,
                         onOpenMonthPicker = { showMonthPicker = true },
                     )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 if (isMonthRefreshing) {
@@ -374,6 +383,7 @@ private fun DashboardContent(
                         label = stringResource(R.string.dashboard_assets_label),
                         value = formatCurrency(renderState.metrics.totalAssets, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_current_value),
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
 
@@ -382,6 +392,7 @@ private fun DashboardContent(
                         label = stringResource(R.string.dashboard_liabilities_label),
                         value = formatCurrency(renderState.metrics.totalLiabilities, renderState.householdCurrency),
                         note = stringResource(R.string.dashboard_outstanding),
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
 
@@ -401,6 +412,7 @@ private fun DashboardContent(
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         valueColor = if (renderState.metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
 
@@ -419,6 +431,7 @@ private fun DashboardContent(
                             renderState.savingsRateDelta < 0 -> ExpenseRed
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
 
@@ -437,6 +450,7 @@ private fun DashboardContent(
                             renderState.runwayChangePercent < 0 -> ExpenseRed
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
 
@@ -447,13 +461,14 @@ private fun DashboardContent(
                         trendLabel = renderState.monthlyExpensesChangePercent?.let {
                             stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
                         },
-                    trendPositive = renderState.monthlyExpensesChangePercent?.let { it >= 0 },
-                    trendColor = when {
-                        renderState.monthlyExpensesChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                        renderState.monthlyExpensesChangePercent < 0 -> IncomeGreen
-                        renderState.monthlyExpensesChangePercent > 0 -> ExpenseRed
+                        trendPositive = renderState.monthlyExpensesChangePercent?.let { it >= 0 },
+                        trendColor = when {
+                            renderState.monthlyExpensesChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                            renderState.monthlyExpensesChangePercent < 0 -> IncomeGreen
+                            renderState.monthlyExpensesChangePercent > 0 -> ExpenseRed
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                 }
             }

@@ -38,10 +38,10 @@ internal fun EntryCard(
 ) {
     val shape = listItemShape(index, count)
     val verticalPadding = when {
-        count == 1         -> PaddingValues(vertical = 4.dp)
-        index == 0         -> PaddingValues(top = 4.dp, bottom = 1.dp)
-        index == count - 1 -> PaddingValues(top = 1.dp, bottom = 4.dp)
-        else               -> PaddingValues(vertical = 1.dp)
+        count == 1 -> PaddingValues(vertical = 2.dp)
+        index == 0 -> PaddingValues(top = 2.dp, bottom = 0.dp)
+        index == count - 1 -> PaddingValues(top = 0.dp, bottom = 2.dp)
+        else -> PaddingValues(vertical = 0.dp)
     }
 
     Card(
@@ -54,7 +54,7 @@ internal fun EntryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {

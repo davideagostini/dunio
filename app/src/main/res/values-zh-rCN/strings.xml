@@ -88,6 +88,8 @@
     <string name="entry_review_description">说明</string>
     <string name="entry_review_amount">金额</string>
     <string name="entry_review_category">分类</string>
+    <string name="category_picker_most_used">最常用</string>
+    <string name="category_picker_all_categories">所有分类</string>
     <string name="entry_type_income">💰  收入</string>
     <string name="entry_type_expense">💸  支出</string>
     <string name="entry_type_income_plain">收入</string>

@@ -60,8 +60,8 @@ import com.davideagostini.summ.ui.auth.AuthGateScreen
 import com.davideagostini.summ.ui.auth.SessionViewModel
 import com.davideagostini.summ.ui.categories.CategoriesScreen
 import com.davideagostini.summ.ui.dashboard.DashboardScreen
-import com.davideagostini.summ.ui.entry.QuickEntryScreen
 import com.davideagostini.summ.ui.entries.EntriesRouteScreen
+import com.davideagostini.summ.ui.entry.QuickEntryScreen
 import com.davideagostini.summ.ui.settings.SettingsScreen
 import com.davideagostini.summ.ui.settings.currency.CurrencyScreen
 import com.davideagostini.summ.ui.settings.export.ExportScreen

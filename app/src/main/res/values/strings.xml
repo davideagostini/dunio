@@ -71,6 +71,8 @@
     <string name="entry_success_message">Your transaction has been saved.</string>
     <string name="entries_balance_spent_in">Spent in %1$s</string>
     <string name="entries_balance_income">Income %1$s</string>
+    <string name="entries_balance_income_label">Income</string>
+    <string name="entries_balance_cash_flow_label">Cash flow</string>
     <string name="entries_balance_positive">In the green %1$s</string>
     <string name="entries_balance_negative">Over budget %1$s</string>
     <string name="entries_filter_all">All</string>
@@ -88,6 +90,8 @@
     <string name="entry_review_description">Description</string>
     <string name="entry_review_amount">Amount</string>
     <string name="entry_review_category">Category</string>
+    <string name="category_picker_most_used">Most used</string>
+    <string name="category_picker_all_categories">All categories</string>
     <string name="entry_type_income">💰  Income</string>
     <string name="entry_type_expense">💸  Expense</string>
     <string name="entry_type_income_plain">Income</string>

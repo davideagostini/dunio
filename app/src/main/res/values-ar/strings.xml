@@ -88,6 +88,8 @@
     <string name="entry_review_description">الوصف</string>
     <string name="entry_review_amount">المبلغ</string>
     <string name="entry_review_category">الفئة</string>
+    <string name="category_picker_most_used">الأكثر استخدامًا</string>
+    <string name="category_picker_all_categories">كل الفئات</string>
     <string name="entry_type_income">💰  دخل</string>
     <string name="entry_type_expense">💸  مصروف</string>
     <string name="entry_type_income_plain">دخل</string>

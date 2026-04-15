@@ -88,6 +88,8 @@
     <string name="entry_review_description">Descripción</string>
     <string name="entry_review_amount">Importe</string>
     <string name="entry_review_category">Categoría</string>
+    <string name="category_picker_most_used">Más usadas</string>
+    <string name="category_picker_all_categories">Todas las categorías</string>
     <string name="entry_type_income">💰  Ingreso</string>
     <string name="entry_type_expense">💸  Gasto</string>
     <string name="entry_type_income_plain">Ingreso</string>

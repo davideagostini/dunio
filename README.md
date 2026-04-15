@@ -100,6 +100,7 @@ The dashboard now renders a lightweight skeleton state while its monthly summari
 The entries screen now keeps the list month-scoped, loads category reports only when the user opens `Reports`, and limits unusual-spending insights to a small rolling window around the selected month instead of the full transaction archive.
 It also renders a local shimmer skeleton during cold loads and uses a lightweight route shell plus progressive body mount so the first tab switch feels more immediate on slower devices.
 To reduce ANR risk on older phones, Firestore transaction listeners now dispatch off the main thread and the visible ledger list is flattened into truly lazy day headers plus entry rows instead of rendering whole day groups in one composed block.
+Entry category pickers also keep a tiny local Room usage index so the most-used categories for the current household and entry type can be shown first without querying Firestore. The index is keyed by `householdId + type + categoryStableId`, grows only by category used, and is treated as best-effort so entry saves never depend on local ranking updates.
 
 ### Assets
 
@@ -143,6 +144,8 @@ The month-close screen now reads only the selected month's entries and asset sna
 Bottom navigation now restores state across the primary tabs (`Dashboard`, `Entries`, `Assets`, `Settings`) so rapid tab switching reuses warm screens more reliably.
 
 Realtime Firestore DAO listeners now use a shared background executor for snapshot callbacks, which keeps document deserialization and mapping away from the UI thread across dashboard, entries, assets, members, invites, recurring, categories, and month close.
+
+Local-only convenience data is stored in Room. The first local table tracks category usage counts for the entry category picker; source-of-truth finance data remains in Firestore under the current household.
 
 Current app-language support includes:
 
@@ -441,6 +444,7 @@ git rm --cached app/google-services.json
 - better backup and migration flows
 - Wear OS support
 - on-device monthly financial summaries
+- Analyze habits with on-device AI insights
 - receipt or invoice scan to draft an entry with description, amount, date, and category
 
 ## Support the project

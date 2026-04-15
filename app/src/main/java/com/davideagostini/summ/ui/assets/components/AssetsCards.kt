@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.ArrowDownward
@@ -33,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Asset
 import com.davideagostini.summ.ui.assets.buildChangeLabel
+import com.davideagostini.summ.ui.components.SummaryCardDefaults
+import com.davideagostini.summ.ui.components.SummaryMetricPill
 import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -50,7 +51,7 @@ fun AssetsSummaryCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(30.dp),
+        shape = SummaryCardDefaults.shape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
@@ -63,46 +64,30 @@ fun AssetsSummaryCard(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.size(4.dp))
+            Spacer(Modifier.size(8.dp))
             Text(
                 text = formatCurrency(netWorth, currency),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.size(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(SummaryCardDefaults.metricRowSpacing),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.assets_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.size(2.dp))
-                    Text(
-                        text = formatCurrency(totalAssets, currency),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = IncomeGreen,
-                    )
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = stringResource(R.string.liabilities_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.size(2.dp))
-                    Text(
-                        text = formatCurrency(totalLiabilities, currency),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = ExpenseRed,
-                    )
-                }
+                SummaryMetricPill(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(R.string.assets_label),
+                    value = formatCurrency(totalAssets, currency),
+                    valueColor = IncomeGreen,
+                )
+                SummaryMetricPill(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(R.string.liabilities_label),
+                    value = formatCurrency(totalLiabilities, currency),
+                    valueColor = ExpenseRed,
+                )
             }
         }
     }

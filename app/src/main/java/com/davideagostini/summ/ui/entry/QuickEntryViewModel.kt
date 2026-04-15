@@ -9,16 +9,25 @@ import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
 import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
+import com.davideagostini.summ.data.repository.CategoryUsageRepository
 import com.davideagostini.summ.data.repository.EntryRepository
+import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.data.session.SessionState
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -42,6 +51,7 @@ data class EntryUiState(
 )
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 /**
  * ViewModel behind the quick-entry flow.
  *
@@ -52,28 +62,75 @@ class QuickEntryViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val entryRepository: EntryRepository,
     private val categoryRepository: CategoryRepository,
+    private val categoryUsageRepository: CategoryUsageRepository,
+    private val sessionRepository: SessionRepository,
 ) : ViewModel() {
     private val categoriesLoaded = MutableStateFlow(false)
+    private val _uiState = MutableStateFlow(EntryUiState())
+    val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
 
-    val categories: StateFlow<List<Category>> =
+    private val allCategories: StateFlow<List<Category>> =
         categoryRepository.allCategories
             .onEach { categoriesLoaded.value = true }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val categories: StateFlow<List<Category>> = combine(
+        allCategories,
+        uiState.map { state -> state.type },
+    ) { categories, type ->
+        categories.filter { category -> category.type == type }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val mostUsedCategories: StateFlow<List<Category>> = combine(
+        sessionRepository.sessionState,
+        uiState.map { state -> state.type },
+        allCategories,
+    ) { sessionState, type, categories ->
+        val householdId = (sessionState as? SessionState.Ready)?.household?.id
+        if (householdId == null) {
+            null
+        } else {
+            CategoryUsageRequest(
+                householdId = householdId,
+                type = type,
+                categories = categories,
+            )
+        }
+    }.flatMapLatest { request ->
+        if (request == null) {
+            flowOf(emptyList())
+        } else {
+            categoryUsageRepository.observeMostUsedCategories(
+                householdId = request.householdId,
+                type = request.type,
+                categories = request.categories,
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val isLoading: StateFlow<Boolean> =
         categoriesLoaded
             .map { loaded -> !loaded }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    private val _uiState = MutableStateFlow(EntryUiState())
-    val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
-
     private val _navEvents = Channel<EntryNavEvent>(Channel.BUFFERED)
     val navEvents = _navEvents.receiveAsFlow()
 
+    private data class CategoryUsageRequest(
+        val householdId: String,
+        val type: String,
+        val categories: List<Category>,
+    )
+
     fun handleEvent(event: EntryEvent) {
         when (event) {
-            is EntryEvent.SelectType        -> _uiState.update { it.copy(type = event.type, operationErrorMessage = null) }
+            is EntryEvent.SelectType        -> _uiState.update {
+                it.copy(
+                    type = event.type,
+                    selectedCategory = it.selectedCategory?.takeIf { category -> category.type == event.type },
+                    operationErrorMessage = null,
+                )
+            }
             is EntryEvent.UpdateDate        -> _uiState.update { it.copy(date = event.value, operationErrorMessage = null) }
             is EntryEvent.UpdateDescription -> _uiState.update { it.copy(description = event.value, descriptionError = null, operationErrorMessage = null) }
             is EntryEvent.UpdatePrice       -> _uiState.update { it.copy(price = event.value, priceError = null, operationErrorMessage = null) }
@@ -138,6 +195,10 @@ class QuickEntryViewModel @Inject constructor(
                         date        = state.date,
                     )
                 )
+                markCategoryUsedSafely(
+                    type = state.type,
+                    category = category,
+                )
                 _uiState.update { it.copy(step = 6, operationErrorMessage = null, isSaving = false) }
                 delay(1_500L)
                 _navEvents.send(EntryNavEvent.Saved)
@@ -149,6 +210,25 @@ class QuickEntryViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private suspend fun currentHouseholdId(): String =
+        (sessionRepository.sessionState.first() as? SessionState.Ready)?.household?.id
+            ?: sessionRepository.requireHouseholdId()
+
+    private suspend fun markCategoryUsedSafely(
+        type: String,
+        category: Category,
+    ) {
+        try {
+            categoryUsageRepository.markUsed(
+                householdId = currentHouseholdId(),
+                type = type,
+                category = category,
+            )
+        } catch (throwable: Throwable) {
+            if (throwable is CancellationException) throw throwable
         }
     }
 }

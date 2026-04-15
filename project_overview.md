@@ -258,6 +258,7 @@ Responsibility:
 - keep category reports on-demand instead of blocking the initial list render
 - flatten grouped entries into lazy day headers plus lazy entry rows
 - render a local shimmer skeleton while the selected month is loading
+- show most-used categories first in entry pickers from a local Room usage index
 - view/edit/delete existing entries
 - show unusual spending insights and monthly balance summary
 - render amounts using the household currency from session state
@@ -265,6 +266,7 @@ Responsibility:
 Cross-cutting performance note:
 
 - Firestore snapshot listeners in realtime DAOs dispatch on a shared background executor so snapshot parsing does not run on the main thread by default.
+- Category usage ranking is local-only and keyed by `householdId + type + categoryStableId`; it grows by category, not by entry, and stale rows are ignored by filtering against the current category list.
 
 ### `ui/settings/currency`
 
@@ -364,6 +366,7 @@ Responsibility:
 
 - multi-step entry creation flow
 - reusable quick capture entry point for activity, tile, and widget-triggered flows
+- use the same most-used/category ordering model as the main entry editor
 
 ### `ui/categories`
 
@@ -572,6 +575,7 @@ The following additions would improve product polish and feedback loops without 
 
 - add on-device AI category suggestion during quick entry
 - add on-device monthly summaries from aggregated household finance data
+- add `Analyze habits` with on-device AI insights from recurring patterns, category mix, and monthly changes
 - add receipt or invoice scan to create a prefilled draft entry after OCR + field extraction + category suggestion
 - add a user feedback mechanism so people can quickly send bug reports, improvement ideas, or general product feedback from inside the app
 

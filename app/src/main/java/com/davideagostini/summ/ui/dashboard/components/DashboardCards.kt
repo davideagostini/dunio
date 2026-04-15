@@ -153,9 +153,10 @@ fun MetricCard(
     trendPositive: Boolean? = null,
     valueColor: Color = MaterialTheme.colorScheme.onSurface,
     trendColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         shape = RoundedCornerShape(28.dp),

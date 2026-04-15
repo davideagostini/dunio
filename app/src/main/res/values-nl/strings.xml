@@ -88,6 +88,8 @@
     <string name="entry_review_description">Beschrijving</string>
     <string name="entry_review_amount">Bedrag</string>
     <string name="entry_review_category">Categorie</string>
+    <string name="category_picker_most_used">Meest gebruikt</string>
+    <string name="category_picker_all_categories">Alle categorieën</string>
     <string name="entry_type_income">💰  Inkomst</string>
     <string name="entry_type_expense">💸  Uitgave</string>
     <string name="entry_type_income_plain">Inkomst</string>

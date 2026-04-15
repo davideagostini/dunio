@@ -37,8 +37,6 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.onSurfaceDark
 import com.davideagostini.summ.ui.theme.onSurfaceLight
-import com.davideagostini.summ.ui.theme.primaryDark
-import com.davideagostini.summ.ui.theme.primaryLight
 import com.davideagostini.summ.widget.components.SummWidgetScaffold
 import com.davideagostini.summ.widget.components.WidgetInfoState
 import com.davideagostini.summ.widget.components.openAppAction

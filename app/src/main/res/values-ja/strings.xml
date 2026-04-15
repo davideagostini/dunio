@@ -88,6 +88,8 @@
     <string name="entry_review_description">説明</string>
     <string name="entry_review_amount">金額</string>
     <string name="entry_review_category">カテゴリ</string>
+    <string name="category_picker_most_used">よく使うカテゴリ</string>
+    <string name="category_picker_all_categories">すべてのカテゴリ</string>
     <string name="entry_type_income">💰  収入</string>
     <string name="entry_type_expense">💸  支出</string>
     <string name="entry_type_income_plain">収入</string>

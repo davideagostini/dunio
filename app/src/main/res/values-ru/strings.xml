@@ -88,6 +88,8 @@
     <string name="entry_review_description">Описание</string>
     <string name="entry_review_amount">Сумма</string>
     <string name="entry_review_category">Категория</string>
+    <string name="category_picker_most_used">Часто используемые</string>
+    <string name="category_picker_all_categories">Все категории</string>
     <string name="entry_type_income">💰  Доход</string>
     <string name="entry_type_expense">💸  Расход</string>
     <string name="entry_type_income_plain">Доход</string>

@@ -13,7 +13,6 @@ import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text

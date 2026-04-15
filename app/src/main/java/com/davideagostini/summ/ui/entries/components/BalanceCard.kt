@@ -1,18 +1,18 @@
 package com.davideagostini.summ.ui.entries.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
+import com.davideagostini.summ.ui.components.SummaryCardDefaults
+import com.davideagostini.summ.ui.components.SummaryMetricPill
 import com.davideagostini.summ.ui.entries.EntriesFilterType
 import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
@@ -38,18 +40,18 @@ internal fun BalanceCard(
     filterType: EntriesFilterType,
     onFilterSelected: (EntriesFilterType) -> Unit,
 ) {
-    Card(
+        Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        shape = RoundedCornerShape(32.dp),
+            .padding(SummaryCardDefaults.outerPadding),
+        shape = SummaryCardDefaults.shape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(
+            Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 24.dp),
+                .padding(SummaryCardDefaults.contentPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -57,8 +59,10 @@ internal fun BalanceCard(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(SummaryCardDefaults.titleSpacing))
+
             Text(
                 text = formatCurrency(expenses, currency),
                 style = MaterialTheme.typography.displaySmall,
@@ -66,31 +70,30 @@ internal fun BalanceCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.entries_balance_income, formatCurrency(income, currency)),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(18.dp))
-            Surface(
-                shape = RoundedCornerShape(999.dp),
-                color = if (netCashFlow >= 0) IncomeGreen.copy(alpha = 0.12f) else ExpenseRed.copy(alpha = 0.12f),
+            Spacer(Modifier.height(SummaryCardDefaults.sectionSpacing))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(SummaryCardDefaults.metricRowSpacing),
             ) {
-                Text(
-                    text = if (netCashFlow >= 0) {
-                        stringResource(R.string.entries_balance_positive, formatCurrency(netCashFlow, currency))
+                SummaryMetricPill(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(R.string.entries_balance_income_label),
+                    value = formatCurrency(income, currency),
+                )
+                SummaryMetricPill(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(R.string.entries_balance_cash_flow_label),
+                    value = if (netCashFlow >= 0) {
+                        "+${formatCurrency(netCashFlow, currency)}"
                     } else {
-                        stringResource(R.string.entries_balance_negative, formatCurrency(abs(netCashFlow), currency))
+                        "-${formatCurrency(abs(netCashFlow), currency)}"
                     },
-                    color = if (netCashFlow >= 0) IncomeGreen else ExpenseRed,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                    valueColor = if (netCashFlow >= 0) IncomeGreen else ExpenseRed,
                 )
             }
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(SummaryCardDefaults.sectionSpacing))
+            // Keep the filter segmented control visually anchored to the summary above.
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
             ) {
