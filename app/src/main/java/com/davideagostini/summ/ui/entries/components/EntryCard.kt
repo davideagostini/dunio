@@ -33,19 +33,18 @@ internal fun EntryCard(
     index: Int,
     count: Int,
     readOnly: Boolean,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val shape = listItemShape(index, count)
     val verticalPadding = when {
-        count == 1 -> PaddingValues(vertical = 2.dp)
-        index == 0 -> PaddingValues(top = 2.dp, bottom = 0.dp)
-        index == count - 1 -> PaddingValues(top = 0.dp, bottom = 2.dp)
-        else -> PaddingValues(vertical = 0.dp)
+        count == 1 -> PaddingValues(horizontal = 20.dp, vertical = 2.dp)
+        index == 0 -> PaddingValues(start = 20.dp, end = 20.dp, top = 2.dp, bottom = 1.dp)
+        index == count - 1 -> PaddingValues(start = 20.dp, end = 20.dp, top = 1.dp, bottom = 2.dp)
+        else -> PaddingValues(start = 20.dp, end = 20.dp, top = 1.dp, bottom = 1.dp)
     }
 
     Card(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(verticalPadding)
             .clickable(onClick = onClick),
@@ -54,7 +53,9 @@ internal fun EntryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {

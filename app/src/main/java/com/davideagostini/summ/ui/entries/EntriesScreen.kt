@@ -596,7 +596,6 @@ internal fun EntriesContent(
                                     index = item.groupIndex,
                                     count = item.groupCount,
                                     readOnly = isMonthClosed,
-                                    modifier = Modifier.padding(horizontal = 20.dp),
                                     onClick = { onEvent(EntriesEvent.Select(item.entry)) },
                                 )
                             }

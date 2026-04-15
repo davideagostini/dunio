@@ -142,7 +142,7 @@ internal fun DayGroupHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 10.dp),
+            .padding(start = 6.dp, end = 6.dp, top = 20.dp, bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

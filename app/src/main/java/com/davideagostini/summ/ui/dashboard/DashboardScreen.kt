@@ -170,14 +170,14 @@ private fun DashboardHeroSkeleton(shimmer: Brush) {
                     .width(120.dp)
                     .height(14.dp),
             )
-            androidx.compose.foundation.layout.Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(18.dp))
             DashboardSkeletonBlock(
                 brush = shimmer,
                 modifier = Modifier
                     .width(220.dp)
                     .height(42.dp),
             )
-            androidx.compose.foundation.layout.Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(18.dp))
             DashboardSkeletonBlock(
                 brush = shimmer,
                 modifier = Modifier
