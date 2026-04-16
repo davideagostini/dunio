@@ -149,6 +149,39 @@ img {
   transform: scaleX(1);
 }
 
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(14, 30, 37, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 22px rgba(16, 36, 43, 0.04);
+}
+
+.language-switch::after {
+  display: none;
+}
+
+.language-switch:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.96);
+  transform: translateY(-1px);
+}
+
+.language-switch-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: var(--text-soft);
+}
+
 .hero {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
