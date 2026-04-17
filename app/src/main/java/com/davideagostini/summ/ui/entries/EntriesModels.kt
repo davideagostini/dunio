@@ -103,7 +103,11 @@ internal fun buildDayGroups(entries: List<EntryDisplayItem>): List<EntryDayGroup
             EntryDayGroup(
                 key = date,
                 expenseTotal = dayEntries.sumOf { entry -> if (entry.type == "expense") entry.price else 0.0 },
-                entries = dayEntries.sortedByDescending { it.date },
+                entries = dayEntries.sortedWith(
+                    compareByDescending<EntryDisplayItem> { it.createdAt }
+                        .thenByDescending { it.date }
+                        .thenByDescending { it.id },
+                ),
             )
         }
 

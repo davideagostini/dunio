@@ -1,0 +1,35 @@
+<resources>
+    <string name="wear_app_name">Dunio</string>
+    <string name="wear_quick_entry_title">Quick entry</string>
+    <string name="wear_type_title">What do you want to add?</string>
+    <string name="wear_type_expense">Expense</string>
+    <string name="wear_type_income">Income</string>
+    <string name="wear_type_expense_hint">Log spending in a few taps.</string>
+    <string name="wear_type_income_hint">Capture money coming in.</string>
+    <string name="wear_quick_categories_title">Quick categories</string>
+    <string name="wear_queue_status">%1$d queued</string>
+    <string name="wear_amount_title">Amount</string>
+    <string name="wear_amount_placeholder">0.00</string>
+    <string name="wear_amount_cta">Continue</string>
+    <string name="wear_amount_validation">Enter a valid amount.</string>
+    <string name="wear_categories_title">Choose category</string>
+    <string name="wear_categories_hint">Pick one of your usual categories first.</string>
+    <string name="wear_categories_empty">No categories available for this type.</string>
+    <string name="wear_show_all_categories">All categories</string>
+    <string name="wear_show_all_categories_hint">Browse the full list</string>
+    <string name="wear_all_categories_title">All categories</string>
+    <string name="wear_confirm_title">Confirm entry</string>
+    <string name="wear_confirm_type">Type</string>
+    <string name="wear_confirm_amount">Amount</string>
+    <string name="wear_confirm_category">Category</string>
+    <string name="wear_save">Save on phone</string>
+    <string name="wear_back">Back</string>
+    <string name="wear_retry">Retry</string>
+    <string name="wear_loading_categories">Loading categories…</string>
+    <string name="wear_saving">Saving…</string>
+    <string name="wear_success">Saved</string>
+    <string name="wear_success_saved_message">The entry was saved on your phone.</string>
+    <string name="wear_success_queued_message">%1$d entry queued and will sync when your phone is back.</string>
+    <string name="wear_phone_unavailable">Your phone is unavailable right now.</string>
+    <string name="wear_generic_error">Something went wrong.</string>
+</resources>

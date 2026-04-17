@@ -38,6 +38,7 @@ The app is intentionally not an accounting suite. The focus is fast daily use, c
 - Gradle project files
 - GitHub CI workflow
 - contribution and release documentation
+- dedicated Wear OS quick-entry architecture notes in [docs/wear-os-quick-entry.md](docs/wear-os-quick-entry.md)
 
 ## Core product model
 
@@ -167,6 +168,17 @@ Current app-language support includes:
 - home-screen quick-entry widget
 - home-screen spending summary widget
 - home-screen top categories widget
+
+### Wear OS
+
+- dedicated Wear OS app module
+- non-standalone watch quick entry
+- watch-to-phone RPC over Wear Data Layer
+- local queue on the watch when the phone is temporarily unavailable
+- package layout split into `data`, `model`, `navigation`, `presentation`, `protocol`, `sync`, `theme`, and `ui`
+
+Wear OS implementation details and architecture notes live in
+[docs/wear-os-quick-entry.md](docs/wear-os-quick-entry.md).
 
 The spending widget now renders from a tiny local cache first and refreshes remotely afterward.
 This avoids the launcher getting stuck on the static preview while Firebase work is still in flight.
@@ -427,7 +439,6 @@ git rm --cached app/google-services.json
 ### High Priority · Lower Effort
 
 - income vs expense analysis with category breakdown
-- improved home-screen widgets
 - user feedback mechanism
 
 ### High Priority · Medium Effort
@@ -442,7 +453,6 @@ git rm --cached app/google-services.json
 - import transactions from CSV with validation
 - bank CSV import support
 - better backup and migration flows
-- Wear OS support
 - on-device monthly financial summaries
 - Analyze habits with on-device AI insights
 - receipt or invoice scan to draft an entry with description, amount, date, and category

@@ -11,4 +11,5 @@ data class Entry(
     val date: Long = System.currentTimeMillis(),
     val period: String = "",
     val recurringTransactionId: String? = null,
+    val createdAt: Long = 0L,
 )

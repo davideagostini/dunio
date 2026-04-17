@@ -1,0 +1,35 @@
+<resources>
+    <string name="wear_app_name">Dunio</string>
+    <string name="wear_quick_entry_title">Quick entry</string>
+    <string name="wear_type_title">Cosa vuoi aggiungere?</string>
+    <string name="wear_type_expense">Spesa</string>
+    <string name="wear_type_income">Entrata</string>
+    <string name="wear_type_expense_hint">Registra una spesa in pochi tap.</string>
+    <string name="wear_type_income_hint">Registra un\'entrata al volo.</string>
+    <string name="wear_quick_categories_title">Categorie rapide</string>
+    <string name="wear_queue_status">%1$d in coda</string>
+    <string name="wear_amount_title">Importo</string>
+    <string name="wear_amount_placeholder">0,00</string>
+    <string name="wear_amount_cta">Continua</string>
+    <string name="wear_amount_validation">Inserisci un importo valido.</string>
+    <string name="wear_categories_title">Scegli categoria</string>
+    <string name="wear_categories_hint">Prima ti mostro quelle che usi di piu.</string>
+    <string name="wear_categories_empty">Nessuna categoria disponibile per questo tipo.</string>
+    <string name="wear_show_all_categories">Tutte le categorie</string>
+    <string name="wear_show_all_categories_hint">Apri l\'elenco completo</string>
+    <string name="wear_all_categories_title">Tutte le categorie</string>
+    <string name="wear_confirm_title">Conferma entry</string>
+    <string name="wear_confirm_type">Tipo</string>
+    <string name="wear_confirm_amount">Importo</string>
+    <string name="wear_confirm_category">Categoria</string>
+    <string name="wear_save">Salva sul telefono</string>
+    <string name="wear_back">Indietro</string>
+    <string name="wear_retry">Riprova</string>
+    <string name="wear_loading_categories">Caricamento categorie…</string>
+    <string name="wear_saving">Salvataggio…</string>
+    <string name="wear_success">Salvata</string>
+    <string name="wear_success_saved_message">L\'entry è stata salvata sul telefono.</string>
+    <string name="wear_success_queued_message">%1$d entry in coda e verrà sincronizzata quando il telefono torna disponibile.</string>
+    <string name="wear_phone_unavailable">Il telefono non è disponibile al momento.</string>
+    <string name="wear_generic_error">Qualcosa è andato storto.</string>
+</resources>

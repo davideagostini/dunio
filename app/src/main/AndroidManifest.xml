@@ -42,6 +42,18 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".wear.WearQuickEntryListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.REQUEST_RECEIVED" />
+                <data
+                    android:scheme="wear"
+                    android:host="*"
+                    android:pathPrefix="/wear/quick-entry/" />
+            </intent-filter>
+        </service>
+
         <receiver
             android:name=".widget.QuickAccessWidgetReceiver"
             android:exported="true"
