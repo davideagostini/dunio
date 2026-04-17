@@ -99,7 +99,7 @@ jobs:
           grep -q '<string name="default_web_client_id"' app/build/generated/res/processDebugGoogleServices/values/values.xml
 
       - name: Compile debug Kotlin
-        run: ./gradlew :app:compileDebugKotlin
+        run: ./gradlew :app:compileDebugKotlin :wear:compileDebugKotlin
 
   build-release-artifacts:
     runs-on: ubuntu-latest
@@ -155,24 +155,38 @@ jobs:
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
 
-      - name: Build signed release APK
-        run: ./gradlew assembleRelease
+      - name: Build signed release APKs
+        run: ./gradlew :app:assembleRelease :wear:assembleRelease
 
-      - name: Build signed release AAB
-        run: ./gradlew bundleRelease
+      - name: Build signed release AABs
+        run: ./gradlew :app:bundleRelease :wear:bundleRelease
 
-      - name: Upload APK artifact
+      - name: Upload phone APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: dunio-release-apk
           path: app/build/outputs/apk/release/dunio-*.apk
           if-no-files-found: error
 
-      - name: Upload AAB artifact
+      - name: Upload phone AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: dunio-release-aab
           path: app/build/outputs/bundle/release/dunio-*.aab
+          if-no-files-found: error
+
+      - name: Upload wear APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dunio-wear-release-apk
+          path: wear/build/outputs/apk/release/dunio-wear-*.apk
+          if-no-files-found: error
+
+      - name: Upload wear AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dunio-wear-release-aab
+          path: wear/build/outputs/bundle/release/dunio-wear-*.aab
           if-no-files-found: error
 
       - name: Upload mapping artifact
@@ -222,6 +236,30 @@ jobs:
     needs: build-release-artifacts
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract module versions
+        id: versions
+        run: |
+          app_version=$(sed -n 's/^val appVersionName = "\(.*\)"/\1/p' app/build.gradle.kts | head -n 1)
+          wear_version=$(sed -n 's/^val wearVersionName = "\(.*\)"/\1/p' wear/build.gradle.kts | head -n 1)
+
+          if [ -z "$app_version" ]; then
+            echo "Unable to extract appVersionName from app/build.gradle.kts" >&2
+            exit 1
+          fi
+
+          if [ -z "$wear_version" ]; then
+            echo "Unable to extract wearVersionName from wear/build.gradle.kts" >&2
+            exit 1
+          fi
+
+          {
+            echo "app_version=$app_version"
+            echo "wear_version=$wear_version"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
@@ -234,13 +272,31 @@ jobs:
           name: dunio-release-aab
           path: dist/aab
 
+      - name: Download wear APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dunio-wear-release-apk
+          path: dist/wear-apk
+
+      - name: Download wear AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dunio-wear-release-aab
+          path: dist/wear-aab
+
       - name: Publish tagged release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Dunio ${{ github.ref_name }}
+          body: |
+            ## Build versions
+            - Phone: ${{ steps.versions.outputs.app_version }}
+            - Wear: ${{ steps.versions.outputs.wear_version }}
           generate_release_notes: true
           make_latest: true
           files: |
             dist/apk/*.apk
             dist/aab/*.aab
+            dist/wear-apk/*.apk
+            dist/wear-aab/*.aab

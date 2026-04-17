@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.json.JSONArray
 import org.json.JSONObject
+import androidx.core.content.edit
 
 /**
  * Small local store for the Wear quick-entry flow.
@@ -30,9 +31,9 @@ internal class WearQuickEntryLocalStore(
         type: String,
         response: WearCategoriesResponse,
     ) {
-        preferences.edit()
-            .putString(categoriesKey(type), response.toJson().toString())
-            .apply()
+        preferences.edit {
+            putString(categoriesKey(type), response.toJson().toString())
+        }
     }
 
     fun readCategories(type: String): WearCategoriesResponse? =
@@ -84,9 +85,9 @@ internal class WearQuickEntryLocalStore(
     private fun writeQueue(entries: List<PendingWearEntry>) {
         val array = JSONArray()
         entries.forEach { entry -> array.put(entry.toJson()) }
-        preferences.edit()
-            .putString(PENDING_QUEUE_KEY, array.toString())
-            .commit()
+        preferences.edit(commit = true) {
+            putString(PENDING_QUEUE_KEY, array.toString())
+        }
     }
 
     private fun categoriesKey(type: String): String = "categories_$type"
