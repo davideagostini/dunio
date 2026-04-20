@@ -8,6 +8,7 @@ import com.davideagostini.summ.data.firebase.FirestorePaths
 import com.davideagostini.summ.data.firebase.firestoreFlow
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,6 +30,7 @@ private data class TransactionDocument(
     val categoryKey: String? = null,
     val period: String = "",
     val recurringTransactionId: String? = null,
+    val createdAt: Timestamp? = null,
 )
 
 @Singleton
@@ -48,7 +50,8 @@ class EntryDao @Inject constructor(
     suspend fun insert(entry: Entry) {
         val db = requireNotNull(firestore) { "Firestore is not available." }
         val householdId = sessionRepository.requireHouseholdId()
-        val reference = db.collection(FirestorePaths.transactions(householdId)).document()
+        val entryId = entry.id.ifBlank { db.collection(FirestorePaths.transactions(householdId)).document().id }
+        val reference = db.document(FirestorePaths.transaction(householdId, entryId))
         reference.set(
             mapOf(
                 "date" to epochToDate(entry.date),
@@ -108,7 +111,7 @@ class EntryDao @Inject constructor(
                                 snapshot != null -> emit(
                                     Result.success(
                                         snapshot.documents.mapNotNull { document ->
-                                            document.toObject(TransactionDocument::class.java)?.toEntry(
+                document.toObject(TransactionDocument::class.java)?.toEntry(
                                                 id = document.id,
                                                 householdId = householdId,
                                             )
@@ -209,6 +212,7 @@ class EntryDao @Inject constructor(
                 date = dateToEpoch(date),
                 period = period.ifBlank { date.take(7) },
                 recurringTransactionId = recurringTransactionId,
+                createdAt = createdAt?.toDate()?.time ?: dateToEpoch(date),
             )
         }
 

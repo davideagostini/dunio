@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Dunio"
 include(":app")
+include(":wear")

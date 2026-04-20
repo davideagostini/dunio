@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="site/assets/cover.png?v=20260402-1" alt="Track net worth in one place">
+  <img src="site/assets/cover.png?v=20260420-3" alt="Track net worth in one place">
 </div>
 
 <div id="user-content-toc">
@@ -29,7 +29,7 @@ The app is intentionally not an accounting suite. The focus is fast daily use, c
 ## Screenshots
 
 <p align="center" width="100%">
-<img src="site/assets/screenshots/1.png" alt="Track net worth in one place" width="25%"><img src="site/assets/screenshots/2.png" alt="Track every transaction" width="25%"><img src="site/assets/screenshots/3.png" alt="Manage assets and liabilities" width="25%"><img src="site/assets/screenshots/4.png" alt="Made for shared finances" width="25%"><img src="site/assets/screenshots/5.png" alt="Add transactions faster" width="25%"><img src="site/assets/screenshots/6.png" alt="Widgets for quick access" width="25%"><img src="site/assets/screenshots/7.png" alt="Faster than opening the app" width="25%"><img src="site/assets/screenshots/8.png" alt="Built for day and night" width="25%">
+<img src="site/assets/screenshots/en/1.png" alt="Track net worth in one place" width="25%"><img src="site/assets/screenshots/en/2.png" alt="Track every transaction" width="25%"><img src="site/assets/screenshots/en/3.png" alt="Manage assets and liabilities" width="25%"><img src="site/assets/screenshots/en/4.png" alt="Made for shared finances" width="25%"><img src="site/assets/screenshots/en/5.png" alt="Add transactions faster" width="25%"><img src="site/assets/screenshots/en/6.png" alt="Widgets for quick access" width="25%"><img src="site/assets/screenshots/en/7.png" alt="Faster than opening the app" width="25%"><img src="site/assets/screenshots/en/8.png" alt="Built for day and night" width="25%">
 </p>
 
 ## What this repository contains
@@ -38,6 +38,7 @@ The app is intentionally not an accounting suite. The focus is fast daily use, c
 - Gradle project files
 - GitHub CI workflow
 - contribution and release documentation
+- dedicated Wear OS quick-entry architecture notes in [docs/wear-os-quick-entry.md](docs/wear-os-quick-entry.md)
 
 ## Core product model
 
@@ -167,6 +168,17 @@ Current app-language support includes:
 - home-screen quick-entry widget
 - home-screen spending summary widget
 - home-screen top categories widget
+
+### Wear OS
+
+- dedicated Wear OS app module
+- non-standalone watch quick entry
+- watch-to-phone RPC over Wear Data Layer
+- local queue on the watch when the phone is temporarily unavailable
+- package layout split into `data`, `model`, `navigation`, `presentation`, `protocol`, `sync`, `theme`, and `ui`
+
+Wear OS implementation details and architecture notes live in
+[docs/wear-os-quick-entry.md](docs/wear-os-quick-entry.md).
 
 The spending widget now renders from a tiny local cache first and refreshes remotely afterward.
 This avoids the launcher getting stuck on the static preview while Firebase work is still in flight.
@@ -427,7 +439,6 @@ git rm --cached app/google-services.json
 ### High Priority · Lower Effort
 
 - income vs expense analysis with category breakdown
-- improved home-screen widgets
 - user feedback mechanism
 
 ### High Priority · Medium Effort
@@ -442,7 +453,6 @@ git rm --cached app/google-services.json
 - import transactions from CSV with validation
 - bank CSV import support
 - better backup and migration flows
-- Wear OS support
 - on-device monthly financial summaries
 - Analyze habits with on-device AI insights
 - receipt or invoice scan to draft an entry with description, amount, date, and category

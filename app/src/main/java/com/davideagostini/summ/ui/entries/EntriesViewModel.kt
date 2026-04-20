@@ -567,6 +567,7 @@ class EntriesViewModel @Inject constructor(
                 categoryKey = entry.categoryKey,
                 emoji = matchedCategory?.emoji ?: "📦",
                 date = entry.date,
+                createdAt = entry.createdAt,
             )
         }
     }

@@ -12,4 +12,5 @@ data class EntryDisplayItem(
     val categoryKey: String? = null,
     val emoji: String,
     val date: Long,
+    val createdAt: Long = 0L,
 )

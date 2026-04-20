@@ -3,6 +3,11 @@
 Dunio is the Android mobile app for the shared-household finance product in this repository. It is a Compose-first application built in Kotlin, backed by Firebase Authentication and Cloud Firestore, and organized around feature packages such as dashboard, assets, entries, categories, recurring, members, and month close.
 
 This document describes the structure that exists today in `mobile-app`, including the quick-entry activity, Android tile integration, and home-screen widgets.
+Wear OS quick-entry architecture is documented separately in
+`docs/wear-os-quick-entry.md`.
+The Wear module now mirrors the main app's organization more closely with dedicated `data`,
+`model`, `navigation`, `presentation`, `protocol`, `sync`, `theme`, and `ui` packages instead of a
+flat feature folder.
 
 The current public positioning is open source and app-first. The app is maintained in public as a real shared-finance Android app and as an Android/Firebase learning project, not as a commercial monetization-first product.
 
