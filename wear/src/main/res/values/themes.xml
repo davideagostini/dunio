@@ -1,3 +1,9 @@
 <resources>
     <style name="Theme.DunioWear" parent="@android:style/Theme.DeviceDefault" />
+
+    <style name="Theme.DunioWear.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen</item>
+        <item name="postSplashScreenTheme">@style/Theme.DunioWear</item>
+    </style>
 </resources>

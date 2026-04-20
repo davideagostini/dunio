@@ -19,10 +19,10 @@ plugins {
 }
 
 /** Human-readable version string displayed to the user and embedded in output filenames. */
-val wearVersionName = "0.1.6-wear"
+val wearVersionName = "0.1.7-wear"
 
 /** Numeric version code used by the Play Store for update ordering. */
-val wearVersionCode = 3601007
+val wearVersionCode = 3601008
 
 /**
  * Local keystore configuration loaded from keystore.properties in the project root.
@@ -214,6 +214,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.google.material)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
