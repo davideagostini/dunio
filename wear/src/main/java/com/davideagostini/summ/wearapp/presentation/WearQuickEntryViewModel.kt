@@ -85,6 +85,7 @@ internal class WearQuickEntryViewModel(
         )
     private val saveInFlight = AtomicBoolean(false)
     private var loadCategoriesJob: Job? = null
+    private var prefetchCategoriesJob: Job? = null
 
     private val navigationEvents = Channel<WearNavigationEvent>(Channel.BUFFERED)
     val navigateToRoute = navigationEvents.receiveAsFlow()
@@ -100,6 +101,7 @@ internal class WearQuickEntryViewModel(
         }
         syncQuickCategories("expense")
         loadCategories("expense")
+        warmCategoriesCache("income")
     }
 
     fun onAction(action: WearQuickEntryAction) {
@@ -150,17 +152,19 @@ internal class WearQuickEntryViewModel(
 
     fun refreshPendingCount() {
         viewModelScope.launch {
-            _uiState.update { it.copy(pendingCount = repository.pendingCount()) }
+            val pendingCount = repository.pendingCount()
+            _uiState.update { it.copy(pendingCount = pendingCount) }
         }
     }
 
     private fun selectType(type: String) {
+        val cachedCategories = repository.readCachedCategories(type)
         _uiState.update {
             it.copy(
                 type = type,
                 step = WearQuickEntryStep.Amount,
-                categories = emptyList(),
-                quickCategories = emptyList(),
+                categories = cachedCategories,
+                quickCategories = cachedCategories.take(3),
                 selectedCategory = null,
                 skipCategoryStep = false,
                 showAllCategories = false,
@@ -169,7 +173,6 @@ internal class WearQuickEntryViewModel(
             )
         }
         navigate(WearQuickEntryRoute.Amount)
-        syncQuickCategories(type)
         loadCategories(type)
     }
 
@@ -264,10 +267,15 @@ internal class WearQuickEntryViewModel(
                             },
                         )
                     }
+                    // The critical section ends as soon as the save result is known. Keeping the
+                    // latch active through the success delay makes a second offline entry feel
+                    // blocked even though the first save already completed.
+                    saveInFlight.set(false)
                     navigate(WearQuickEntryRoute.Success)
                     delay(2000L)
                     resetFlow()
                 }.onFailure { throwable ->
+                    saveInFlight.set(false)
                     _uiState.update {
                         it.copy(
                             isSaving = false,
@@ -290,7 +298,16 @@ internal class WearQuickEntryViewModel(
     private fun loadCategories(type: String) {
         loadCategoriesJob?.cancel()
         loadCategoriesJob = viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingCategories = true, successMessage = null, errorMessage = null) }
+            val cachedCategories = repository.readCachedCategories(type)
+            _uiState.update {
+                it.copy(
+                    categories = if (cachedCategories.isNotEmpty()) cachedCategories else it.categories,
+                    quickCategories = if (cachedCategories.isNotEmpty()) cachedCategories.take(3) else it.quickCategories,
+                    isLoadingCategories = cachedCategories.isEmpty(),
+                    successMessage = null,
+                    errorMessage = null,
+                )
+            }
             runCatching {
                 repository.loadCategories(type)
             }.onSuccess { response ->
@@ -303,21 +320,35 @@ internal class WearQuickEntryViewModel(
                         errorMessage = null,
                     )
                 }
+                warmCategoriesCache(oppositeType(type))
             }.onFailure { throwable ->
                 if (throwable is CancellationException) {
                     _uiState.update { it.copy(isLoadingCategories = false) }
                     throw throwable
                 }
-                val cachedCategories = repository.readCachedCategories(type)
+                val fallbackCategories = repository.readCachedCategories(type)
                 _uiState.update {
                     it.copy(
-                        categories = cachedCategories,
-                        quickCategories = cachedCategories.take(3),
+                        categories = fallbackCategories,
+                        quickCategories = fallbackCategories.take(3),
                         isLoadingCategories = false,
-                        errorMessage = throwable.message ?: getApplication<Application>().getString(R.string.wear_generic_error),
+                        errorMessage = if (fallbackCategories.isEmpty()) {
+                            throwable.message ?: getApplication<Application>().getString(R.string.wear_generic_error)
+                        } else {
+                            null
+                        },
                     )
                 }
             }
+        }
+    }
+
+    private fun warmCategoriesCache(type: String) {
+        if (repository.readCachedCategories(type).isNotEmpty()) return
+
+        prefetchCategoriesJob?.cancel()
+        prefetchCategoriesJob = viewModelScope.launch {
+            runCatching { repository.loadCategories(type) }
         }
     }
 
@@ -397,4 +428,7 @@ internal class WearQuickEntryViewModel(
         val digitsAfter = value.substring(separatorIndex + 1).count { it.isDigit() }
         return digitsBefore > 0 && digitsAfter in 1..2
     }
+
+    private fun oppositeType(type: String): String =
+        if (type == "income") "expense" else "income"
 }

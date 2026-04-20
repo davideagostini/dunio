@@ -14,9 +14,8 @@ package com.davideagostini.summ.wearapp.data
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
-import android.util.Log
 import com.davideagostini.summ.wearapp.R
+import com.davideagostini.summ.wearapp.data.WearQuickEntryRepository.Companion.backgroundScope
 import com.davideagostini.summ.wearapp.model.PendingWearEntry
 import com.davideagostini.summ.wearapp.model.WearCategoriesResponse
 import com.davideagostini.summ.wearapp.model.WearCategory
@@ -115,7 +114,6 @@ internal class WearQuickEntryRepository(
                 event.dataItem.uri.path?.startsWith(WearQuickEntryProtocol.PATH_PENDING_PREFIX) == true
             }
             if (affectsPendingEntries) {
-                Log.d(TAG, "observePendingCount dataChanged")
                 backgroundScope.launch {
                     emitPendingCount()
                 }
@@ -144,13 +142,10 @@ internal class WearQuickEntryRepository(
      */
     suspend fun loadCategories(type: String): WearCategoriesResponse {
         return try {
-            Log.d(TAG, "loadCategories start type=$type")
             val response = requestCategoriesFromPhone(type)
             localStore.saveCategories(type, response)
-            Log.d(TAG, "loadCategories success type=$type count=${response.categories.size}")
             response
         } catch (throwable: Throwable) {
-            Log.w(TAG, "loadCategories fallback type=$type reason=${throwable.message}", throwable)
             localStore.readCategories(type)
                 ?: throw throwable
         }
@@ -190,19 +185,15 @@ internal class WearQuickEntryRepository(
         )
 
         return try {
-            Log.d(TAG, "saveEntry start requestId=${pendingEntry.requestId} type=$type amount=$amount category=${category.name}")
             sendEntryToPhone(
                 entry = pendingEntry,
                 nodeLookupTimeoutMillis = INTERACTIVE_NODE_LOOKUP_TIMEOUT_MILLIS,
             )
-            Log.d(TAG, "saveEntry live success requestId=${pendingEntry.requestId}")
             WearSaveResult.Saved
         } catch (throwable: Throwable) {
             if (throwable is PhoneRejectedException) throw throwable
-            Log.w(TAG, "saveEntry queue fallback requestId=${pendingEntry.requestId} reason=${throwable.message}", throwable)
             enqueuePendingEntry(pendingEntry)
             val queuedCount = queryPendingCount()
-            Log.d(TAG, "saveEntry queued requestId=${pendingEntry.requestId} pendingCount=$queuedCount")
             WearSaveResult.Queued(queuedCount)
         }
     }
@@ -223,7 +214,12 @@ internal class WearQuickEntryRepository(
             .put("type", type)
             .toString()
             .toByteArray(Charsets.UTF_8)
-        val response = request(nodeId, WearQuickEntryProtocol.PATH_CATEGORIES, payload)
+        val response = request(
+            nodeId = nodeId,
+            path = WearQuickEntryProtocol.PATH_CATEGORIES,
+            payload = payload,
+            requestTimeoutMillis = CATEGORY_REQUEST_TIMEOUT_MILLIS,
+        )
         return WearCategoriesResponse(
             currency = response.optString("currency", "EUR"),
             categories = response.optJSONArray("categories")?.toWearCategories().orEmpty(),
@@ -252,9 +248,7 @@ internal class WearQuickEntryRepository(
             }
             .asPutDataRequest()
 
-        Log.d(TAG, "enqueuePendingEntry start requestId=${entry.requestId} path=$path")
         dataClient.putDataItem(request).await()
-        Log.d(TAG, "enqueuePendingEntry success requestId=${entry.requestId} path=$path")
     }
 
     /**
@@ -269,9 +263,7 @@ internal class WearQuickEntryRepository(
     private suspend fun queryPendingCount(): Int {
         val buffer = dataClient.getDataItems(pendingEntriesUri, DataClient.FILTER_PREFIX).await()
         return try {
-            buffer.count.also { count ->
-                Log.d(TAG, "queryPendingCount result=$count")
-            }
+            buffer.count
         } finally {
             buffer.release()
         }
@@ -301,7 +293,6 @@ internal class WearQuickEntryRepository(
             .put("categoryKey", entry.categoryKey ?: JSONObject.NULL)
             .toString()
             .toByteArray(Charsets.UTF_8)
-        Log.d(TAG, "sendEntryToPhone requestId=${entry.requestId} nodeId=$nodeId lookupTimeout=$nodeLookupTimeoutMillis")
         request(nodeId, WearQuickEntryProtocol.PATH_SAVE, payload)
     }
 
@@ -324,31 +315,27 @@ internal class WearQuickEntryRepository(
         nodeId: String,
         path: String,
         payload: ByteArray,
+        requestTimeoutMillis: Long = REQUEST_TIMEOUT_MILLIS,
     ): JSONObject {
-        Log.d(TAG, "request start path=$path nodeId=$nodeId payloadBytes=${payload.size}")
         val responseBytes = try {
-            withTimeout(REQUEST_TIMEOUT_MILLIS) {
+            withTimeout(requestTimeoutMillis) {
                 Wearable.getMessageClient(context)
                     .sendRequest(nodeId, path, payload)
                     .await()
             }
         } catch (throwable: Throwable) {
-            Log.w(TAG, "request failure path=$path nodeId=$nodeId reason=${throwable.message}", throwable)
             throw PhoneUnavailableException(
                 throwable.message ?: context.getString(R.string.wear_phone_unavailable),
                 throwable,
             )
         }
 
-        Log.d(TAG, "request success path=$path nodeId=$nodeId responseBytes=${responseBytes.size}")
         val response = JSONObject(responseBytes.decodeToString())
         if (!response.optBoolean("ok")) {
-            Log.w(TAG, "request rejected path=$path nodeId=$nodeId message=${response.optString("message")}")
             throw PhoneRejectedException(
                 response.optString("message", "Wear quick entry request was rejected."),
             )
         }
-        Log.d(TAG, "request accepted path=$path nodeId=$nodeId")
         return response
     }
 
@@ -378,7 +365,6 @@ internal class WearQuickEntryRepository(
                     .await()
             }
         } catch (throwable: Throwable) {
-            Log.w(TAG, "findPhoneNodeId capability lookup failed timeout=$nodeLookupTimeoutMillis reason=${throwable.message}", throwable)
             throw PhoneUnavailableException(
                 throwable.message ?: context.getString(R.string.wear_phone_unavailable),
                 throwable,
@@ -387,7 +373,6 @@ internal class WearQuickEntryRepository(
         val capableNode = reachableCapability.nodes.firstOrNull { node -> node.isNearby }
             ?: reachableCapability.nodes.firstOrNull()
         if (capableNode != null) {
-            Log.d(TAG, "findPhoneNodeId capability match nodeId=${capableNode.id} nearby=${capableNode.isNearby}")
             return capableNode.id
         }
 
@@ -396,7 +381,6 @@ internal class WearQuickEntryRepository(
                 Wearable.getNodeClient(context).connectedNodes.await()
             }
         } catch (throwable: Throwable) {
-            Log.w(TAG, "findPhoneNodeId connectedNodes lookup failed timeout=$nodeLookupTimeoutMillis reason=${throwable.message}", throwable)
             throw PhoneUnavailableException(
                 throwable.message ?: context.getString(R.string.wear_phone_unavailable),
                 throwable,
@@ -405,18 +389,18 @@ internal class WearQuickEntryRepository(
         val nearbyNode = connectedNodes.firstOrNull { node -> node.isNearby }
             ?: connectedNodes.firstOrNull()
 
-        return nearbyNode?.id?.also { nodeId ->
-            Log.d(TAG, "findPhoneNodeId connectedNodes match nodeId=$nodeId nearby=${nearbyNode.isNearby}")
-        } ?: throw PhoneUnavailableException(context.getString(R.string.wear_phone_unavailable))
+        return nearbyNode?.id ?: throw PhoneUnavailableException(context.getString(R.string.wear_phone_unavailable))
     }
 
     /**
      * Companion object holding timeout constants and shared infrastructure.
      */
     private companion object {
-        const val TAG = "WearQuickEntryRepo"
         /** Maximum time to wait for a response after a request has been sent to the phone. */
         const val REQUEST_TIMEOUT_MILLIS = 8_000L
+
+        /** Categories should fail fast so the user sees cached content or a retry state quickly. */
+        const val CATEGORY_REQUEST_TIMEOUT_MILLIS = 2_000L
 
         /** Shorter timeout used when the user is actively interacting (save button tap). */
         const val INTERACTIVE_NODE_LOOKUP_TIMEOUT_MILLIS = 2_000L

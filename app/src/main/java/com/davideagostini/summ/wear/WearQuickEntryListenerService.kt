@@ -1,7 +1,6 @@
 package com.davideagostini.summ.wear
 
 import android.net.Uri
-import android.util.Log
 import com.davideagostini.summ.data.category.stableUsageId
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
@@ -56,7 +55,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
             return null
         }
 
-        Log.d(TAG, "onRequest path=$path nodeId=$nodeId payloadBytes=${request.size}")
         val taskSource = TaskCompletionSource<ByteArray>()
         requestScope.launch {
             runCatching {
@@ -66,10 +64,8 @@ class WearQuickEntryListenerService : WearableListenerService() {
                     else -> error("Unsupported path: $path")
                 }
             }.onSuccess { response ->
-                Log.d(TAG, "onRequest success path=$path nodeId=$nodeId")
                 taskSource.setResult(response.toString().toByteArray(Charsets.UTF_8))
             }.onFailure { throwable ->
-                Log.w(TAG, "onRequest failure path=$path nodeId=$nodeId reason=${throwable.message}", throwable)
                 val payload = errorResponse(
                     throwable.message ?: "Wear quick entry failed.",
                 ).toString().toByteArray(Charsets.UTF_8)
@@ -86,7 +82,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
                 if (event.type != DataEvent.TYPE_CHANGED) return@forEach
                 val path = event.dataItem.uri.path ?: return@forEach
                 if (!path.startsWith(WearQuickEntryProtocol.PATH_PENDING_PREFIX)) return@forEach
-                Log.d(TAG, "onDataChanged uri=${event.dataItem.uri}")
                 pendingUris += event.dataItem.uri
             }
         } finally {
@@ -96,9 +91,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
         pendingUris.forEach { uri ->
             requestScope.launch {
                 runCatching { processPendingEntry(uri) }
-                    .onFailure { throwable ->
-                        Log.w(TAG, "processPendingEntry failure uri=$uri reason=${throwable.message}", throwable)
-                    }
             }
         }
     }
@@ -111,7 +103,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
     private suspend fun handleCategoriesRequest(request: ByteArray): JSONObject {
         val payload = JSONObject(request.decodeToString())
         val type = payload.optString("type").ifBlank { "expense" }
-        Log.d(TAG, "handleCategoriesRequest start type=$type")
         val sessionState = sessionRepository.sessionState.first { state -> state !is SessionState.Loading }
         val readyState = sessionState as? SessionState.Ready
             ?: return errorResponse("Open Dunio on your phone and sign in first.")
@@ -144,22 +135,17 @@ class WearQuickEntryListenerService : WearableListenerService() {
             .put("ok", true)
             .put("currency", readyState.household.currency)
             .put("categories", categoriesJson)
-            .also { Log.d(TAG, "handleCategoriesRequest success type=$type count=${orderedCategories.size}") }
     }
 
     private suspend fun handleSaveRequest(request: ByteArray): JSONObject {
-        Log.d(TAG, "handleSaveRequest start")
         savePayload(JSONObject(request.decodeToString()))
         return JSONObject()
             .put("ok", true)
             .put("message", "Saved on phone")
-            .also { Log.d(TAG, "handleSaveRequest success") }
     }
 
     private suspend fun processPendingEntry(uri: Uri) {
-        Log.d(TAG, "processPendingEntry start uri=$uri")
-        val dataItem = readDataItem(uri) ?: return
-        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
+        val dataMap = readPendingDataMap(uri) ?: return
         val payload = JSONObject()
             .put("requestId", dataMap.getString("requestId"))
             .put("type", dataMap.getString("type"))
@@ -169,17 +155,14 @@ class WearQuickEntryListenerService : WearableListenerService() {
             .put("categoryKey", dataMap.getString("categoryKey"))
 
         savePayload(payload)
-        Log.d(TAG, "processPendingEntry delete start uri=$uri requestId=${payload.optString("requestId")}")
         Wearable.getDataClient(this).deleteDataItems(uri).await()
-        Log.d(TAG, "processPendingEntry delete success uri=$uri requestId=${payload.optString("requestId")}")
     }
 
-    private suspend fun readDataItem(uri: Uri) =
+    private suspend fun readPendingDataMap(uri: Uri) =
         Wearable.getDataClient(this).getDataItems(uri).await().let { buffer ->
             try {
-                buffer.firstOrNull().also { item ->
-                    Log.d(TAG, "readDataItem uri=$uri found=${item != null}")
-                }
+                val item = buffer.firstOrNull()
+                item?.let { DataMapItem.fromDataItem(it).dataMap }
             } finally {
                 buffer.release()
             }
@@ -191,7 +174,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
         val amount = payload.optDouble("amount", Double.NaN)
         val categoryName = payload.optString("categoryName").trim()
         val categoryKey = payload.optString("categoryKey").trim().ifBlank { null }
-        Log.d(TAG, "savePayload start requestId=$requestId type=$type amount=$amount category=$categoryName")
 
         if (type != "expense" && type != "income") {
             throw IllegalArgumentException("Unsupported entry type.")
@@ -214,7 +196,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
                 date = System.currentTimeMillis(),
             ),
         )
-        Log.d(TAG, "savePayload inserted requestId=$requestId")
 
         serviceScope.launch {
             runCatching {
@@ -242,7 +223,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
             .put("message", message)
 
     private companion object {
-        const val TAG = "WearQuickEntryPhone"
         val requestScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     }
 }

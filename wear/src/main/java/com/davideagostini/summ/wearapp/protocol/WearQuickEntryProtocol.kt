@@ -19,6 +19,9 @@
  */
 package com.davideagostini.summ.wearapp.protocol
 
+import com.davideagostini.summ.wearapp.protocol.WearQuickEntryProtocol.PHONE_CAPABILITY
+
+
 /**
  * Singleton holding the RPC contract between the Wear app and the phone app.
  *

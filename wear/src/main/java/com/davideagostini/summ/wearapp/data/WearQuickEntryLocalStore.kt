@@ -15,11 +15,11 @@
 package com.davideagostini.summ.wearapp.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.davideagostini.summ.wearapp.model.WearCategoriesResponse
 import com.davideagostini.summ.wearapp.model.WearCategory
 import org.json.JSONArray
 import org.json.JSONObject
-import androidx.core.content.edit
 
 /**
  * Lightweight cache backed by SharedPreferences for Wear quick-entry data.

@@ -155,6 +155,11 @@ When the watch asks for categories:
 The watch caches that response locally per type so the user can still complete a quick entry if the
 phone becomes temporarily unavailable after categories were loaded at least once.
 
+To make offline follow-up entries more reliable, the watch also warms the cache for the opposite
+type (`expense` vs `income`) as soon as one category load succeeds while the phone is reachable.
+That way, if the user goes offline and switches type on the next entry, the category step can still
+show a cached list instead of becoming unusable.
+
 ---
 
 ## Save flow
@@ -215,6 +220,11 @@ Instead:
 4. the phone-side listener saves the entry and deletes the item
 
 This removes the need for deprecated background reconnect listeners on the watch.
+
+An important consequence of this design is that reconnect processing is driven by the Data Layer
+itself, not by a watch-side retry loop. If a pending `DataItem` reaches the phone, the phone-side
+listener processes it and deletes it; the watch queue badge updates from observing those same
+pending `DataItem` changes.
 
 ---
 
@@ -286,6 +296,7 @@ repositories already used by the phone UI.
 - owns the state machine
 - validates amount input
 - coordinates category loading
+- warms category cache for the opposite transaction type after a successful online load
 - handles saved vs queued outcomes
 - exposes a dedicated `pendingCount` flow for the first screen badge
 - receives UI intent through a single `WearQuickEntryAction` channel instead of many callback
@@ -305,6 +316,8 @@ repositories already used by the phone UI.
 - manages cached categories
 - queues pending entries as `DataItem`s when the phone is unavailable
 - exposes the pending queue count by reading the current pending `DataItem`s
+- uses a shorter timeout for category requests than for save requests so offline category screens
+  fall back quickly instead of appearing stuck in loading
 
 ### `data/WearQuickEntryLocalStore`
 
@@ -359,6 +372,9 @@ Known limitations:
 - queued items still assume the phone can process the payload when it receives the `DataItem`
   event; if the phone app is in an invalid session state, the item remains pending until a future
   processing pass handles it
+- offline category selection still depends on the watch having cached that category type at least
+  once while online; the warm-cache strategy reduces this issue but cannot create categories the
+  watch has never seen
 
 ---
 
