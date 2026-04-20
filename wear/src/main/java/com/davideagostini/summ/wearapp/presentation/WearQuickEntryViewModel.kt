@@ -265,6 +265,10 @@ internal class WearQuickEntryViewModel(
                                     result.pendingCount,
                                 )
                             },
+                            pendingCount = when (result) {
+                                WearSaveResult.Saved -> it.pendingCount
+                                is WearSaveResult.Queued -> result.pendingCount
+                            },
                         )
                     }
                     // The critical section ends as soon as the save result is known. Keeping the
@@ -389,6 +393,7 @@ internal class WearQuickEntryViewModel(
             )
         }
         syncQuickCategories("expense")
+        refreshPendingCount()
         resetNavigation(WearQuickEntryRoute.Type)
     }
 
