@@ -1,3 +1,16 @@
+/**
+ * Reusable UI components for the Wear OS quick-entry flow.
+ *
+ * This file contains shared composables used across multiple step screens:
+ * - [WearActionButton]: full-width button with optional emoji icon and secondary label.
+ * - [BackTextButton]: lightweight "Back" button using the child-button style.
+ * - [AmountField]: styled text input for entering monetary amounts.
+ * - [QueueStatusChip]: pill-shaped chip showing the count of pending entries.
+ * - [SummaryPanel]: bordered card used on the confirmation screen.
+ * - [ConfirmValue]: label–value row used inside [SummaryPanel].
+ *
+ * All composables are `internal` to the Wear app module.
+ */
 package com.davideagostini.summ.wearapp.ui
 
 import androidx.compose.foundation.background
@@ -43,6 +56,21 @@ import androidx.wear.compose.material3.Text
 import com.davideagostini.summ.wearapp.R
 import com.davideagostini.summ.wearapp.theme.WearThemeTokens
 
+/**
+ * Full-width action button used throughout the quick-entry wizard.
+ *
+ * Displays a primary [label], an optional [secondaryLabel] below it,
+ * and an optional [iconEmoji] inside a circular badge to the left.
+ * The button is designed to fill the available width so it is easy to
+ * tap on a small watch screen.
+ *
+ * @param label          Primary text displayed on the button.
+ * @param secondaryLabel Optional second line of text (e.g. a hint). Not shown if null.
+ * @param iconEmoji      Optional emoji rendered inside a circular icon badge.
+ * @param centeredLabel  When true, centres the label text instead of left-aligning it.
+ * @param onClick        Callback invoked when the button is tapped.
+ * @param colors         Button colour configuration; falls back to filled-tonal defaults if null.
+ */
 @Composable
 internal fun WearActionButton(
     label: String,
@@ -77,6 +105,7 @@ internal fun WearActionButton(
                     Text(
                         text = it,
                         fontSize = 18.sp,
+                        color = WearThemeTokens.onBackground,
                     )
                 }
             }
@@ -99,6 +128,15 @@ internal fun WearActionButton(
     )
 }
 
+/**
+ * Lightweight centred "Back" button for navigation within the wizard.
+ *
+ * Uses the Wear Material 3 child-button style (smaller tap target,
+ * secondary visual weight) so it does not compete with the primary
+ * action on each screen.
+ *
+ * @param onClick Callback invoked when the button is tapped.
+ */
 @Composable
 internal fun BackTextButton(
     onClick: () -> Unit,
@@ -124,6 +162,24 @@ internal fun BackTextButton(
     }
 }
 
+/**
+ * Styled text input field for entering a monetary amount.
+ *
+ * Features:
+ * - Rounded-corner bordered container matching the theme surface.
+ * - Placeholder text shown when the field is empty.
+ * - Centre-aligned, semi-bold text at 22 sp for readability on small screens.
+ * - Decimal keyboard type to guide the system IME.
+ * - Local [TextFieldValue] state synced with the external [value] via
+ *   [LaunchedEffect] so cursor position is preserved during recompositions.
+ *
+ * The text colour adapts to the surface luminance (white on dark, black on light)
+ * to remain legible regardless of the active colour scheme.
+ *
+ * @param value        Current text value controlled by the parent.
+ * @param onValueChange Callback invoked on every keystroke with the new text.
+ * @param placeholder  Hint text shown when the field is blank.
+ */
 @Composable
 internal fun AmountField(
     value: String,
@@ -137,6 +193,11 @@ internal fun AmountField(
         Color.Black.copy(alpha = 0.92f)
     }
 
+    /**
+     * Syncs the external [value] into the local [TextFieldValue] whenever
+     * they diverge. This happens when the parent resets the amount (e.g.
+     * after a successful save) or when the ViewModel clears the field.
+     */
     LaunchedEffect(value) {
         if (value != fieldValue.text) {
             fieldValue = fieldValue.copy(text = value)
@@ -179,6 +240,16 @@ internal fun AmountField(
     }
 }
 
+/**
+ * Pill-shaped chip that displays the number of entries currently queued
+ * for deferred synchronisation with the phone.
+ *
+ * The chip is conditionally shown on the type-selection screen when
+ * [pendingCount] is greater than zero. It uses a schedule icon to
+ * visually communicate "pending / waiting" status.
+ *
+ * @param pendingCount Number of pending entries to display.
+ */
 @Composable
 internal fun QueueStatusChip(
     pendingCount: Int,
@@ -203,10 +274,20 @@ internal fun QueueStatusChip(
         Text(
             text = stringResource(R.string.wear_queue_status, pendingCount),
             style = MaterialTheme.typography.labelSmall,
+            color = WearThemeTokens.onBackground,
         )
     }
 }
 
+/**
+ * Bordered card panel used on the confirmation screen to display
+ * the entry summary (type, amount, category).
+ *
+ * Provides a rounded-corner container with a themed background and
+ * a subtle border. Content is laid out vertically via [ColumnScope].
+ *
+ * @param content Composable content (typically a series of [ConfirmValue] rows).
+ */
 @Composable
 internal fun SummaryPanel(
     content: @Composable ColumnScope.() -> Unit,
@@ -221,6 +302,16 @@ internal fun SummaryPanel(
     )
 }
 
+/**
+ * A single label–value row used inside [SummaryPanel] on the confirmation screen.
+ *
+ * The label is drawn on the left in a smaller, muted style and the value
+ * on the right in the standard body style. This creates a key-value layout
+ * that is easy to scan on the small watch display.
+ *
+ * @param label The field name (e.g. "Type", "Amount", "Category").
+ * @param value The field value (e.g. "Expense", "€12.50", "🛒 Groceries").
+ */
 @Composable
 internal fun ConfirmValue(
     label: String,
@@ -239,6 +330,7 @@ internal fun ConfirmValue(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
+            color = WearThemeTokens.onBackground,
             textAlign = TextAlign.End,
         )
     }

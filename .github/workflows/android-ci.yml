@@ -196,6 +196,13 @@ jobs:
           path: app/build/outputs/mapping/release/dunio-*-mapping.txt
           if-no-files-found: error
 
+      - name: Upload wear mapping artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dunio-wear-release-mapping
+          path: wear/build/outputs/mapping/release/dunio-wear-*-mapping.txt
+          if-no-files-found: error
+
       - name: Check native debug metadata artifact contents
         id: native_debug_metadata
         run: |
@@ -284,6 +291,18 @@ jobs:
           name: dunio-wear-release-aab
           path: dist/wear-aab
 
+      - name: Download phone mapping artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dunio-release-mapping
+          path: dist/mapping
+
+      - name: Download wear mapping artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dunio-wear-release-mapping
+          path: dist/wear-mapping
+
       - name: Publish tagged release
         uses: softprops/action-gh-release@v2
         with:
@@ -300,3 +319,5 @@ jobs:
             dist/aab/*.aab
             dist/wear-apk/*.apk
             dist/wear-aab/*.aab
+            dist/mapping/*.txt
+            dist/wear-mapping/*.txt

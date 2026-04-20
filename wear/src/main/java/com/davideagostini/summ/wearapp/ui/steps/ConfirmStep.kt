@@ -1,7 +1,20 @@
+/**
+ * Fourth step of the Wear quick-entry wizard: review and confirm the entry.
+ *
+ * This screen displays a summary panel with the transaction type, formatted
+ * amount, and selected category. The user can either confirm (dispatching
+ * [WearQuickEntryAction.Save]) or go back to edit.
+ *
+ * The bottom bar uses Wear Material 3's [AlertDialogDefaults] dismiss and
+ * confirm button styles to provide a clear accept/cancel affordance that
+ * matches the platform's dialog pattern.
+ *
+ * An optimistic saving state is tracked locally so the UI can show the
+ * loading spinner immediately on tap, before the ViewModel's async save
+ * completes and updates the global state.
+ */
 package com.davideagostini.summ.wearapp.ui.steps
-
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,8 +45,7 @@ import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.IconButtonDefaults
 import androidx.wear.compose.material3.MaterialTheme
-import androidx.wear.compose.material3.ScrollIndicator
-import androidx.wear.compose.material3.ScrollIndicatorColors
+import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import com.davideagostini.summ.wearapp.R
 import com.davideagostini.summ.wearapp.presentation.WearQuickEntryAction
@@ -43,6 +55,29 @@ import com.davideagostini.summ.wearapp.theme.WearThemeTokens
 import com.davideagostini.summ.wearapp.ui.ConfirmValue
 import com.davideagostini.summ.wearapp.ui.SummaryPanel
 
+/**
+ * Composable for the entry confirmation and save screen.
+ *
+ * Layout structure:
+ * - [TransformingLazyColumn] with:
+ *   1. Title text ("Confirm entry").
+ *   2. [SummaryPanel] containing type, amount, and category rows.
+ *   3. Optional saving indicator (spinner + "Saving..." text).
+ *   4. Optional error message.
+ *   5. Bottom spacer to leave room for the button bar.
+ * - Bottom-aligned Row with:
+ *   - Dismiss button (dark) to go back.
+ *   - Confirm button (light accent) to save, showing a spinner while saving.
+ *
+ * The [optimisticSaving] local state bridges the gap between the user's tap
+ * and the ViewModel's `isSaving` state propagation, ensuring the spinner
+ * appears without any perceptible delay.
+ *
+ * @param uiState        Current UI state with entry details and saving status.
+ * @param formattedAmount Pre-formatted amount string (currency symbol + value).
+ * @param onAction       Callback to dispatch user actions to the ViewModel.
+ * @param onBack         Callback invoked when the user presses the dismiss button.
+ */
 @Composable
 internal fun ConfirmStep(
     uiState: WearQuickEntryUiState,
@@ -62,11 +97,18 @@ internal fun ConfirmStep(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    ScreenScaffold(
+        scrollState = state,
+    ) { contentPadding ->
         TransformingLazyColumn(
             state = state,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 44.dp),
+            contentPadding = PaddingValues(
+                start = 18.dp,
+                end = 18.dp,
+                top = contentPadding.calculateTopPadding() + WearStepTopInset,
+                bottom = contentPadding.calculateBottomPadding(),
+            ),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -74,6 +116,7 @@ internal fun ConfirmStep(
                 Text(
                     text = stringResource(R.string.wear_confirm_title),
                     style = MaterialTheme.typography.titleMedium,
+                    color = WearThemeTokens.onBackground,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -128,16 +171,6 @@ internal fun ConfirmStep(
             }
             item { Spacer(Modifier.height(92.dp)) }
         }
-        ScrollIndicator(
-            state = state,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 6.dp),
-            colors = ScrollIndicatorColors(
-                indicatorColor = WearThemeTokens.onBackground.copy(alpha = 0.92f),
-                trackColor = WearThemeTokens.onBackground.copy(alpha = 0.20f),
-            ),
-        )
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

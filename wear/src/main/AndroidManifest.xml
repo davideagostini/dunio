@@ -5,9 +5,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_wear_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/wear_app_name"
-        android:roundIcon="@drawable/ic_wear_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DunioWear">
 
@@ -24,14 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".sync.WearQuickEntrySyncService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
-            </intent-filter>
-        </service>
     </application>
 
 </manifest>

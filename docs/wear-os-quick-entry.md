@@ -78,24 +78,26 @@ wear/src/main/java/com/davideagostini/summ/wearapp/
 │   └── WearQuickEntryViewModel.kt
 ├── protocol/
 │   └── WearQuickEntryProtocol.kt
-├── sync/
-│   ├── WearQuickEntryQueueSignal.kt
-│   └── WearQuickEntrySyncService.kt
 ├── theme/
 │   └── WearQuickEntryTheme.kt
 └── ui/
     ├── WearQuickEntryComponents.kt
-    └── WearQuickEntrySteps.kt
+    └── steps/
+        ├── AmountStep.kt
+        ├── CategoryStep.kt
+        ├── ConfirmStep.kt
+        ├── SuccessStep.kt
+        └── TypeStep.kt
 ```
 
 ---
 
 ## Communication model
 
-The watch and phone communicate through the **Wear Data Layer** using
-`MessageClient.sendRequest(...)`.
+The watch and phone communicate through the **Wear Data Layer** in two modes:
 
-This is used as a small RPC channel.
+- `MessageClient.sendRequest(...)` for immediate request/response operations
+- `DataClient` `DataItem`s for offline-safe pending entry synchronization
 
 ### RPC paths
 
@@ -103,6 +105,7 @@ Defined in both modules:
 
 - `/wear/quick-entry/categories`
 - `/wear/quick-entry/save`
+- `/wear/quick-entry/pending/{requestId}`
 
 ### Capability
 
@@ -169,22 +172,24 @@ If the phone is reachable:
 
 If the phone is not reachable:
 
-1. the watch stores the payload in a tiny local queue
+1. the watch persists the payload as a pending `DataItem`
 2. the watch shows success as `queued`
-3. when the phone becomes reachable again, the watch retries automatically
+3. the Wear Data Layer synchronizes that item automatically when the devices reconnect
+4. the phone consumes the item and deletes it only after saving the entry successfully
 
 ---
 
 ## Local persistence on watch
 
-The watch uses a very small SharedPreferences-backed store.
+The watch uses two small persistence layers:
 
-This is enough because the stored payload is tiny and text-only.
+- `SharedPreferences` for cached categories
+- Wear Data Layer `DataItem`s for queued pending entries
 
 Stored data:
 
 - cached categories by type
-- queued pending quick entries
+- queued pending quick entries as `DataItem`s under `/wear/quick-entry/pending/...`
 
 The queue payload stores only:
 
@@ -200,13 +205,16 @@ This is intentionally minimal.
 
 ## Automatic retry model
 
-Automatic retry is handled in two ways:
+Offline retry no longer depends on a watch-side reconnect service.
 
-1. when the watch app opens, it tries to flush any queued entries
-2. a background `WearQuickEntrySyncService` listens for watch/phone reconnection signals and tries
-   to flush the queue again
+Instead:
 
-This gives the feature a much better UX than a pure live-only request model.
+1. the watch writes a pending `DataItem`
+2. the Wear Data Layer keeps that item while devices are disconnected
+3. the platform synchronizes it automatically when a connection becomes available
+4. the phone-side listener saves the entry and deletes the item
+
+This removes the need for deprecated background reconnect listeners on the watch.
 
 ---
 
@@ -226,7 +234,7 @@ Examples:
 
 Behavior:
 
-- save is queued locally
+- save is queued in the Wear Data Layer
 - categories fall back to cached copy if available
 
 ### `PhoneRejectedException`
@@ -253,6 +261,7 @@ Behavior:
 It is responsible for:
 
 - decoding watch requests
+- processing pending quick-entry `DataItem`s
 - resolving session / household state
 - loading ordered category data
 - saving entries through `EntryRepository`
@@ -294,25 +303,13 @@ repositories already used by the phone UI.
 
 - speaks to the phone over Data Layer RPC
 - manages cached categories
-- manages pending entry queue
-- flushes queue when possible
+- queues pending entries as `DataItem`s when the phone is unavailable
+- exposes the pending queue count by reading the current pending `DataItem`s
 
 ### `data/WearQuickEntryLocalStore`
 
 - persists cached category payloads by type
-- persists the queued watch entries
-- exposes the current queue size as a small observable flow
-
-### `sync/WearQuickEntrySyncService`
-
-- reacts to reconnection events
-- triggers background queue flush
-
-### `sync/WearQuickEntryQueueSignal`
-
-- provides an in-process queue-size signal for immediate UI updates
-- complements the local-store flow when background sync changes the queue while the app is already
-  open
+- does not own the pending-entry queue anymore
 
 ### `ui/`
 
@@ -336,16 +333,15 @@ The queue badge on the first screen is intentionally handled as a dedicated stat
 
 Current update chain:
 
-1. queue changes in `WearQuickEntryRepository`
-2. repository writes the new queue to `WearQuickEntryLocalStore`
-3. repository also publishes the new count through `WearQuickEntryQueueSignal`
-4. `WearQuickEntryViewModel` updates `pendingCount`
-5. the `type` route in `WearQuickEntryNavigation` collects that flow directly
-6. `TypeStep` shows or hides the badge
+1. the watch creates or receives a pending-entry `DataItem` change
+2. `WearQuickEntryRepository.observePendingCount()` reacts through a `DataClient` listener
+3. `WearQuickEntryViewModel` updates `pendingCount`
+4. the `type` route in `WearQuickEntryNavigation` collects that flow directly
+5. `TypeStep` shows or hides the badge
 
 This is more explicit than relying only on broad screen-level recomposition and is important
-because the `type` route stays mounted inside the Wear navigation host while background sync may be
-changing the queue.
+because the `type` route stays mounted inside the Wear navigation host while the phone may consume
+pending items in background.
 
 ---
 
@@ -360,7 +356,9 @@ Known limitations:
 - no custom description
 - no custom date
 - no edit/delete on watch
-- queue flushing is small and local, not a full sync engine
+- queued items still assume the phone can process the payload when it receives the `DataItem`
+  event; if the phone app is in an invalid session state, the item remains pending until a future
+  processing pass handles it
 
 ---
 
@@ -372,6 +370,8 @@ If this V1 performs well, the best follow-ups are:
 2. voice amount or voice quick entry
 3. better watch-specific visual polish
 4. optional quick templates such as groceries, fuel, coffee
+5. add a dedicated phone-side recovery pass for stale pending `DataItem`s when the handheld app
+   returns to foreground after a failed processing attempt
 
 Not recommended yet:
 

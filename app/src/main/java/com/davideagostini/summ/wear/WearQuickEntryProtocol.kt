@@ -11,4 +11,7 @@ internal object WearQuickEntryProtocol {
     const val PATH_PREFIX = "/wear/quick-entry"
     const val PATH_CATEGORIES = "$PATH_PREFIX/categories"
     const val PATH_SAVE = "$PATH_PREFIX/save"
+    const val PATH_PENDING_PREFIX = "$PATH_PREFIX/pending"
+
+    fun pendingEntryPath(requestId: String): String = "$PATH_PENDING_PREFIX/$requestId"
 }

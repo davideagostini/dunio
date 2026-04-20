@@ -1,3 +1,18 @@
+/**
+ * Third step of the Wear quick-entry wizard: choose a category.
+ *
+ * This screen is reused in two modes controlled by [WearQuickEntryUiState.showAllCategories]:
+ * - **Quick mode** (default): shows the top 3 most-used categories from
+ *   [WearQuickEntryUiState.quickCategories] plus an "All categories" button.
+ * - **Full mode**: shows the complete [WearQuickEntryUiState.categories] list.
+ *
+ * While categories are loading, a [CircularProgressIndicator] is shown.
+ * If loading fails or the list is empty, an error/empty message and a retry
+ * button are displayed instead.
+ *
+ * Tapping a category dispatches [WearQuickEntryAction.SelectCategory] which
+ * advances the flow to the confirmation screen.
+ */
 package com.davideagostini.summ.wearapp.ui.steps
 
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +35,7 @@ import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.ButtonDefaults
 import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.MaterialTheme
-import androidx.wear.compose.material3.ScrollIndicator
-import androidx.wear.compose.material3.ScrollIndicatorColors
+import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import com.davideagostini.summ.wearapp.R
 import com.davideagostini.summ.wearapp.presentation.WearQuickEntryAction
@@ -30,6 +44,26 @@ import com.davideagostini.summ.wearapp.theme.WearThemeTokens
 import com.davideagostini.summ.wearapp.ui.BackTextButton
 import com.davideagostini.summ.wearapp.ui.WearActionButton
 
+/**
+ * Composable for the category-selection screen.
+ *
+ * Layout structure (top to bottom):
+ * 1. Title text (changes between "Choose category" and "All categories").
+ * 2. Hint text (only in quick mode).
+ * 3. Category content rendered by a `when` block:
+ *    - **Loading**: centered [CircularProgressIndicator].
+ *    - **Quick categories**: top-3 buttons + "All categories" link.
+ *    - **Full categories**: all category buttons.
+ *    - **Empty / error**: message text + retry button.
+ * 4. [BackTextButton] to navigate back.
+ *
+ * A [LaunchedEffect] scrolls to the top when switching from quick to
+ * full-category mode so the user sees the beginning of the full list.
+ *
+ * @param uiState  Current UI state with categories, loading, and error info.
+ * @param onAction Callback to dispatch user actions to the ViewModel.
+ * @param onBack   Callback invoked when the user presses the back button.
+ */
 @Composable
 internal fun CategoryStep(
     uiState: WearQuickEntryUiState,
@@ -42,11 +76,18 @@ internal fun CategoryStep(
             state.scrollToItem(0)
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    ScreenScaffold(
+        scrollState = state,
+    ) { contentPadding ->
         TransformingLazyColumn(
             state = state,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 44.dp),
+            contentPadding = PaddingValues(
+                start = 18.dp,
+                end = 18.dp,
+                top = contentPadding.calculateTopPadding() + WearStepTopInset,
+                bottom = contentPadding.calculateBottomPadding(),
+            ),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -58,6 +99,7 @@ internal fun CategoryStep(
                         stringResource(R.string.wear_categories_title)
                     },
                     style = MaterialTheme.typography.titleMedium,
+                    color = WearThemeTokens.onBackground,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -178,19 +220,8 @@ internal fun CategoryStep(
             }
 
             item {
-                Spacer(Modifier.height(72.dp))
+                Spacer(Modifier.height(12.dp))
             }
         }
-
-        ScrollIndicator(
-            state = state,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 6.dp),
-            colors = ScrollIndicatorColors(
-                indicatorColor = WearThemeTokens.onBackground.copy(alpha = 0.92f),
-                trackColor = WearThemeTokens.onBackground.copy(alpha = 0.20f),
-            ),
-        )
     }
 }

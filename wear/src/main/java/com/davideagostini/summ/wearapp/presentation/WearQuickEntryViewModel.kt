@@ -10,7 +10,8 @@ import com.davideagostini.summ.wearapp.model.WearCategory
 import com.davideagostini.summ.wearapp.model.WearSaveResult
 import com.davideagostini.summ.wearapp.navigation.WearNavigationEvent
 import com.davideagostini.summ.wearapp.navigation.WearQuickEntryRoute
-import com.davideagostini.summ.wearapp.sync.WearQuickEntryQueueSignal
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,30 +84,19 @@ internal class WearQuickEntryViewModel(
             initialValue = _uiState.value.pendingCount,
         )
     private val saveInFlight = AtomicBoolean(false)
+    private var loadCategoriesJob: Job? = null
 
     private val navigationEvents = Channel<WearNavigationEvent>(Channel.BUFFERED)
     val navigateToRoute = navigationEvents.receiveAsFlow()
 
     init {
-        // Keep the queue badge live even when background sync flushes SharedPreferences while the
-        // quick-entry app is already on screen.
+        // Pending entries now live in the Data Layer. Listening here keeps the chip aligned both
+        // when the watch queues a new entry locally and when the phone later consumes and deletes
+        // the same pending item after reconnecting.
         viewModelScope.launch {
             repository.observePendingCount().collectLatest { pendingCount ->
                 _uiState.update { it.copy(pendingCount = pendingCount) }
             }
-        }
-        // Deterministic in-process signal from the repository/service when queued entries are
-        // added or drained. This covers the cases where SharedPreferences callbacks lag behind.
-        viewModelScope.launch {
-            WearQuickEntryQueueSignal.pendingCount.collectLatest { pendingCount ->
-                if (pendingCount != null) {
-                    _uiState.update { it.copy(pendingCount = pendingCount) }
-                }
-            }
-        }
-        // Try to drain any queue from previous offline attempts as soon as the watch app opens.
-        viewModelScope.launch {
-            repository.flushPendingEntriesWithRetries()
         }
         syncQuickCategories("expense")
         loadCategories("expense")
@@ -159,7 +149,9 @@ internal class WearQuickEntryViewModel(
     }
 
     fun refreshPendingCount() {
-        _uiState.update { it.copy(pendingCount = repository.pendingCount()) }
+        viewModelScope.launch {
+            _uiState.update { it.copy(pendingCount = repository.pendingCount()) }
+        }
     }
 
     private fun selectType(type: String) {
@@ -167,6 +159,8 @@ internal class WearQuickEntryViewModel(
             it.copy(
                 type = type,
                 step = WearQuickEntryStep.Amount,
+                categories = emptyList(),
+                quickCategories = emptyList(),
                 selectedCategory = null,
                 skipCategoryStep = false,
                 showAllCategories = false,
@@ -199,7 +193,7 @@ internal class WearQuickEntryViewModel(
             )
         }
         navigate(if (_uiState.value.selectedCategory != null) WearQuickEntryRoute.Confirm else WearQuickEntryRoute.Category)
-        if (_uiState.value.categories.isEmpty() && !_uiState.value.isLoadingCategories) {
+        if (_uiState.value.categories.isEmpty()) {
             loadCategories(_uiState.value.type)
         }
     }
@@ -271,7 +265,7 @@ internal class WearQuickEntryViewModel(
                         )
                     }
                     navigate(WearQuickEntryRoute.Success)
-                    delay(1200L)
+                    delay(2000L)
                     resetFlow()
                 }.onFailure { throwable ->
                     _uiState.update {
@@ -294,7 +288,8 @@ internal class WearQuickEntryViewModel(
     }
 
     private fun loadCategories(type: String) {
-        viewModelScope.launch {
+        loadCategoriesJob?.cancel()
+        loadCategoriesJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoadingCategories = true, successMessage = null, errorMessage = null) }
             runCatching {
                 repository.loadCategories(type)
@@ -305,9 +300,14 @@ internal class WearQuickEntryViewModel(
                         categories = response.categories,
                         quickCategories = response.categories.take(3),
                         isLoadingCategories = false,
+                        errorMessage = null,
                     )
                 }
             }.onFailure { throwable ->
+                if (throwable is CancellationException) {
+                    _uiState.update { it.copy(isLoadingCategories = false) }
+                    throw throwable
+                }
                 val cachedCategories = repository.readCachedCategories(type)
                 _uiState.update {
                     it.copy(
@@ -397,5 +397,4 @@ internal class WearQuickEntryViewModel(
         val digitsAfter = value.substring(separatorIndex + 1).count { it.isDigit() }
         return digitsBefore > 0 && digitsAfter in 1..2
     }
-
 }

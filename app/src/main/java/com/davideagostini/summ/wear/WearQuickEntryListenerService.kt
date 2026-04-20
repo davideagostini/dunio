@@ -1,4 +1,7 @@
 package com.davideagostini.summ.wear
+
+import android.net.Uri
+import android.util.Log
 import com.davideagostini.summ.data.category.stableUsageId
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.Entry
@@ -9,6 +12,10 @@ import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -17,16 +24,19 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
 @AndroidEntryPoint
 /**
- * Phone-side RPC bridge for Wear quick entry.
+ * Phone-side bridge for Wear quick entry.
  *
- * The watch never touches Firebase directly in V1. It sends tiny RPC payloads to this listener,
- * and the listener delegates to the same repositories already used by the phone app.
+ * Immediate saves still use request/response for fast UI feedback on the watch. Offline saves use
+ * a DataItem under `/wear/quick-entry/pending/...`, which the platform syncs automatically when
+ * the phone becomes reachable again.
  */
 class WearQuickEntryListenerService : WearableListenerService() {
 
@@ -42,14 +52,13 @@ class WearQuickEntryListenerService : WearableListenerService() {
         path: String,
         request: ByteArray,
     ): Task<ByteArray>? {
-        // Only handle the two quick-entry endpoints. Any other path should continue through the
-        // normal Wear listener chain untouched.
         if (path != WearQuickEntryProtocol.PATH_CATEGORIES && path != WearQuickEntryProtocol.PATH_SAVE) {
             return null
         }
 
+        Log.d(TAG, "onRequest path=$path nodeId=$nodeId payloadBytes=${request.size}")
         val taskSource = TaskCompletionSource<ByteArray>()
-        serviceScope.launch {
+        requestScope.launch {
             runCatching {
                 when (path) {
                     WearQuickEntryProtocol.PATH_CATEGORIES -> handleCategoriesRequest(request)
@@ -57,8 +66,10 @@ class WearQuickEntryListenerService : WearableListenerService() {
                     else -> error("Unsupported path: $path")
                 }
             }.onSuccess { response ->
+                Log.d(TAG, "onRequest success path=$path nodeId=$nodeId")
                 taskSource.setResult(response.toString().toByteArray(Charsets.UTF_8))
             }.onFailure { throwable ->
+                Log.w(TAG, "onRequest failure path=$path nodeId=$nodeId reason=${throwable.message}", throwable)
                 val payload = errorResponse(
                     throwable.message ?: "Wear quick entry failed.",
                 ).toString().toByteArray(Charsets.UTF_8)
@@ -68,16 +79,39 @@ class WearQuickEntryListenerService : WearableListenerService() {
         return taskSource.task
     }
 
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
+        val pendingUris = mutableListOf<Uri>()
+        try {
+            dataEvents.forEach { event ->
+                if (event.type != DataEvent.TYPE_CHANGED) return@forEach
+                val path = event.dataItem.uri.path ?: return@forEach
+                if (!path.startsWith(WearQuickEntryProtocol.PATH_PENDING_PREFIX)) return@forEach
+                Log.d(TAG, "onDataChanged uri=${event.dataItem.uri}")
+                pendingUris += event.dataItem.uri
+            }
+        } finally {
+            dataEvents.release()
+        }
+
+        pendingUris.forEach { uri ->
+            requestScope.launch {
+                runCatching { processPendingEntry(uri) }
+                    .onFailure { throwable ->
+                        Log.w(TAG, "processPendingEntry failure uri=$uri reason=${throwable.message}", throwable)
+                    }
+            }
+        }
+    }
+
     override fun onDestroy() {
         serviceScope.cancel()
         super.onDestroy()
     }
 
     private suspend fun handleCategoriesRequest(request: ByteArray): JSONObject {
-        // Categories stay phone-owned because the phone already knows the active household,
-        // translations, and the local "most used" ranking.
         val payload = JSONObject(request.decodeToString())
         val type = payload.optString("type").ifBlank { "expense" }
+        Log.d(TAG, "handleCategoriesRequest start type=$type")
         val sessionState = sessionRepository.sessionState.first { state -> state !is SessionState.Loading }
         val readyState = sessionState as? SessionState.Ready
             ?: return errorResponse("Open Dunio on your phone and sign in first.")
@@ -110,33 +144,69 @@ class WearQuickEntryListenerService : WearableListenerService() {
             .put("ok", true)
             .put("currency", readyState.household.currency)
             .put("categories", categoriesJson)
+            .also { Log.d(TAG, "handleCategoriesRequest success type=$type count=${orderedCategories.size}") }
     }
 
     private suspend fun handleSaveRequest(request: ByteArray): JSONObject {
-        // V1 keeps the payload intentionally small: type + amount + category.
-        val payload = JSONObject(request.decodeToString())
+        Log.d(TAG, "handleSaveRequest start")
+        savePayload(JSONObject(request.decodeToString()))
+        return JSONObject()
+            .put("ok", true)
+            .put("message", "Saved on phone")
+            .also { Log.d(TAG, "handleSaveRequest success") }
+    }
+
+    private suspend fun processPendingEntry(uri: Uri) {
+        Log.d(TAG, "processPendingEntry start uri=$uri")
+        val dataItem = readDataItem(uri) ?: return
+        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
+        val payload = JSONObject()
+            .put("requestId", dataMap.getString("requestId"))
+            .put("type", dataMap.getString("type"))
+            .put("amount", dataMap.getDouble("amount"))
+            .put("categoryName", dataMap.getString("categoryName"))
+            .put("categoryEmoji", dataMap.getString("categoryEmoji"))
+            .put("categoryKey", dataMap.getString("categoryKey"))
+
+        savePayload(payload)
+        Log.d(TAG, "processPendingEntry delete start uri=$uri requestId=${payload.optString("requestId")}")
+        Wearable.getDataClient(this).deleteDataItems(uri).await()
+        Log.d(TAG, "processPendingEntry delete success uri=$uri requestId=${payload.optString("requestId")}")
+    }
+
+    private suspend fun readDataItem(uri: Uri) =
+        Wearable.getDataClient(this).getDataItems(uri).await().let { buffer ->
+            try {
+                buffer.firstOrNull().also { item ->
+                    Log.d(TAG, "readDataItem uri=$uri found=${item != null}")
+                }
+            } finally {
+                buffer.release()
+            }
+        }
+
+    private suspend fun savePayload(payload: JSONObject) {
         val requestId = payload.optString("requestId").trim().ifBlank { "" }
         val type = payload.optString("type").ifBlank { "expense" }
         val amount = payload.optDouble("amount", Double.NaN)
         val categoryName = payload.optString("categoryName").trim()
         val categoryKey = payload.optString("categoryKey").trim().ifBlank { null }
+        Log.d(TAG, "savePayload start requestId=$requestId type=$type amount=$amount category=$categoryName")
 
         if (type != "expense" && type != "income") {
-            return errorResponse("Unsupported entry type.")
+            throw IllegalArgumentException("Unsupported entry type.")
         }
         if (!amount.isFinite() || amount <= 0.0) {
-            return errorResponse("Enter a valid amount.")
+            throw IllegalArgumentException("Enter a valid amount.")
         }
         if (categoryName.isBlank()) {
-            return errorResponse("Pick a category first.")
+            throw IllegalArgumentException("Pick a category first.")
         }
 
         entryRepository.insert(
             Entry(
                 id = requestId,
                 type = type,
-                // The watch flow does not expose description editing yet, so we reuse the category
-                // label as a minimal fallback description for the created entry.
                 description = categoryName,
                 price = amount,
                 category = categoryName,
@@ -144,30 +214,35 @@ class WearQuickEntryListenerService : WearableListenerService() {
                 date = System.currentTimeMillis(),
             ),
         )
+        Log.d(TAG, "savePayload inserted requestId=$requestId")
 
-        runCatching {
-            // Ranking is a local convenience feature only; it must never make the actual save fail.
-            val sessionState = sessionRepository.sessionState.first { state -> state !is SessionState.Loading }
-            val readyState = sessionState as? SessionState.Ready ?: return@runCatching
-            categoryUsageRepository.markUsed(
-                householdId = readyState.household.id,
-                type = type,
-                category = Category(
-                    name = categoryName,
-                    emoji = payload.optString("categoryEmoji").ifBlank { "📦" },
+        serviceScope.launch {
+            runCatching {
+                val sessionState = withTimeoutOrNull(1_000L) {
+                    sessionRepository.sessionState.first { state -> state !is SessionState.Loading }
+                }
+                val readyState = sessionState as? SessionState.Ready ?: return@runCatching
+                categoryUsageRepository.markUsed(
+                    householdId = readyState.household.id,
                     type = type,
-                    systemKey = categoryKey,
-                ),
-            )
+                    category = Category(
+                        name = categoryName,
+                        emoji = payload.optString("categoryEmoji").ifBlank { "📦" },
+                        type = type,
+                        systemKey = categoryKey,
+                    ),
+                )
+            }
         }
-
-        return JSONObject()
-            .put("ok", true)
-            .put("message", "Saved on phone")
     }
 
     private fun errorResponse(message: String): JSONObject =
         JSONObject()
             .put("ok", false)
             .put("message", message)
+
+    private companion object {
+        const val TAG = "WearQuickEntryPhone"
+        val requestScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
 }

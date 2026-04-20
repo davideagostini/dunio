@@ -1,32 +1,50 @@
+/**
+ * Local persistence layer for the Wear OS quick-entry flow.
+ *
+ * This store uses SharedPreferences to cache the most recent category list
+ * received from the phone, keyed by transaction type ("expense" / "income").
+ * The cached data allows the watch to show categories immediately on launch
+ * without waiting for a network round-trip.
+ *
+ * Pending entries are **not** stored here; they live in the Wear Data Layer
+ * so the platform can automatically synchronise them when the phone reconnects.
+ *
+ * The file also contains private extension functions for JSON serialization
+ * and deserialization of [WearCategoriesResponse] and [WearCategory].
+ */
 package com.davideagostini.summ.wearapp.data
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.davideagostini.summ.wearapp.model.PendingWearEntry
 import com.davideagostini.summ.wearapp.model.WearCategoriesResponse
 import com.davideagostini.summ.wearapp.model.WearCategory
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import org.json.JSONArray
 import org.json.JSONObject
 import androidx.core.content.edit
 
 /**
- * Small local store for the Wear quick-entry flow.
+ * Lightweight cache backed by SharedPreferences for Wear quick-entry data.
  *
- * It keeps:
- * - the latest category list returned by the phone, grouped by type
- * - a queue of pending entries that the watch should push to the phone later
+ * SharedPreferences was chosen over a database because the data is tiny
+ * (a few dozen categories at most) and entirely textual. The store is
+ * scoped to the "wear_quick_entry_store" preferences file.
  *
- * SharedPreferences is enough here because the payload is intentionally tiny and fully textual.
+ * @param context Application context used to obtain the SharedPreferences instance.
  */
 internal class WearQuickEntryLocalStore(
     context: Context,
 ) {
     private val preferences = context.getSharedPreferences("wear_quick_entry_store", Context.MODE_PRIVATE)
 
+    /**
+     * Persists a category response for the given transaction type.
+     *
+     * The response is serialized to a JSON string and stored under a
+     * type-specific key (e.g. "categories_expense"). Any previously
+     * cached response for the same type is overwritten.
+     *
+     * @param type     Transaction type ("expense" or "income").
+     * @param response The full [WearCategoriesResponse] to cache.
+     */
     fun saveCategories(
         type: String,
         response: WearCategoriesResponse,
@@ -36,67 +54,46 @@ internal class WearQuickEntryLocalStore(
         }
     }
 
+    /**
+     * Reads the cached category response for the given transaction type.
+     *
+     * Returns `null` if no cache exists or if the stored JSON is corrupt
+     * (deserialization is wrapped in `runCatching` to handle parse errors
+     * gracefully).
+     *
+     * @param type Transaction type ("expense" or "income").
+     * @return The cached [WearCategoriesResponse], or null.
+     */
     fun readCategories(type: String): WearCategoriesResponse? =
         preferences.getString(categoriesKey(type), null)
             ?.let { stored -> runCatching { JSONObject(stored).toCategoriesResponse() }.getOrNull() }
 
-    fun enqueue(entry: PendingWearEntry) {
-        val queue = readQueue().toMutableList()
-        queue.add(entry)
-        writeQueue(queue)
-    }
-
-    fun readQueue(): List<PendingWearEntry> =
-        preferences.getString(PENDING_QUEUE_KEY, null)
-            ?.let { stored ->
-                runCatching {
-                    JSONArray(stored).toPendingEntries()
-                }.getOrDefault(emptyList())
-            }
-            ?: emptyList()
-
-    fun replaceQueue(entries: List<PendingWearEntry>) {
-        writeQueue(entries)
-    }
-
     /**
-     * Small convenience accessor used by the UI to surface how many entries are still waiting for
-     * the phone to come back online.
+     * Builds the SharedPreferences key for the given transaction type.
+     *
+     * @param type Transaction type.
+     * @return Key string, e.g. "categories_expense".
      */
-    fun pendingCount(): Int = readQueue().size
-
-    /**
-     * Watches the queue size so the UI stays aligned even when a background service flushes the
-     * pending entries while the app is already open.
-     */
-    fun observePendingCount(): Flow<Int> = callbackFlow {
-        trySend(pendingCount())
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PENDING_QUEUE_KEY) {
-                trySend(pendingCount())
-            }
-        }
-        preferences.registerOnSharedPreferenceChangeListener(listener)
-        awaitClose {
-            preferences.unregisterOnSharedPreferenceChangeListener(listener)
-        }
-    }.distinctUntilChanged()
-
-    private fun writeQueue(entries: List<PendingWearEntry>) {
-        val array = JSONArray()
-        entries.forEach { entry -> array.put(entry.toJson()) }
-        preferences.edit(commit = true) {
-            putString(PENDING_QUEUE_KEY, array.toString())
-        }
-    }
-
     private fun categoriesKey(type: String): String = "categories_$type"
-
-    private companion object {
-        const val PENDING_QUEUE_KEY = "pending_entries"
-    }
 }
 
+/**
+ * Serializes a [WearCategoriesResponse] into a [JSONObject].
+ *
+ * The resulting JSON has the structure:
+ * ```
+ * {
+ *   "currency": "EUR",
+ *   "categories": [
+ *     {"name": "Groceries", "emoji": "🛒", "systemKey": "groceries"},
+ *     ...
+ *   ]
+ * }
+ * ```
+ *
+ * @receiver The response to serialize.
+ * @return A JSON representation suitable for writing to SharedPreferences.
+ */
 private fun WearCategoriesResponse.toJson(): JSONObject {
     val categoriesArray = JSONArray()
     categories.forEach { category ->
@@ -113,12 +110,31 @@ private fun WearCategoriesResponse.toJson(): JSONObject {
         .put("categories", categoriesArray)
 }
 
+/**
+ * Deserializes a [JSONObject] into a [WearCategoriesResponse].
+ *
+ * Missing fields are given sensible defaults: "EUR" for currency and an
+ * empty list for categories.
+ *
+ * @receiver The JSON object to parse.
+ * @return The reconstructed [WearCategoriesResponse].
+ */
 private fun JSONObject.toCategoriesResponse(): WearCategoriesResponse =
     WearCategoriesResponse(
         currency = optString("currency", "EUR"),
         categories = optJSONArray("categories")?.toWearCategories().orEmpty(),
     )
 
+/**
+ * Converts a [JSONArray] of category objects into a list of [WearCategory].
+ *
+ * Each element in the array is expected to be a JSONObject with "name",
+ * "emoji", and optionally "systemKey" fields. Null or malformed entries
+ * are silently skipped.
+ *
+ * @receiver The JSON array to convert.
+ * @return A list of parsed [WearCategory] instances.
+ */
 internal fun JSONArray.toWearCategories(): List<WearCategory> =
     buildList(length()) {
         for (index in 0 until length()) {
@@ -128,32 +144,6 @@ internal fun JSONArray.toWearCategories(): List<WearCategory> =
                     name = category.optString("name"),
                     emoji = category.optString("emoji", "📦"),
                     systemKey = category.optString("systemKey").ifBlank { null },
-                ),
-            )
-        }
-    }
-
-private fun PendingWearEntry.toJson(): JSONObject =
-    JSONObject()
-        .put("requestId", requestId)
-        .put("type", type)
-        .put("amount", amount)
-        .put("categoryName", categoryName)
-        .put("categoryEmoji", categoryEmoji)
-        .put("categoryKey", categoryKey ?: JSONObject.NULL)
-
-private fun JSONArray.toPendingEntries(): List<PendingWearEntry> =
-    buildList(length()) {
-        for (index in 0 until length()) {
-            val entry = optJSONObject(index) ?: continue
-            add(
-                PendingWearEntry(
-                    requestId = entry.optString("requestId").ifBlank { java.util.UUID.randomUUID().toString() },
-                    type = entry.optString("type", "expense"),
-                    amount = entry.optDouble("amount", 0.0),
-                    categoryName = entry.optString("categoryName"),
-                    categoryEmoji = entry.optString("categoryEmoji", "📦"),
-                    categoryKey = entry.optString("categoryKey").ifBlank { null },
                 ),
             )
         }
