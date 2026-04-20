@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="site/assets/cover.png?v=20260402-1" alt="Track net worth in one place">
+  <img src="site/assets/cover.png?v=20260420-3" alt="Track net worth in one place">
 </div>
 
 <div id="user-content-toc">
@@ -29,7 +29,7 @@ The app is intentionally not an accounting suite. The focus is fast daily use, c
 ## Screenshots
 
 <p align="center" width="100%">
-<img src="site/assets/screenshots/1.png" alt="Track net worth in one place" width="25%"><img src="site/assets/screenshots/2.png" alt="Track every transaction" width="25%"><img src="site/assets/screenshots/3.png" alt="Manage assets and liabilities" width="25%"><img src="site/assets/screenshots/4.png" alt="Made for shared finances" width="25%"><img src="site/assets/screenshots/5.png" alt="Add transactions faster" width="25%"><img src="site/assets/screenshots/6.png" alt="Widgets for quick access" width="25%"><img src="site/assets/screenshots/7.png" alt="Faster than opening the app" width="25%"><img src="site/assets/screenshots/8.png" alt="Built for day and night" width="25%">
+<img src="site/assets/screenshots/en/1.png" alt="Track net worth in one place" width="25%"><img src="site/assets/screenshots/en/2.png" alt="Track every transaction" width="25%"><img src="site/assets/screenshots/en/3.png" alt="Manage assets and liabilities" width="25%"><img src="site/assets/screenshots/en/4.png" alt="Made for shared finances" width="25%"><img src="site/assets/screenshots/en/5.png" alt="Add transactions faster" width="25%"><img src="site/assets/screenshots/en/6.png" alt="Widgets for quick access" width="25%"><img src="site/assets/screenshots/en/7.png" alt="Faster than opening the app" width="25%"><img src="site/assets/screenshots/en/8.png" alt="Built for day and night" width="25%">
 </p>
 
 ## What this repository contains

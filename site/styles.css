@@ -514,14 +514,14 @@ img {
 }
 
 .screenshot-grid {
-  column-count: 4;
-  column-gap: 16px;
-  display: block;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .shot-card {
-  break-inside: avoid;
-  margin: 0 0 16px;
+  break-inside: auto;
+  margin: 0;
   overflow: hidden;
   padding: 12px;
   transition:
@@ -530,15 +530,15 @@ img {
 }
 
 .shot-card:nth-child(4n + 2) {
-  transform: translateY(34px);
+  transform: none;
 }
 
 .shot-card:nth-child(4n + 3) {
-  transform: translateY(16px);
+  transform: none;
 }
 
 .shot-card:nth-child(4n + 4) {
-  transform: translateY(52px);
+  transform: none;
 }
 
 .shot-card img {
@@ -563,20 +563,8 @@ img {
 
 @media (hover: hover) and (pointer: fine) {
   .shot-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 24px 56px rgba(16, 36, 43, 0.12);
-  }
-
-  .shot-card:nth-child(4n + 2):hover {
-    transform: translateY(31px);
-  }
-
-  .shot-card:nth-child(4n + 3):hover {
-    transform: translateY(13px);
-  }
-
-  .shot-card:nth-child(4n + 4):hover {
-    transform: translateY(49px);
+    transform: translateY(-1px);
+    box-shadow: 0 18px 40px rgba(16, 36, 43, 0.08);
   }
 }
 
@@ -876,7 +864,7 @@ img {
   }
 
   .screenshot-grid {
-    column-count: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .callout-actions {
@@ -949,7 +937,7 @@ img {
   }
 
   .screenshot-grid {
-    column-count: 1;
+    grid-template-columns: 1fr;
   }
 
   .shot-card {
@@ -957,7 +945,6 @@ img {
     margin-left: auto;
     margin-right: auto;
     padding: 7px;
-    margin-bottom: 10px;
   }
 
   .shot-card img {
