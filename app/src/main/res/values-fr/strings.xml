@@ -64,6 +64,9 @@
     <string name="auth_join_household_action">Rejoindre le foyer</string>
     <string name="auth_join_short">Rejoindre</string>
     <string name="auth_join_household_helper">Demandez à votre partenaire d’inviter votre adresse e-mail et de partager l’ID du foyer.</string>
+    <string name="auth_join_household_signed_in_label">Compte Google connecté</string>
+    <string name="auth_join_household_signed_in_note">Cette adresse e-mail doit correspondre à l’invitation.</string>
+    <string name="session_joining_household_message">Vérification de votre invitation et connexion au foyer…</string>
     <string name="quick_entry_signed_out_message">Connectez-vous pour ajouter une saisie rapide.</string>
     <string name="quick_entry_needs_household_message">Créez ou rejoignez un foyer avant d’ajouter des écritures.</string>
     <string name="entry_step_type_title">Quel type d’écriture ?</string>
@@ -291,7 +294,7 @@
     <string name="session_default_member_name">Membre</string>
     <string name="session_household_id_required">Saisissez un ID de foyer.</string>
     <string name="session_household_not_found">Foyer introuvable.</string>
-    <string name="session_household_invite_required">Aucune invitation en attente n’a été trouvée pour ce compte Google.</string>
+    <string name="session_household_invite_required">Aucune invitation en attente n’a été trouvée pour ce compte Google. Assurez-vous que l’invitation utilise exactement l’adresse e-mail avec laquelle vous êtes connecté.</string>
     <string name="session_household_required">Créez d’abord un foyer ou rejoignez-en un.</string>
     <string name="session_load_error">Impossible de charger la session.</string>
     <string name="session_household_load_error">Impossible de charger le foyer.</string>

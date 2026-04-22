@@ -64,6 +64,9 @@
     <string name="auth_join_household_action">الانضمام إلى household</string>
     <string name="auth_join_short">انضمام</string>
     <string name="auth_join_household_helper">اطلب من شريكك دعوة بريدك الإلكتروني ومشاركة معرّف household معك.</string>
+    <string name="auth_join_household_signed_in_label">حساب Google المتصل</string>
+    <string name="auth_join_household_signed_in_note">يجب أن يطابق هذا البريد الإلكتروني الدعوة.</string>
+    <string name="session_joining_household_message">جارٍ التحقق من الدعوة والانضمام إلى الأسرة…</string>
     <string name="quick_entry_signed_out_message">سجّل الدخول لإضافة إدخال سريع.</string>
     <string name="quick_entry_needs_household_message">أنشئ household أو انضم إليه قبل إضافة العمليات.</string>
     <string name="entry_step_type_title">ما نوع هذا الإدخال؟</string>
@@ -291,7 +294,7 @@
     <string name="session_default_member_name">عضو</string>
     <string name="session_household_id_required">أدخل معرّف الـ household.</string>
     <string name="session_household_not_found">لم يتم العثور على الـ household.</string>
-    <string name="session_household_invite_required">لم يتم العثور على دعوة معلّقة لهذا الحساب على Google.</string>
+    <string name="session_household_invite_required">لم يتم العثور على دعوة معلّقة لهذا الحساب على Google. تأكد من أن الدعوة تستخدم بالضبط البريد الإلكتروني الذي سجلت الدخول به.</string>
     <string name="session_household_required">أنشئ household أو انضم إلى واحد أولاً.</string>
     <string name="session_load_error">تعذر تحميل الجلسة.</string>
     <string name="session_household_load_error">تعذر تحميل الـ household.</string>

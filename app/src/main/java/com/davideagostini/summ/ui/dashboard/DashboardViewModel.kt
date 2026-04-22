@@ -257,7 +257,7 @@ class DashboardViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(hasAnyTransactions, hasAnyAssets, getStartedPrefs) { hasEntries, hasAssets, prefs ->
-                !prefs.dismissed && (!hasEntries || !hasAssets)
+                !prefs.dismissed && !hasEntries && !hasAssets
             }.collect { showGetStarted ->
                 _uiState.update {
                     it.copy(

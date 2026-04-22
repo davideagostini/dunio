@@ -64,6 +64,9 @@
     <string name="auth_join_household_action">Присоединиться к household</string>
     <string name="auth_join_short">Присоединиться</string>
     <string name="auth_join_household_helper">Попросите партнера пригласить ваш e-mail и поделиться ID household.</string>
+    <string name="auth_join_household_signed_in_label">Подключённый аккаунт Google</string>
+    <string name="auth_join_household_signed_in_note">Этот e-mail должен совпадать с приглашением.</string>
+    <string name="session_joining_household_message">Проверяем приглашение и подключаем к домохозяйству…</string>
     <string name="quick_entry_signed_out_message">Войдите, чтобы добавить быструю запись.</string>
     <string name="quick_entry_needs_household_message">Создайте household или присоединитесь к нему, прежде чем добавлять операции.</string>
     <string name="entry_step_type_title">Какой это тип записи?</string>
@@ -291,7 +294,7 @@
     <string name="session_default_member_name">Участник</string>
     <string name="session_household_id_required">Введите ID household.</string>
     <string name="session_household_not_found">Household не найден.</string>
-    <string name="session_household_invite_required">Для этого аккаунта Google не найдено ожидающее приглашение.</string>
+    <string name="session_household_invite_required">Для этого аккаунта Google не найдено ожидающее приглашение. Убедитесь, что приглашение использует точно тот e-mail, под которым вы вошли.</string>
     <string name="session_household_required">Сначала создайте household или присоединитесь к нему.</string>
     <string name="session_load_error">Не удалось загрузить сессию.</string>
     <string name="session_household_load_error">Не удалось загрузить household.</string>

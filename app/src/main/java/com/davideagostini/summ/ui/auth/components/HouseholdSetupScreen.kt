@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.SummTheme
@@ -46,6 +50,7 @@ import com.davideagostini.summ.ui.theme.SummTheme
 @Composable
 fun HouseholdSetupScreen(
     userName: String,
+    userEmail: String,
     userPhotoUrl: String?,
     isSubmitting: Boolean,
     errorMessage: String?,
@@ -61,6 +66,7 @@ fun HouseholdSetupScreen(
 
     HouseholdSetupContent(
         userName = userName,
+        userEmail = userEmail,
         userPhotoUrl = userPhotoUrl,
         isSubmitting = isSubmitting,
         errorMessage = errorMessage,
@@ -110,6 +116,7 @@ fun HouseholdSetupScreen(
 @Composable
 private fun HouseholdSetupContent(
     userName: String,
+    userEmail: String,
     userPhotoUrl: String?,
     isSubmitting: Boolean,
     errorMessage: String?,
@@ -132,8 +139,10 @@ private fun HouseholdSetupContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .imePadding()
+                .navigationBarsPadding()
                 .statusBarsPadding(),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
@@ -159,6 +168,7 @@ private fun HouseholdSetupContent(
                     onSelectMode = onSelectMode,
                     isSubmitting = isSubmitting,
                     errorMessage = errorMessage,
+                    userEmail = userEmail,
                     householdName = householdName,
                     householdId = householdId,
                     onHouseholdNameChange = onHouseholdNameChange,
@@ -200,6 +210,7 @@ private fun HouseholdSetupScreenPreview() {
     HouseholdSetupPreviewContainer {
         HouseholdSetupContent(
             userName = "Davide Agostini",
+            userEmail = "davide@example.com",
             userPhotoUrl = "https://example.com/avatar.jpg",
             isSubmitting = false,
             errorMessage = null,
@@ -223,9 +234,10 @@ private fun HouseholdSetupScreenErrorPreview() {
     HouseholdSetupPreviewContainer {
         HouseholdSetupContent(
             userName = "Davide Agostini",
+            userEmail = "davide@example.com",
             userPhotoUrl = "https://example.com/avatar.jpg",
             isSubmitting = false,
-            errorMessage = "Household not found. Check the ID and try again.",
+            errorMessage = "No pending invite was found for this Google account. Make sure the invite uses the exact email you are signed in with.",
             selectedMode = HouseholdSetupMode.Join,
             householdName = "",
             householdId = "ZZZZ9999",
@@ -246,6 +258,7 @@ private fun HouseholdSetupScreenSubmittingPreview() {
     HouseholdSetupPreviewContainer {
         HouseholdSetupContent(
             userName = "Davide Agostini",
+            userEmail = "davide@example.com",
             userPhotoUrl = "https://example.com/avatar.jpg",
             isSubmitting = true,
             errorMessage = null,
@@ -286,6 +299,7 @@ private fun HouseholdActionCard(
     actionLabel: String,
     keyboardCapitalization: KeyboardCapitalization,
     inlineErrorMessage: String? = null,
+    signedInEmail: String? = null,
 ) {
     AuthCard {
         Text(
@@ -306,6 +320,36 @@ private fun HouseholdActionCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
+            if (!signedInEmail.isNullOrBlank()) {
+                Spacer(Modifier.height(12.dp))
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    androidx.compose.foundation.layout.Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.auth_join_household_signed_in_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = signedInEmail,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.auth_join_household_signed_in_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
         Spacer(Modifier.height(16.dp))
         if (!inlineErrorMessage.isNullOrBlank()) {
@@ -338,6 +382,7 @@ private fun HouseholdModeCard(
     onSelectMode: (HouseholdSetupMode) -> Unit,
     isSubmitting: Boolean,
     errorMessage: String?,
+    userEmail: String,
     householdName: String,
     householdId: String,
     onHouseholdNameChange: (String) -> Unit,
@@ -402,6 +447,7 @@ private fun HouseholdModeCard(
                 actionLabel = stringResource(R.string.auth_join_household_action),
                 keyboardCapitalization = KeyboardCapitalization.None,
                 inlineErrorMessage = errorMessage,
+                signedInEmail = userEmail,
             )
         }
     }

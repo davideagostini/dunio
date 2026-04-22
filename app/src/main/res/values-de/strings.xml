@@ -64,6 +64,9 @@
     <string name="auth_join_household_action">Haushalt beitreten</string>
     <string name="auth_join_short">Beitreten</string>
     <string name="auth_join_household_helper">Bitte deine Partnerin oder deinen Partner, deine E-Mail einzuladen und die Haushalts-ID mit dir zu teilen.</string>
+    <string name="auth_join_household_signed_in_label">Verbundenes Google-Konto</string>
+    <string name="auth_join_household_signed_in_note">Diese E-Mail muss mit der Einladung übereinstimmen.</string>
+    <string name="session_joining_household_message">Einladung wird geprüft und der Haushalt wird verbunden…</string>
     <string name="quick_entry_signed_out_message">Melde dich an, um einen Schnelleintrag hinzuzufügen.</string>
     <string name="quick_entry_needs_household_message">Erstelle einen Haushalt oder tritt einem Haushalt bei, bevor du Einträge hinzufügst.</string>
     <string name="entry_step_type_title">Welche Art von Eintrag ist das?</string>
@@ -291,7 +294,7 @@
     <string name="session_default_member_name">Mitglied</string>
     <string name="session_household_id_required">Gib eine Haushalts-ID ein.</string>
     <string name="session_household_not_found">Haushalt nicht gefunden.</string>
-    <string name="session_household_invite_required">Für dieses Google-Konto wurde keine ausstehende Einladung gefunden.</string>
+    <string name="session_household_invite_required">Für dieses Google-Konto wurde keine ausstehende Einladung gefunden. Stelle sicher, dass die Einladung genau die E-Mail verwendet, mit der du angemeldet bist.</string>
     <string name="session_household_required">Erstelle zuerst einen Haushalt oder tritt einem bei.</string>
     <string name="session_load_error">Sitzung konnte nicht geladen werden.</string>
     <string name="session_household_load_error">Haushalt konnte nicht geladen werden.</string>

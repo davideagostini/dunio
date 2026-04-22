@@ -2,10 +2,14 @@ package com.davideagostini.summ.ui.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,7 +45,9 @@ fun AuthGateScreen(
     }
 
     if (uiState.isHouseholdTransitioning && uiState.errorMessage == null) {
-        LoadingScreen()
+        LoadingScreen(
+            message = stringResource(R.string.session_joining_household_message),
+        )
         return
     }
 
@@ -59,6 +65,7 @@ fun AuthGateScreen(
         )
         is SessionState.NeedsHousehold -> HouseholdSetupScreen(
             userName = state.user.name,
+            userEmail = state.user.email,
             userPhotoUrl = state.user.photoUrl,
             isSubmitting = uiState.isSubmitting,
             errorMessage = uiState.errorMessage,
@@ -73,13 +80,30 @@ fun AuthGateScreen(
 
 @Composable
 private fun LoadingScreen() {
+    LoadingScreen(message = null)
+}
+
+@Composable
+private fun LoadingScreen(
+    message: String?,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer),
         contentAlignment = Alignment.Center,
     ) {
-        CircularProgressIndicator()
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator()
+            if (!message.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 

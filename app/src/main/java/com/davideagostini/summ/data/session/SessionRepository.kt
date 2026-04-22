@@ -164,6 +164,9 @@ class SessionRepository @Inject constructor(
             mapOf(
                 "userId" to firebaseUser.uid,
                 "role" to "owner",
+                "email" to (firebaseUser.email ?: ""),
+                "name" to (firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name)),
+                "photoURL" to firebaseUser.photoUrl?.toString(),
                 "joinedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
             )
         )
@@ -213,11 +216,6 @@ class SessionRepository @Inject constructor(
         val userEmail = firebaseUser.email?.trim()?.lowercase()
             ?: error(appContext.getString(R.string.session_household_invite_required))
         require(trimmedId.isNotEmpty()) { appContext.getString(R.string.session_household_id_required) }
-        val householdSnapshot = db.document(FirestorePaths.household(trimmedId)).get().await()
-
-        if (!householdSnapshot.exists()) {
-            error(appContext.getString(R.string.session_household_not_found))
-        }
 
         val inviteRef = db.document(FirestorePaths.invite(trimmedId, userEmail))
         val inviteSnapshot = inviteRef.get().await()
@@ -233,6 +231,9 @@ class SessionRepository @Inject constructor(
             mapOf(
                 "userId" to firebaseUser.uid,
                 "role" to invitedRole,
+                "email" to (firebaseUser.email ?: ""),
+                "name" to (firebaseUser.displayName ?: firebaseUser.email ?: appContext.getString(R.string.session_default_member_name)),
+                "photoURL" to firebaseUser.photoUrl?.toString(),
                 "joinedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
             )
         )
@@ -369,7 +370,11 @@ class SessionRepository @Inject constructor(
                         .addSnapshotListener { householdSnapshot, householdError ->
                             if (householdError != null) {
                                 if (householdError.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
-                                    trySend(SessionState.NeedsHousehold(user.copy(householdId = null)))
+                                    if (isBootstrapProtected()) {
+                                        trySend(SessionState.Loading)
+                                    } else {
+                                        trySend(SessionState.NeedsHousehold(user.copy(householdId = null)))
+                                    }
                                 } else {
                                     trySend(SessionState.ConfigurationError(householdError.message ?: appContext.getString(R.string.session_household_load_error)))
                                 }

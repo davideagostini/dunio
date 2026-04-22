@@ -207,6 +207,7 @@ fun AppNavGraph(
                 MembersScreen(
                     householdId = readyState.household.id,
                     currentUserId = readyState.user.uid,
+                    currentUserEmail = readyState.user.email,
                     onBack = { navController.popBackStack() },
                 )
             }

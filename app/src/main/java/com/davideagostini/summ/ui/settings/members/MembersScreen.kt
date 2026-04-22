@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -66,6 +68,7 @@ import kotlinx.coroutines.launch
 fun MembersScreen(
     householdId: String,
     currentUserId: String,
+    currentUserEmail: String,
     onBack: () -> Unit,
     viewModel: MembersViewModel = hiltViewModel(),
 ) {
@@ -82,6 +85,7 @@ fun MembersScreen(
     MembersContent(
         householdId = householdId,
         currentUserId = currentUserId,
+        currentUserEmail = currentUserEmail,
         members = members,
         invites = invites,
         uiState = uiState,
@@ -97,6 +101,7 @@ fun MembersScreen(
 private fun MembersContent(
     householdId: String,
     currentUserId: String,
+    currentUserEmail: String,
     members: List<Member>,
     invites: List<Invite>,
     uiState: MembersUiState,
@@ -135,7 +140,11 @@ private fun MembersContent(
         )
 
         LazyColumn(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 92.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 128.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
@@ -156,6 +165,8 @@ private fun MembersContent(
             itemsIndexed(members, key = { _, member -> member.userId }) { index, member ->
                 MemberRow(
                     member = member,
+                    currentUserEmail = currentUserEmail,
+                    isCurrentUser = member.userId == currentUserId,
                     index = index,
                     count = members.size,
                 )
@@ -295,6 +306,8 @@ private fun MembersHeaderCard(
 @Composable
 private fun MemberRow(
     member: Member,
+    currentUserEmail: String,
+    isCurrentUser: Boolean,
     index: Int,
     count: Int,
 ) {
@@ -330,7 +343,10 @@ private fun MemberRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = member.email.ifBlank { stringResource(R.string.members_no_email) },
+                    text = member.email.ifBlank {
+                        if (isCurrentUser && currentUserEmail.isNotBlank()) currentUserEmail
+                        else stringResource(R.string.members_no_email)
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

@@ -64,6 +64,9 @@
     <string name="auth_join_household_action">household に参加</string>
     <string name="auth_join_short">参加</string>
     <string name="auth_join_household_helper">パートナーにあなたのメールアドレスを招待してもらい、household ID を共有してもらってください。</string>
+    <string name="auth_join_household_signed_in_label">接続中の Google アカウント</string>
+    <string name="auth_join_household_signed_in_note">このメールアドレスは招待と一致している必要があります。</string>
+    <string name="session_joining_household_message">招待を確認して household に参加しています…</string>
     <string name="quick_entry_signed_out_message">クイック入力を追加するにはサインインしてください。</string>
     <string name="quick_entry_needs_household_message">記録を追加する前に household を作成するか参加してください。</string>
     <string name="entry_step_type_title">どの種類の記録ですか？</string>
@@ -291,7 +294,7 @@
     <string name="session_default_member_name">メンバー</string>
     <string name="session_household_id_required">household ID を入力してください。</string>
     <string name="session_household_not_found">household が見つかりません。</string>
-    <string name="session_household_invite_required">この Google アカウントに対する保留中の招待は見つかりませんでした。</string>
+    <string name="session_household_invite_required">この Google アカウントに対する保留中の招待は見つかりませんでした。招待が、現在ログインしているメールアドレスと完全に一致していることを確認してください。</string>
     <string name="session_household_required">先に household を作成するか参加してください。</string>
     <string name="session_load_error">セッションを読み込めませんでした。</string>
     <string name="session_household_load_error">household を読み込めませんでした。</string>

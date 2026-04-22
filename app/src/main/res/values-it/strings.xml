@@ -60,6 +60,9 @@
     <string name="auth_join_household_action">Unisciti al nucleo familiare</string>
     <string name="auth_join_short">Unisciti</string>
     <string name="auth_join_household_helper">Chiedi al tuo partner di invitare la tua email e condividere l’ID del nucleo familiare.</string>
+    <string name="auth_join_household_signed_in_label">Account Google collegato</string>
+    <string name="auth_join_household_signed_in_note">Questa email deve corrispondere all’invito.</string>
+    <string name="session_joining_household_message">Sto verificando l’invito e unendo il nucleo familiare…</string>
     <string name="quick_entry_signed_out_message">Accedi per aggiungere una voce rapida.</string>
     <string name="quick_entry_needs_household_message">Crea o unisciti a un nucleo familiare prima di aggiungere movimenti.</string>
     <string name="entry_step_type_title">Che tipo di movimento è?</string>
@@ -324,7 +327,7 @@
     <string name="session_default_member_name">Membro</string>
     <string name="session_household_id_required">Inserisci un ID household.</string>
     <string name="session_household_not_found">Household non trovato.</string>
-    <string name="session_household_invite_required">Nessun invito in sospeso trovato per questo account Google.</string>
+    <string name="session_household_invite_required">Nessun invito in sospeso trovato per questo account Google. Assicurati che l’invito usi esattamente l’email con cui sei connesso.</string>
     <string name="session_household_required">Crea o unisciti prima a un household.</string>
     <string name="session_load_error">Impossibile caricare la sessione.</string>
     <string name="session_household_load_error">Impossibile caricare l’household.</string>
