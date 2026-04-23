@@ -289,8 +289,17 @@ private fun RecurringContent(
         uiState.sheetMode != RecurringSheetMode.Add &&
         uiState.sheetMode != RecurringSheetMode.Edit
     ) {
+        val dismissSheet: () -> Unit = {
+            scope.launch {
+                allowHide = true
+                sheetState.hide()
+                onEvent(RecurringEvent.DismissSheet)
+                allowHide = false
+            }
+            Unit
+        }
         ModalBottomSheet(
-            onDismissRequest = {},
+            onDismissRequest = dismissSheet,
             sheetState = sheetState,
             containerColor = Color.Transparent,
             dragHandle = null,
@@ -301,14 +310,7 @@ private fun RecurringContent(
                 categories = categories,
                 currency = renderState.householdCurrency,
                 onEvent = onEvent,
-                onDismiss = {
-                    scope.launch {
-                        allowHide = true
-                        sheetState.hide()
-                        onEvent(RecurringEvent.DismissSheet)
-                        allowHide = false
-                    }
-                },
+                onDismiss = dismissSheet,
             )
         }
     }

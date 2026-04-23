@@ -662,9 +662,18 @@ internal fun EntriesContent(
     // The compact action sheet stays mounted for both action and success states, matching the assets flow.
     // Keep delete success in the compact bottom sheet, like assets. Fullscreen remains reserved for edit flow.
     if ((uiState.sheetMode == EntrySheetMode.Action || uiState.sheetMode == EntrySheetMode.Success) && !isFullscreenEditFlow) {
+        val dismissSheet: () -> Unit = {
+            scope.launch {
+                allowSheetHide = true
+                sheetState.hide()
+                onEvent(EntriesEvent.DismissSheet)
+                allowSheetHide = false
+            }
+            Unit
+        }
         // The sheet is only responsible for the compact action surface; success remains within the same container.
         ModalBottomSheet(
-            onDismissRequest = {},
+            onDismissRequest = dismissSheet,
             sheetState = sheetState,
             containerColor = Color.Transparent,
             dragHandle = null,
@@ -680,14 +689,7 @@ internal fun EntriesContent(
                     formatMonthLabel(selectedMonth),
                 ),
                 onEvent = onEvent,
-                onDismiss = {
-                    scope.launch {
-                        allowSheetHide = true
-                        sheetState.hide()
-                        onEvent(EntriesEvent.DismissSheet)
-                        allowSheetHide = false
-                    }
-                },
+                onDismiss = dismissSheet,
             )
         }
     }

@@ -32,6 +32,9 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,35 +50,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation3.ui.NavDisplay
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.session.SessionState
-import com.davideagostini.summ.ui.assets.AssetsRouteScreen
 import com.davideagostini.summ.ui.auth.AuthGateScreen
 import com.davideagostini.summ.ui.auth.SessionViewModel
-import com.davideagostini.summ.ui.categories.CategoriesScreen
-import com.davideagostini.summ.ui.dashboard.DashboardScreen
-import com.davideagostini.summ.ui.entries.EntriesRouteScreen
 import com.davideagostini.summ.ui.entry.QuickEntryScreen
-import com.davideagostini.summ.ui.settings.SettingsScreen
-import com.davideagostini.summ.ui.settings.currency.CurrencyScreen
-import com.davideagostini.summ.ui.settings.export.ExportScreen
-import com.davideagostini.summ.ui.settings.language.LanguageScreen
-import com.davideagostini.summ.ui.settings.members.MembersScreen
-import com.davideagostini.summ.ui.settings.monthclose.MonthCloseScreen
-import com.davideagostini.summ.ui.settings.recurring.RecurringScreen
-import com.davideagostini.summ.ui.settings.theme.ThemeScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph(
-    navController: NavHostController = rememberNavController(),
     sessionViewModel: SessionViewModel = hiltViewModel(),
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
@@ -97,9 +83,12 @@ fun AppNavGraph(
         sessionViewModel.runRecurringAutoApplyIfNeeded(readyState)
     }
 
-    // Shared overlay state lives here so dashboard, assets, entries, and month close can coordinate with the shell.
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    // Shared overlay state lives here so dashboard, assets, entries, and month close can coordinate
+    // with the shell. This remains true in Navigation 3: not every piece of visible UI should be
+    // modeled as a destination. Some UI is still shell-owned state.
+    val navigationState = rememberAppNavigationState()
+    val currentKey = navigationState.currentKey
+    val context = LocalContext.current
 
     var showEntrySheet by remember { mutableStateOf(false) }
     var showEntriesFullscreenEditor by remember { mutableStateOf(false) }
@@ -113,144 +102,86 @@ fun AppNavGraph(
         skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden || allowEntrySheetHide },
     )
-
-    fun navigate(route: String) = navController.navigate(route) { launchSingleTop = true }
-
-    fun navigatePrimary(route: String) = navController.navigate(route) {
-        popUpTo(navController.graph.findStartDestination().id) {
-            saveState = true
+    val dismissEntrySheet: () -> Unit = {
+        scope.launch {
+            allowEntrySheetHide = true
+            sheetState.hide()
+            showEntrySheet = false
+            allowEntrySheetHide = false
         }
-        launchSingleTop = true
-        restoreState = true
+        Unit
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // The NavHost keeps feature routes isolated while the shell manages cross-screen overlays.
-        NavHost(
-            navController = navController,
-            startDestination = "dashboard",
-            modifier = Modifier.matchParentSize(),
-        ) {
-            composable("entries") {
-                // Entries uses a lightweight route placeholder first so tab switches remain immediate
-                // on older devices before the full screen ViewModel tree is mounted.
-                EntriesRouteScreen(
-                    onFullscreenEditVisibilityChanged = { showEntriesFullscreenEditor = it },
-                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
-                )
-            }
-            composable("dashboard") {
-                // Dashboard only needs to report month-picker visibility.
-                DashboardScreen(
-                    onGetStartedVisibilityChanged = { showDashboardGetStarted = it },
-                    onOpenQuickEntry = { showEntrySheet = true },
-                    onOpenNewAsset = {
-                        openAssetsAddOnNextVisit = true
-                        navigatePrimary("assets")
-                    },
-                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
-                )
-            }
-            composable("assets") {
-                // Assets also participates in the shared overlay state because it uses fullscreen editing.
-                AssetsRouteScreen(
-                    onFullscreenEditVisibilityChanged = { showAssetsFullscreenEditor = it },
-                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
-                    openAddOnLaunch = openAssetsAddOnNextVisit,
-                    onOpenAddConsumed = { openAssetsAddOnNextVisit = false },
-                )
-            }
-            composable("settings") {
-                SettingsScreen(
-                    onNavigateCurrency = { navigate("currency") },
-                    onNavigateLanguage = { navigate("language") },
-                    onNavigateTheme = { navigate("theme") },
-                    onNavigateExport = { navigate("export-data") },
-                    onNavigateCategories = { navigate("categories") },
-                    onNavigateMembers = { navigate("members") },
-                    onNavigateRecurring = { navigate("recurring") },
-                    onNavigateMonthClose = { navigate("month-close") },
-                    onSignOut = sessionViewModel::signOut,
-                    householdName = readyState.household.name,
-                    householdId = readyState.household.id,
-                    householdCurrency = readyState.household.currency,
-                    userName = readyState.user.name,
-                    userPhotoUrl = readyState.user.photoUrl,
-                )
-            }
-            composable("currency") {
-                CurrencyScreen(
-                    selectedCurrency = readyState.household.currency,
-                    isUpdatingCurrency = sessionUiState.isSubmitting,
-                    errorMessage = sessionUiState.errorMessage,
-                    onSelectCurrency = sessionViewModel::updateHouseholdCurrency,
-                    onDismissError = sessionViewModel::consumeError,
-                    onBack = { navController.popBackStack() },
-                )
-            }
-            composable("language") {
-                LanguageScreen(
-                    onBack = { navController.popBackStack() },
-                )
-            }
-            composable("theme") {
-                ThemeScreen(
-                    onBack = { navController.popBackStack() },
-                )
-            }
-            composable("export-data") {
-                ExportScreen(
-                    onBack = { navController.popBackStack() },
-                )
-            }
-            composable("members") {
-                MembersScreen(
-                    householdId = readyState.household.id,
-                    currentUserId = readyState.user.uid,
-                    currentUserEmail = readyState.user.email,
-                    onBack = { navController.popBackStack() },
-                )
-            }
-            composable("categories") {
-                CategoriesScreen(onBack = { navController.popBackStack() })
-            }
-            composable("recurring") {
-                RecurringScreen(onBack = { navController.popBackStack() })
-            }
-            composable("month-close") {
-                // Month close uses the same shared month picker overlay as the other financial screens.
-                MonthCloseScreen(
-                    onBack = { navController.popBackStack() },
-                    onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
-                )
-            }
-        }
+    val entryProvider = appEntryProvider(
+        navigationState = navigationState,
+        readyState = readyState,
+        sessionUiStateIsSubmitting = sessionUiState.isSubmitting,
+        sessionUiStateErrorMessage = sessionUiState.errorMessage,
+        onUpdateHouseholdCurrency = sessionViewModel::updateHouseholdCurrency,
+        onConsumeSessionError = sessionViewModel::consumeError,
+        onSignOut = sessionViewModel::signOut,
+        onOpenQuickEntry = { showEntrySheet = true },
+        onEntriesFullscreenEditVisibilityChanged = { showEntriesFullscreenEditor = it },
+        onAssetsFullscreenEditVisibilityChanged = { showAssetsFullscreenEditor = it },
+        onMonthPickerVisibilityChanged = { showMonthPickerOverlay = it },
+        onDashboardGetStartedVisibilityChanged = { showDashboardGetStarted = it },
+        openAssetsAddOnLaunch = openAssetsAddOnNextVisit,
+        onAssetsAddConsumed = { openAssetsAddOnNextVisit = false },
+    )
+    val navEntries = navigationState.toDecoratedEntries(entryProvider)
 
-        // Hide the bottom bar whenever a modal or fullscreen flow would compete for attention.
-        if (currentRoute != "categories" &&
-            currentRoute != "currency" &&
-            currentRoute != "language" &&
-            currentRoute != "theme" &&
-            currentRoute != "export-data" &&
-            currentRoute != "members" &&
-            currentRoute != "recurring" &&
-            currentRoute != "month-close" &&
-            !showDashboardGetStarted &&
-            !showMonthPickerOverlay &&
-            !showEntriesFullscreenEditor &&
-            !showAssetsFullscreenEditor
+    Box(modifier = Modifier.fillMaxSize()) {
+        // NavDisplay is now the production navigation host for the phone shell.
+        // The entries come from AppNavigationState rather than from a NavController-owned graph,
+        // which means the app now truly owns its back stack as recommended by Navigation 3.
+        NavDisplay(
+            entries = navEntries,
+            modifier = Modifier.matchParentSize(),
+            transitionSpec = {
+                ContentTransform(
+                    targetContentEnter = EnterTransition.None,
+                    initialContentExit = ExitTransition.None,
+                )
+            },
+            popTransitionSpec = {
+                ContentTransform(
+                    targetContentEnter = EnterTransition.None,
+                    initialContentExit = ExitTransition.None,
+                )
+            },
+            predictivePopTransitionSpec = { _: Int ->
+                ContentTransform(
+                    targetContentEnter = EnterTransition.None,
+                    initialContentExit = ExitTransition.None,
+                )
+            },
+            onBack = {
+                if (!navigationState.goBack()) {
+                    context.findActivity()?.finish()
+                }
+            }
+        )
+
+        // Bottom-bar visibility is now derived from typed navigation keys plus shell overlays.
+        if (shouldShowBottomBar(
+                currentKey = currentKey,
+                showDashboardGetStarted = showDashboardGetStarted,
+                showMonthPickerOverlay = showMonthPickerOverlay,
+                showEntriesFullscreenEditor = showEntriesFullscreenEditor,
+                showAssetsFullscreenEditor = showAssetsFullscreenEditor,
+            )
         ) {
             Box(
                 modifier = Modifier.matchParentSize(),
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 SummBottomBar(
-                    currentRoute = currentRoute,
-                    onNavigateDashboard = { navigatePrimary("dashboard") },
-                    onNavigateEntries = { navigatePrimary("entries") },
+                    selectedTab = navigationState.selectedTopLevel,
+                    onNavigateDashboard = { navigationState.selectTopLevel(DashboardKey) },
+                    onNavigateEntries = { navigationState.selectTopLevel(EntriesKey) },
                     onAddEntry = { showEntrySheet = true },
-                    onNavigateAssets = { navigatePrimary("assets") },
-                    onNavigateSettings = { navigatePrimary("settings") },
+                    onNavigateAssets = { navigationState.selectTopLevel(AssetsKey) },
+                    onNavigateSettings = { navigationState.selectTopLevel(SettingsKey) },
                 )
             }
         }
@@ -259,7 +190,7 @@ fun AppNavGraph(
     // Quick entry is a modal sheet above the shell, so dismissal must restore the sheet flag explicitly.
     if (showEntrySheet) {
         ModalBottomSheet(
-            onDismissRequest = {},
+            onDismissRequest = dismissEntrySheet,
             sheetState = sheetState,
             containerColor = Color.Transparent,
             dragHandle = null,
@@ -267,22 +198,29 @@ fun AppNavGraph(
         ) {
             QuickEntryScreen(
                 resolvedSessionState = readyState,
-                onDismiss = {
-                    scope.launch {
-                        allowEntrySheetHide = true
-                        sheetState.hide()
-                        showEntrySheet = false
-                        allowEntrySheetHide = false
-                    }
-                },
+                onDismiss = dismissEntrySheet,
             )
         }
     }
 }
 
+/**
+ * Walks up the Context chain until it finds an Activity.
+ *
+ * This is used only as the final fallback when Navigation 3 reports that the
+ * shell no longer wants to handle "back" (Dashboard root). At that point the
+ * correct behavior is to let the app screen finish.
+ */
+private tailrec fun android.content.Context.findActivity(): android.app.Activity? =
+    when (this) {
+        is android.app.Activity -> this
+        is android.content.ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
+
 @Composable
 private fun SummBottomBar(
-    currentRoute: String?,
+    selectedTab: TopLevelKey,
     onNavigateDashboard: () -> Unit,
     onNavigateEntries: () -> Unit,
     onAddEntry: () -> Unit,
@@ -310,14 +248,14 @@ private fun SummBottomBar(
             ) {
                 NavTab(
                     label = stringResource(R.string.dashboard_title),
-                    icon = if (currentRoute == "dashboard") Icons.Filled.BarChart else Icons.Outlined.BarChart,
-                    selected = currentRoute == "dashboard",
+                    icon = if (selectedTab == DashboardKey) Icons.Filled.BarChart else Icons.Outlined.BarChart,
+                    selected = selectedTab == DashboardKey,
                     onClick = onNavigateDashboard,
                 )
                 NavTab(
                     label = stringResource(R.string.entries_action_title),
-                    icon = if (currentRoute == "entries") Icons.Filled.Receipt else Icons.Outlined.Receipt,
-                    selected = currentRoute == "entries",
+                    icon = if (selectedTab == EntriesKey) Icons.Filled.Receipt else Icons.Outlined.Receipt,
+                    selected = selectedTab == EntriesKey,
                     onClick = onNavigateEntries,
                 )
                 NavTab(
@@ -328,14 +266,14 @@ private fun SummBottomBar(
                 )
                 NavTab(
                     label = stringResource(R.string.dashboard_assets_label),
-                    icon = if (currentRoute == "assets") Icons.Filled.Wallet else Icons.Outlined.Wallet,
-                    selected = currentRoute == "assets",
+                    icon = if (selectedTab == AssetsKey) Icons.Filled.Wallet else Icons.Outlined.Wallet,
+                    selected = selectedTab == AssetsKey,
                     onClick = onNavigateAssets,
                 )
                 NavTab(
                     label = stringResource(R.string.settings_title),
-                    icon = if (currentRoute == "settings") Icons.Filled.Settings else Icons.Outlined.Settings,
-                    selected = currentRoute == "settings",
+                    icon = if (selectedTab == SettingsKey) Icons.Filled.Settings else Icons.Outlined.Settings,
+                    selected = selectedTab == SettingsKey,
                     onClick = onNavigateSettings,
                 )
             }

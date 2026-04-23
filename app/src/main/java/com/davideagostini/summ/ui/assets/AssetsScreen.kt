@@ -594,8 +594,17 @@ private fun AssetsContent(
     // Fullscreen editor flows stay in their own overlay so the two presentations do
     // not compete for the same container.
     if ((uiState.sheetMode == AssetSheetMode.Action || uiState.sheetMode == AssetSheetMode.Success) && !showFullScreenEditor) {
+        val dismissSheet: () -> Unit = {
+            scope.launch {
+                allowSheetHide = true
+                sheetState.hide()
+                onEvent(AssetsEvent.DismissSheet)
+                allowSheetHide = false
+            }
+            Unit
+        }
         ModalBottomSheet(
-            onDismissRequest = {},
+            onDismissRequest = dismissSheet,
             sheetState = sheetState,
             containerColor = Color.Transparent,
             dragHandle = null,
@@ -610,14 +619,7 @@ private fun AssetsContent(
                     formatMonthLabel(selectedMonth),
                 ),
                 onEvent = onEvent,
-                onDismiss = {
-                    scope.launch {
-                        allowSheetHide = true
-                        sheetState.hide()
-                        onEvent(AssetsEvent.DismissSheet)
-                        allowSheetHide = false
-                    }
-                },
+                onDismiss = dismissSheet,
             )
         }
     }

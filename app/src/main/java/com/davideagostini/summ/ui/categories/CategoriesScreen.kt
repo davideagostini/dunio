@@ -170,8 +170,17 @@ private fun CategoriesContent(
 
     // The action state keeps the compact sheet presentation. Fullscreen editor states never render here.
     if ((uiState.sheetMode == CategorySheetMode.Action || uiState.sheetMode == CategorySheetMode.Success) && !showFullScreenEditor) {
+        val dismissSheet: () -> Unit = {
+            scope.launch {
+                allowSheetHide = true
+                sheetState.hide()
+                onEvent(CategoriesEvent.DismissSheet)
+                allowSheetHide = false
+            }
+            Unit
+        }
         ModalBottomSheet(
-            onDismissRequest = {},
+            onDismissRequest = dismissSheet,
             sheetState       = sheetState,
             containerColor   = Color.Transparent,
             dragHandle       = null,
@@ -180,14 +189,7 @@ private fun CategoriesContent(
             CategoryActionSheet(
                 uiState = uiState,
                 onEvent = onEvent,
-                onDismiss = {
-                    scope.launch {
-                        allowSheetHide = true
-                        sheetState.hide()
-                        onEvent(CategoriesEvent.DismissSheet)
-                        allowSheetHide = false
-                    }
-                },
+                onDismiss = dismissSheet,
             )
         }
     }
