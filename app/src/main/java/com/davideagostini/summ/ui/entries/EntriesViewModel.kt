@@ -381,8 +381,7 @@ class EntriesViewModel @Inject constructor(
             EntriesEvent.StartEdit -> {
                 val entry = _uiState.value.selectedEntry ?: return
                 val cat = categories.value.firstOrNull { category ->
-                    category.type == entry.type &&
-                        (category.systemKey == entry.categoryKey || category.name == entry.category)
+                    category.systemKey == entry.categoryKey || category.name == entry.category
                 }
                 _uiState.update {
                     it.copy(
@@ -404,7 +403,6 @@ class EntriesViewModel @Inject constructor(
             is EntriesEvent.UpdateType -> _uiState.update {
                 it.copy(
                     editType = event.value,
-                    editCategory = it.editCategory?.takeIf { category -> category.type == event.value },
                     operationErrorMessage = null,
                 )
             }

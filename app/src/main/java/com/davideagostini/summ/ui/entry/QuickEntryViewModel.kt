@@ -77,9 +77,8 @@ class QuickEntryViewModel @Inject constructor(
     val categories: StateFlow<List<Category>> = combine(
         allCategories,
         uiState.map { state -> state.type },
-    ) { categories, type ->
-        categories.filter { category -> category.type == type }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    ) { categories, _ -> categories }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val mostUsedCategories: StateFlow<List<Category>> = combine(
         sessionRepository.sessionState,

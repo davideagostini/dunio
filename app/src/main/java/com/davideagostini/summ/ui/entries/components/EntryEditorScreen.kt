@@ -260,7 +260,7 @@ private fun EntryEditForm(
                 )
                 Spacer(Modifier.height(6.dp))
             }
-            val availableCategories = categories.filter { category -> category.type == uiState.editType }
+            val availableCategories = categories
             val mostUsedStableIds = mostUsedCategories.map { category -> category.stableUsageId() }.toSet()
             val allCategories = availableCategories.filterNot { category -> category.stableUsageId() in mostUsedStableIds }
 
