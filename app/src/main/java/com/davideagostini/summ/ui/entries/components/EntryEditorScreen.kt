@@ -177,8 +177,8 @@ private fun EntryEditForm(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     listOf(
-                        "income" to stringResource(R.string.entry_type_income),
                         "expense" to stringResource(R.string.entry_type_expense),
+                        "income" to stringResource(R.string.entry_type_income),
                     ).forEach { (value, label) ->
                         val selected = uiState.editType == value
                         val color = if (value == "income") IncomeGreen else ExpenseRed
