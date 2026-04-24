@@ -169,11 +169,9 @@ class EntriesViewModel @Inject constructor(
 
     val isLoading: StateFlow<Boolean> = combine(
         entriesLoaded,
-        hasAnyEntriesLoaded,
-        categoriesLoaded,
-        monthClosesLoaded,
-    ) { entriesReady, hasAnyEntriesReady, categoriesReady, monthClosesReady ->
-        !entriesReady || !hasAnyEntriesReady || !categoriesReady || !monthClosesReady
+        monthEntries,
+    ) { entriesReady, entries ->
+        !entriesReady && entries.isEmpty()
     }.stateIn(viewModelScope, sharingStarted, true)
 
     private data class EntriesSourceState(
