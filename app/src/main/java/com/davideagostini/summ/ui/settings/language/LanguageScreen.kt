@@ -126,6 +126,7 @@ fun LanguageScreen(
                     onClick = {
                         val language = pendingSelection ?: return@TextButton
                         AppLanguageManager.setLanguage(context, language)
+                        onBack()
                         showApplyDialog = false
                         pendingSelection = null
                         context.findActivity()?.recreate()
