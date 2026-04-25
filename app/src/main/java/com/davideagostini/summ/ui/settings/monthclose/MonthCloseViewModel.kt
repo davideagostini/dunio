@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.AssetHistoryEntry
-import com.davideagostini.summ.data.entity.RecurringTransaction
 import com.davideagostini.summ.data.repository.AssetRepository
 import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.repository.MonthCloseRepository
@@ -69,7 +68,11 @@ class MonthCloseViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     val uiState: StateFlow<MonthCloseUiState> = combine(
-        selectedMonth, assetHistory, entries, recurringTransactions, monthCloses
+        selectedMonth,
+        assetHistory,
+        entries,
+        recurringTransactions,
+        monthCloses,
     ) { month, history, transactions, recurring, closes ->
         val monthAssets = history.buildAssetsSnapshotForMonth(month)
         val monthTransactions = transactions.filter { it.period.ifBlank { it.date.toMonthKey() } == month }
@@ -87,11 +90,6 @@ class MonthCloseViewModel @Inject constructor(
 
         MonthCloseUiState(
             month = month,
-            monthOptions = buildMonthOptions(
-                recurring = recurring,
-                monthCloses = closes,
-                selectedMonth = month,
-            ),
             status = existingClose?.status ?: "draft",
             assetSnapshotCount = monthAssets.size,
             transactionCount = monthTransactions.size,
@@ -121,20 +119,6 @@ class MonthCloseViewModel @Inject constructor(
             )
         }
     }
-}
-
-private fun buildMonthOptions(
-    recurring: List<RecurringTransaction>,
-    monthCloses: List<com.davideagostini.summ.data.entity.MonthClose>,
-    selectedMonth: String,
-): List<String> {
-    val months = mutableSetOf<String>()
-    months += recurring.map { it.startDate.take(7) }
-    months += monthCloses.map { it.period }
-    months += selectedMonth
-    val current = YearMonth.parse(selectedMonth)
-    repeat(12) { index -> months += current.minusMonths(index.toLong()).toString() }
-    return months.filter { it.isNotBlank() }.sortedDescending()
 }
 
 private fun List<AssetHistoryEntry>.buildAssetsSnapshotForMonth(month: String) =

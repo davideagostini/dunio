@@ -45,6 +45,7 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.components.FullScreenLoading
 import com.davideagostini.summ.ui.components.MonthPickerField
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
+import com.davideagostini.summ.ui.components.MonthPickerViewModel
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -65,8 +66,10 @@ fun MonthCloseScreen(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
     viewModel: MonthCloseViewModel = hiltViewModel(),
 ) {
+    val monthPickerViewModel: MonthPickerViewModel = hiltViewModel()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val monthOptions by monthPickerViewModel.monthOptions.collectAsStateWithLifecycle()
 
     if (isLoading) {
         FullScreenLoading()
@@ -75,6 +78,7 @@ fun MonthCloseScreen(
 
     MonthCloseContent(
         uiState = uiState,
+        monthOptions = monthOptions,
         onBack = onBack,
         onSelectMonth = viewModel::selectMonth,
         onSetStatus = viewModel::setStatus,
@@ -86,6 +90,7 @@ fun MonthCloseScreen(
 @Composable
 private fun MonthCloseContent(
     uiState: MonthCloseUiState,
+    monthOptions: List<String>,
     onBack: () -> Unit,
     onSelectMonth: (String) -> Unit,
     onSetStatus: (String) -> Unit,
@@ -272,7 +277,7 @@ private fun MonthCloseContent(
         MonthPickerOverlay(
             visible = showMonthPicker,
             selectedOption = uiState.month,
-            options = uiState.monthOptions,
+            options = monthOptions,
             optionLabel = ::formatMonthOption,
             onSelect = onSelectMonth,
             onDismiss = { showMonthPicker = false },

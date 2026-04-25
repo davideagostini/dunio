@@ -22,6 +22,8 @@ class DashboardMonthlyRepository @Inject constructor(
 
     fun observeLatestSummary(): Flow<DashboardMonthlySummary?> = dao.observeLatestSummary()
 
+    fun observeEarliestSummary(): Flow<DashboardMonthlySummary?> = dao.observeEarliestSummary()
+
     fun observeRecentSummaries(limit: Long = 12L): Flow<List<DashboardMonthlySummary>> =
         dao.observeRecentSummaries(limit)
 

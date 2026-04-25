@@ -69,6 +69,7 @@ import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
+import com.davideagostini.summ.ui.components.MonthPickerViewModel
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.entries.components.BalanceCard
@@ -135,10 +136,12 @@ fun EntriesScreen(
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit = {},
     onMonthPickerVisibilityChanged: (Boolean) -> Unit = {},
 ) {
+    val monthPickerViewModel: MonthPickerViewModel = hiltViewModel()
     // The screen stays thin: it only observes immutable state and forwards callbacks to the ViewModel.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
     val isReportRefreshing by viewModel.isReportRefreshing.collectAsStateWithLifecycle()
+    val monthOptions by monthPickerViewModel.monthOptions.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val mostUsedEditCategories by viewModel.mostUsedEditCategories.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
@@ -148,7 +151,7 @@ fun EntriesScreen(
 
     if (isLoading) {
         EntriesLoadingContent(
-            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(buildRecentMonthOptions()),
+            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(monthOptions),
             uiState = uiState,
         )
         return
@@ -163,6 +166,7 @@ fun EntriesScreen(
         uiState = uiState,
         isMonthRefreshing = isMonthRefreshing,
         isReportRefreshing = isReportRefreshing,
+        monthOptions = monthOptions,
         onEvent = onEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
@@ -403,6 +407,7 @@ internal fun EntriesContent(
     uiState: EntriesUiState,
     isMonthRefreshing: Boolean,
     isReportRefreshing: Boolean,
+    monthOptions: List<String>,
     onEvent: (EntriesEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
@@ -417,7 +422,6 @@ internal fun EntriesContent(
         skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden || allowSheetHide },
     )
-    val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = renderState.selectedMonth
     val isMonthClosed = renderState.isMonthClosed
     val unusualSpendingInsights = renderState.unusualSpendingInsights

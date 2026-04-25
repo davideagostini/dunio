@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -31,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -40,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.theme.listItemShape
+import java.time.YearMonth
 
 @Composable
 fun MonthPickerField(
@@ -115,6 +121,17 @@ fun MonthPickerOverlay(
         ),
         modifier = modifier.fillMaxSize(),
     ) {
+        val sections = remember(options) { buildMonthPickerSections(options) }
+        val listState = rememberLazyListState()
+        LaunchedEffect(selectedOption, sections) {
+            val selectedSectionIndex = sections.indexOfFirst { section ->
+                section.months.any { it == selectedOption }
+            }
+            if (selectedSectionIndex >= 0) {
+                listState.scrollToItem(selectedSectionIndex)
+            }
+        }
+
         // Keep the whole overlay on a themed surface so title text and icons inherit the dark-mode palette.
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -148,47 +165,78 @@ fun MonthPickerOverlay(
                     }
                 }
 
-                options.forEachIndexed { index, option ->
-                    // Top/bottom padding changes based on position so the list reads like a grouped sheet.
-                    val verticalPadding = when {
-                        options.size == 1 -> PaddingValues(horizontal = 16.dp, vertical = 4.dp)
-                        index == 0 -> PaddingValues(top = 4.dp, bottom = 1.dp)
-                        index == options.lastIndex -> PaddingValues(top = 1.dp, bottom = 4.dp)
-                        else -> PaddingValues(vertical = 1.dp)
-                    }
-                    val isSelected = option == selectedOption
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    items(
+                        items = sections,
+                        key = { section -> "year:${section.year}" },
+                    ) { section ->
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                text = section.year.toString(),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                            )
 
-                    // The month options follow the app surface palette so they stay readable in dark mode.
-                    Card(
-                        onClick = {
-                            onSelect(option)
-                            onDismiss()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(verticalPadding),
-                        shape = listItemShape(index, options.size),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                        ),
-                        border = if (isSelected) {
-                            BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-                        } else {
-                            null
-                        },
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    ) {
-                        Text(
-                            text = optionLabel(option),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                        )
+                            section.months.forEachIndexed { index, option ->
+                                val isSelected = option == selectedOption
+                                Card(
+                                    onClick = {
+                                        onSelect(option)
+                                        onDismiss()
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = listItemShape(index, section.months.size),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        contentColor = MaterialTheme.colorScheme.onSurface,
+                                    ),
+                                    border = if (isSelected) {
+                                        BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                                    } else {
+                                        null
+                                    },
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                ) {
+                                    Text(
+                                        text = optionLabel(option),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
+
+private data class MonthPickerYearSection(
+    val year: Int,
+    val months: List<String>,
+)
+
+private fun buildMonthPickerSections(options: List<String>): List<MonthPickerYearSection> =
+    options
+        .groupBy { YearMonth.parse(it).year }
+        .map { (year, months) ->
+            MonthPickerYearSection(
+                year = year,
+                months = months,
+            )
+        }

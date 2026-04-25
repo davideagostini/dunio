@@ -71,6 +71,7 @@ import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.components.DeleteConfirmationDialog
 import com.davideagostini.summ.ui.components.MonthCloseReadOnlyBanner
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
+import com.davideagostini.summ.ui.components.MonthPickerViewModel
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import kotlinx.coroutines.launch
@@ -128,10 +129,12 @@ fun AssetsScreen(
     openAddOnLaunch: Boolean = false,
     onOpenAddConsumed: () -> Unit = {},
 ) {
+    val monthPickerViewModel: MonthPickerViewModel = hiltViewModel()
     // Collect the feature state with lifecycle awareness so the UI only observes
     // active screens and avoids leaking recompositions in the background.
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
+    val monthOptions by monthPickerViewModel.monthOptions.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -147,6 +150,7 @@ fun AssetsScreen(
         renderState = renderState,
         uiState = uiState,
         isMonthRefreshing = isMonthRefreshing,
+        monthOptions = monthOptions,
         onEvent = viewModel::handleEvent,
         onFullscreenEditVisibilityChanged = onFullscreenEditVisibilityChanged,
         onMonthPickerVisibilityChanged = onMonthPickerVisibilityChanged,
@@ -391,6 +395,7 @@ private fun AssetsContent(
     renderState: AssetsRenderState,
     uiState: AssetsUiState,
     isMonthRefreshing: Boolean,
+    monthOptions: List<String>,
     onEvent: (AssetsEvent) -> Unit,
     onFullscreenEditVisibilityChanged: (Boolean) -> Unit,
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
@@ -407,7 +412,6 @@ private fun AssetsContent(
         skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden || allowSheetHide },
     )
-    val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = renderState.selectedMonth.ifBlank { preferredRecentMonth(monthOptions) }
     val isMonthClosed = renderState.isMonthClosed
     val shimmer = rememberAssetsShimmerBrush()

@@ -111,6 +111,32 @@ class DashboardMonthlyDao @Inject constructor(
         }
     }
 
+    fun observeEarliestSummary(): Flow<DashboardMonthlySummary?> {
+        val db = firestore ?: return flowOf(null)
+        return sessionRepository.sessionState.flatMapLatest { sessionState ->
+            val readyState = sessionState as? SessionState.Ready
+            if (readyState == null) {
+                flowOf(null)
+            } else {
+                firestoreFlow<DashboardMonthlySummary?> { emit ->
+                    db.collection(FirestorePaths.dashboardMonthly(readyState.household.id))
+                        .orderBy("period", Query.Direction.ASCENDING)
+                        .limit(1)
+                        .addSnapshotListener(FirestoreExecutors.listenerExecutor) { snapshot, error ->
+                            when {
+                                error != null -> emit(Result.failure(error))
+                                snapshot != null -> {
+                                    val summary = snapshot.documents.firstOrNull()?.toObject(DashboardMonthlyDocument::class.java)
+                                        ?.toSummary()
+                                    emit(Result.success(summary))
+                                }
+                            }
+                        }
+                }.map { result -> result.getOrElse { null } }
+            }
+        }
+    }
+
     fun observeRecentSummaries(limit: Long = 12L): Flow<List<DashboardMonthlySummary>> {
         val db = firestore ?: return flowOf(emptyList())
         return sessionRepository.sessionState.flatMapLatest { sessionState ->

@@ -43,7 +43,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.components.MonthPickerOverlay
-import com.davideagostini.summ.ui.components.buildRecentMonthOptions
+import com.davideagostini.summ.ui.components.MonthPickerViewModel
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.dashboard.components.DashboardToolbar
 import com.davideagostini.summ.ui.dashboard.components.GetStartedScreen
@@ -69,14 +69,16 @@ fun DashboardScreen(
     onOpenNewAsset: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
+    val monthPickerViewModel: MonthPickerViewModel = hiltViewModel()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isMonthRefreshing by viewModel.isMonthRefreshing.collectAsStateWithLifecycle()
+    val monthOptions by monthPickerViewModel.monthOptions.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val renderState by viewModel.renderState.collectAsStateWithLifecycle()
 
     if (isLoading) {
         DashboardLoadingContent(
-            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(buildRecentMonthOptions()),
+            selectedMonth = uiState.selectedMonth ?: preferredRecentMonth(monthOptions),
         )
         return
     }
@@ -85,6 +87,7 @@ fun DashboardScreen(
         renderState = renderState,
         uiState = uiState,
         isMonthRefreshing = isMonthRefreshing,
+        monthOptions = monthOptions,
         onSelectMonth = viewModel::selectMonth,
         onSelectRange = viewModel::selectRange,
         onDismissGetStarted = viewModel::dismissGetStarted,
@@ -284,6 +287,7 @@ private fun DashboardContent(
     renderState: DashboardRenderState,
     uiState: DashboardUiState,
     isMonthRefreshing: Boolean,
+    monthOptions: List<String>,
     onSelectMonth: (String) -> Unit,
     onSelectRange: (DashboardRange) -> Unit,
     onDismissGetStarted: () -> Unit,
@@ -293,7 +297,6 @@ private fun DashboardContent(
     onMonthPickerVisibilityChanged: (Boolean) -> Unit,
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
-    val monthOptions = remember { buildRecentMonthOptions() }
     val selectedMonth = renderState.selectedMonth
 
     // Keep the shared bottom bar hidden while the month picker overlay is open.
