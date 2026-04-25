@@ -2,6 +2,7 @@ package com.davideagostini.summ.ui.settings.recurring
 
 import androidx.compose.runtime.Immutable
 import com.davideagostini.summ.data.entity.RecurringTransaction
+import com.davideagostini.summ.ui.format.currentLocalStartOfDayMillis
 
 enum class RecurringSheetMode { Hidden, Action, Add, Edit }
 
@@ -17,7 +18,7 @@ data class RecurringUiState(
     val category: String = "",
     val categoryKey: String? = null,
     val dayOfMonth: String = "1",
-    val startDate: Long = System.currentTimeMillis(),
+    val startDate: Long = currentLocalStartOfDayMillis(),
     val active: Boolean = true,
     val descriptionError: String? = null,
     val amountError: String? = null,

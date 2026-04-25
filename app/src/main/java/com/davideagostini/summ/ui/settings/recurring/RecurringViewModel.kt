@@ -11,6 +11,7 @@ import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
+import com.davideagostini.summ.ui.format.currentLocalStartOfDayMillis
 import com.davideagostini.summ.ui.format.formatEditableAmount
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -105,7 +106,7 @@ class RecurringViewModel @Inject constructor(
                     category = "",
                     categoryKey = null,
                     dayOfMonth = "1",
-                    startDate = System.currentTimeMillis(),
+                    startDate = currentLocalStartOfDayMillis(),
                     active = true,
                     descriptionError = null,
                     amountError = null,

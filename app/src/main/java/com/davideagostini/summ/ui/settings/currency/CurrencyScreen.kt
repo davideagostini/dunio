@@ -102,20 +102,17 @@ fun CurrencyScreen(
             }
         }
     }
-    val selectedCurrencyCode = normalizeCurrencyCode(selectedCurrency)
-    val orderedOptions = remember(filteredOptions, selectedCurrencyCode) {
-        filteredOptions.sortedWith(
-            compareByDescending<CurrencyOption> { it.code == selectedCurrencyCode }
-                .thenBy { it.displayName.lowercase(Locale.getDefault()) }
-                .thenBy { it.code }
-        )
+    val selectedCurrencyCode = normalizeCurrencyCode(pendingSelection ?: selectedCurrency)
+    LaunchedEffect(errorMessage) {
+        if (!errorMessage.isNullOrBlank()) {
+            pendingSelection = null
+        }
     }
 
     LaunchedEffect(selectedCurrency, isUpdatingCurrency, errorMessage, pendingSelection) {
         val currentPending = pendingSelection ?: return@LaunchedEffect
         if (!isUpdatingCurrency && errorMessage == null && normalizeCurrencyCode(selectedCurrency) == currentPending) {
             pendingSelection = null
-            onBack()
         }
     }
 
@@ -148,7 +145,7 @@ fun CurrencyScreen(
         )
 
         CurrencyListSection(
-            options = orderedOptions,
+            options = filteredOptions,
             selectedCurrencyCode = selectedCurrencyCode,
             isUpdatingCurrency = isUpdatingCurrency,
             onSelectCurrency = { currencyCode ->

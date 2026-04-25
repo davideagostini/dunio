@@ -170,6 +170,8 @@
     <string name="settings_language_title">Idioma</string>
     <string name="settings_language_subtitle">Idioma de la app: %1$s</string>
     <string name="settings_language_screen_message">Elige el idioma utilizado en la app. La opción activa se resalta en la lista.</string>
+    <string name="settings_language_restart_title">¿Aplicar el cambio de idioma?</string>
+    <string name="settings_language_restart_message">La app necesita refrescarse para aplicar este cambio de idioma. ¿Continuar?</string>
     <string name="settings_theme_title">Tema</string>
     <string name="settings_theme_subtitle">Tema de la app: %1$s</string>
     <string name="settings_theme_screen_message">Elige cómo debe verse la app. La opción activa se resalta en la lista.</string>

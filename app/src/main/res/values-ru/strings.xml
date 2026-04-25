@@ -170,6 +170,8 @@
     <string name="settings_language_title">Язык</string>
     <string name="settings_language_subtitle">Язык приложения: %1$s</string>
     <string name="settings_language_screen_message">Выберите язык приложения. Активный язык выделяется в списке.</string>
+    <string name="settings_language_restart_title">Применить изменение языка?</string>
+    <string name="settings_language_restart_message">Для применения этого изменения языка приложению нужно обновиться. Продолжить?</string>
     <string name="settings_theme_title">Тема</string>
     <string name="settings_theme_subtitle">Тема приложения: %1$s</string>
     <string name="settings_theme_screen_message">Выберите внешний вид приложения. Активная тема выделяется в списке.</string>

@@ -170,6 +170,8 @@
     <string name="settings_language_title">语言</string>
     <string name="settings_language_subtitle">应用语言：%1$s</string>
     <string name="settings_language_screen_message">选择应用中使用的语言。当前选项会在列表中高亮显示。</string>
+    <string name="settings_language_restart_title">应用语言更改？</string>
+    <string name="settings_language_restart_message">应用需要刷新才能应用此语言更改。继续吗？</string>
     <string name="settings_theme_title">主题</string>
     <string name="settings_theme_subtitle">应用主题：%1$s</string>
     <string name="settings_theme_screen_message">选择应用的显示方式。当前选项会在列表中高亮显示。</string>

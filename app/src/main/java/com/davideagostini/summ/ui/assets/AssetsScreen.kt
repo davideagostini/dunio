@@ -581,6 +581,7 @@ private fun AssetsContent(
             onCopyPreviousMonth = { if (!isMonthClosed) onEvent(AssetsEvent.CopyPreviousMonth) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
                 .padding(end = 16.dp, bottom = 94.dp),
         )
 

@@ -170,6 +170,8 @@
     <string name="settings_language_title">اللغة</string>
     <string name="settings_language_subtitle">لغة التطبيق: %1$s</string>
     <string name="settings_language_screen_message">اختر اللغة المستخدمة في التطبيق. يتم تمييز الخيار النشط داخل القائمة.</string>
+    <string name="settings_language_restart_title">تطبيق تغيير اللغة؟</string>
+    <string name="settings_language_restart_message">تحتاج التطبيق إلى إعادة التحميل لتطبيق تغيير اللغة هذا. هل تريد المتابعة؟</string>
     <string name="settings_theme_title">المظهر</string>
     <string name="settings_theme_subtitle">مظهر التطبيق: %1$s</string>
     <string name="settings_theme_screen_message">اختر كيف يجب أن يظهر التطبيق. يتم تمييز الخيار النشط داخل القائمة.</string>

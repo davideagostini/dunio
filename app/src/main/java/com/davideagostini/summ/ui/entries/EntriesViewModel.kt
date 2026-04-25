@@ -20,6 +20,7 @@ import com.davideagostini.summ.domain.model.EntryDisplayItem
 import com.davideagostini.summ.ui.components.buildRecentMonthOptions
 import com.davideagostini.summ.ui.components.preferredRecentMonth
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
+import com.davideagostini.summ.ui.format.currentLocalStartOfDayMillis
 import com.davideagostini.summ.ui.format.formatEditableAmount
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -528,7 +529,7 @@ class EntriesViewModel @Inject constructor(
             editType = "expense",
             editDescription = "",
             editPrice = "",
-            editDate = System.currentTimeMillis(),
+            editDate = currentLocalStartOfDayMillis(),
             editCategory = null,
             descriptionError = null,
             priceError = null,

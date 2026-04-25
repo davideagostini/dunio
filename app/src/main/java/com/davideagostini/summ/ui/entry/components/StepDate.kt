@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
 import com.davideagostini.summ.ui.entry.EntryEvent
 import com.davideagostini.summ.ui.entry.EntryUiState
+import com.davideagostini.summ.ui.format.datePickerMillisToLocalStartOfDayMillis
+import com.davideagostini.summ.ui.format.localStartOfDayMillisToDatePickerMillis
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,7 +33,9 @@ import java.util.Locale
 @Composable
 internal fun StepDate(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.date)
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = localStartOfDayMillisToDatePickerMillis(uiState.date),
+    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         StepTitle(stringResource(R.string.entry_step_date_title))
@@ -58,7 +62,9 @@ internal fun StepDate(uiState: EntryUiState, onEvent: (EntryEvent) -> Unit) {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        datePickerState.selectedDateMillis?.let { onEvent(EntryEvent.UpdateDate(it)) }
+                        datePickerState.selectedDateMillis?.let {
+                            onEvent(EntryEvent.UpdateDate(datePickerMillisToLocalStartOfDayMillis(it)))
+                        }
                         showDatePicker = false
                     },
                     shape = AppButtonShape,

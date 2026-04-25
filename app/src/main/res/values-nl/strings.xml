@@ -170,6 +170,8 @@
     <string name="settings_language_title">Taal</string>
     <string name="settings_language_subtitle">Apptaal: %1$s</string>
     <string name="settings_language_screen_message">Kies de taal die in de app wordt gebruikt. De actieve keuze wordt in de lijst gemarkeerd.</string>
+    <string name="settings_language_restart_title">Taalwijziging toepassen?</string>
+    <string name="settings_language_restart_message">De app moet opnieuw laden om deze taalwijziging toe te passen. Doorgaan?</string>
     <string name="settings_theme_title">Thema</string>
     <string name="settings_theme_subtitle">Appthema: %1$s</string>
     <string name="settings_theme_screen_message">Kies hoe de app eruit moet zien. De actieve keuze wordt in de lijst gemarkeerd.</string>

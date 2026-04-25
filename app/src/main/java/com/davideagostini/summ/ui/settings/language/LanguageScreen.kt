@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,9 +29,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -56,8 +59,11 @@ fun LanguageScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
+    var pendingSelection by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var showApplyDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     val selectedLanguage by AppLanguageManager.currentLanguage.collectAsStateWithLifecycle()
     val orderedOptions = AppLanguageManager.supportedLanguages
+    val selectedLanguageTag = pendingSelection ?: selectedLanguage.tag
 
     Column(
         modifier = Modifier
@@ -93,18 +99,52 @@ fun LanguageScreen(
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             itemsIndexed(orderedOptions, key = { _, option -> option.tag }) { index, option ->
-                LanguageListItem(
+        LanguageListItem(
                     option = option,
                     index = index,
                     count = orderedOptions.size,
-                    isSelected = option.tag == selectedLanguage.tag,
+                    isSelected = option.tag == selectedLanguageTag,
                     onClick = {
-                        AppLanguageManager.setLanguage(context, option.tag)
-                        context.findActivity()?.recreate()
+                        pendingSelection = option.tag
+                        showApplyDialog = true
                     },
                 )
             }
         }
+    }
+
+    if (showApplyDialog && pendingSelection != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showApplyDialog = false
+                pendingSelection = null
+            },
+            title = { Text(stringResource(R.string.settings_language_restart_title)) },
+            text = { Text(stringResource(R.string.settings_language_restart_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val language = pendingSelection ?: return@TextButton
+                        AppLanguageManager.setLanguage(context, language)
+                        showApplyDialog = false
+                        pendingSelection = null
+                        context.findActivity()?.recreate()
+                    },
+                ) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showApplyDialog = false
+                        pendingSelection = null
+                    },
+                ) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
     }
 }
 

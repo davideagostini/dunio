@@ -37,6 +37,7 @@ import com.davideagostini.summ.ui.dashboard.ChartPoint
 import com.davideagostini.summ.ui.dashboard.DashboardRange
 import com.davideagostini.summ.ui.dashboard.formatMonthOption
 import com.davideagostini.summ.ui.dashboard.formatPercent
+import com.davideagostini.summ.ui.format.currencySymbol
 import com.davideagostini.summ.ui.format.formatCurrency
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -130,6 +131,7 @@ fun NetWorthCard(
             Spacer(Modifier.height(20.dp))
             NetWorthChart(
                 points = chartPoints,
+                currency = currency,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp),
@@ -221,6 +223,7 @@ fun MetricCard(
 @Composable
 private fun NetWorthChart(
     points: List<ChartPoint>,
+    currency: String,
     modifier: Modifier = Modifier,
 ) {
     if (points.isEmpty()) {
@@ -252,11 +255,11 @@ private fun NetWorthChart(
             labels.getOrElse(value.toInt().coerceIn(0, labels.lastIndex)) { labels.first() }
         }
     }
-    val startAxisFormatter = remember {
+    val startAxisFormatter = remember(currency) {
         CartesianValueFormatter.decimal(
             decimalCount = 2,
             thousandsSeparator = ",",
-            prefix = "€",
+            prefix = currencySymbol(currency),
         )
     }
     val chartTheme = rememberM3VicoTheme(

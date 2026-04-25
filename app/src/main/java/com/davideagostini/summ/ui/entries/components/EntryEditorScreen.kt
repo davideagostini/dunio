@@ -59,6 +59,8 @@ import com.davideagostini.summ.ui.entries.EntriesEvent
 import com.davideagostini.summ.ui.entries.EntriesUiState
 import com.davideagostini.summ.ui.entries.EntrySheetMode
 import com.davideagostini.summ.ui.format.currencySymbol
+import com.davideagostini.summ.ui.format.datePickerMillisToLocalStartOfDayMillis
+import com.davideagostini.summ.ui.format.localStartOfDayMillisToDatePickerMillis
 import com.davideagostini.summ.ui.theme.AppButtonShape
 import com.davideagostini.summ.ui.theme.ExpenseRed
 import com.davideagostini.summ.ui.theme.IncomeGreen
@@ -138,7 +140,9 @@ private fun EntryEditForm(
     onCancel: () -> Unit,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.editDate)
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = localStartOfDayMillisToDatePickerMillis(uiState.editDate),
+    )
     val controlsEnabled = !readOnly && !uiState.isSaving
     val cancelEnabled = !uiState.isSaving
 
@@ -339,7 +343,9 @@ private fun EntryEditForm(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        datePickerState.selectedDateMillis?.let { onEvent(EntriesEvent.UpdateDate(it)) }
+                        datePickerState.selectedDateMillis?.let {
+                            onEvent(EntriesEvent.UpdateDate(datePickerMillisToLocalStartOfDayMillis(it)))
+                        }
                         showDatePicker = false
                     },
                     shape = AppButtonShape,

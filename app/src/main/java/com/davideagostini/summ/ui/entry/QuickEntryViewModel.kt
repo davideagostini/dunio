@@ -13,6 +13,7 @@ import com.davideagostini.summ.data.repository.CategoryUsageRepository
 import com.davideagostini.summ.data.repository.EntryRepository
 import com.davideagostini.summ.data.session.SessionRepository
 import com.davideagostini.summ.data.session.SessionState
+import com.davideagostini.summ.ui.format.currentLocalStartOfDayMillis
 import com.davideagostini.summ.ui.format.parseAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,7 +41,7 @@ import javax.inject.Inject
 data class EntryUiState(
     val step: Int                   = 0,
     val type: String                = "expense",
-    val date: Long                  = System.currentTimeMillis(),
+    val date: Long                  = currentLocalStartOfDayMillis(),
     val description: String         = "",
     val price: String               = "",
     val selectedCategory: Category? = null,

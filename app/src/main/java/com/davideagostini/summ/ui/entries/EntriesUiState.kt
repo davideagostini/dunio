@@ -3,6 +3,7 @@ package com.davideagostini.summ.ui.entries
 import androidx.compose.runtime.Immutable
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.domain.model.EntryDisplayItem
+import com.davideagostini.summ.ui.format.currentLocalStartOfDayMillis
 
 enum class EntrySheetMode { Hidden, Action, Edit, Success }
 enum class EntriesFilterType { All, Expenses, Income }
@@ -20,7 +21,7 @@ data class EntriesUiState(
     val editType: String              = "expense",
     val editDescription: String       = "",
     val editPrice: String             = "",
-    val editDate: Long                = System.currentTimeMillis(),
+    val editDate: Long                = currentLocalStartOfDayMillis(),
     val editCategory: Category?       = null,
     val descriptionError: String?     = null,
     val priceError: String?           = null,

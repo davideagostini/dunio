@@ -62,7 +62,9 @@ import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.ui.auth.components.AuthErrorCard
 import com.davideagostini.summ.ui.format.currencySymbol
+import com.davideagostini.summ.ui.format.datePickerMillisToLocalStartOfDayMillis
 import com.davideagostini.summ.ui.format.formatCurrency
+import com.davideagostini.summ.ui.format.localStartOfDayMillisToDatePickerMillis
 import com.davideagostini.summ.ui.settings.recurring.RecurringEvent
 import com.davideagostini.summ.ui.settings.recurring.RecurringSheetMode
 import com.davideagostini.summ.ui.settings.recurring.RecurringUiState
@@ -85,7 +87,9 @@ internal fun RecurringSheet(
     fullScreen: Boolean = false,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.startDate)
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = localStartOfDayMillisToDatePickerMillis(uiState.startDate),
+    )
     val containerModifier = if (fullScreen) {
         Modifier
             .fillMaxSize()
@@ -343,10 +347,15 @@ internal fun RecurringSheet(
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { onEvent(RecurringEvent.UpdateStartDate(it)) }
-                    showDatePicker = false
-                }, shape = AppButtonShape) { Text(stringResource(R.string.action_ok)) }
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            onEvent(RecurringEvent.UpdateStartDate(datePickerMillisToLocalStartOfDayMillis(it)))
+                        }
+                        showDatePicker = false
+                    },
+                    shape = AppButtonShape,
+                ) { Text(stringResource(R.string.action_ok)) }
             },
             dismissButton = { TextButton(onClick = { showDatePicker = false }, shape = AppButtonShape) { Text(stringResource(R.string.action_cancel)) } },
         ) { DatePicker(state = datePickerState) }
