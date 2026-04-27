@@ -106,6 +106,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">rispetto al mese precedente</string>
     <string name="widget_open_app">Apri app</string>
+    <string name="recurring_debug_tools">Strumenti debug</string>
+    <string name="recurring_debug_tools_subtitle">Usa solo durante i test.</string>
+    <string name="recurring_debug_apply_now">Esegui ora</string>
     <string name="widget_sign_in_required">Accedi per caricare i dati del nucleo familiare.</string>
     <string name="widget_household_required">Crea o unisciti a un nucleo familiare per usare questo widget.</string>
     <string name="widget_loading_error">Impossibile caricare i dati del widget.</string>

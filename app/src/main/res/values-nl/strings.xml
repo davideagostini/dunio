@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">ten opzichte van vorige maand</string>
     <string name="widget_open_app">App openen</string>
+    <string name="recurring_debug_tools">Debugtools</string>
+    <string name="recurring_debug_tools_subtitle">Alleen gebruiken tijdens testen.</string>
+    <string name="recurring_debug_apply_now">Nu uitvoeren</string>
     <string name="widget_sign_in_required">Log in om huishoudgegevens te laden.</string>
     <string name="widget_household_required">Maak een huishouden aan of sluit je aan om deze widget te gebruiken.</string>
     <string name="widget_loading_error">Widgetgegevens konden niet worden geladen.</string>

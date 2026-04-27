@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.davideagostini.summ.BuildConfig
 import com.davideagostini.summ.R
 import com.davideagostini.summ.data.entity.Category
 import com.davideagostini.summ.data.entity.RecurringTransaction
@@ -224,6 +225,39 @@ private fun RecurringContent(
                 }
             }
 
+            if (BuildConfig.DEBUG) {
+                item {
+                    Card(
+                        shape = RoundedCornerShape(22.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.recurring_debug_tools),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Text(
+                                    stringResource(R.string.recurring_debug_tools_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            TextButton(onClick = { onEvent(RecurringEvent.DebugApplyDueNow) }) {
+                                Text(stringResource(R.string.recurring_debug_apply_now))
+                            }
+                        }
+                    }
+                }
+            }
+
             if (renderState.filteredRecurring.isEmpty()) {
                 item {
                     Card(
@@ -370,6 +404,16 @@ private fun toInstantCompat(value: String): Long =
         .toEpochMilli()
 
 private fun getRecurringDueDateLabel(recurring: RecurringTransaction, monthKey: String = java.time.YearMonth.now().toString()): String {
-    val yearMonth = java.time.YearMonth.parse(monthKey)
+    val startDate = java.time.LocalDate.parse(recurring.startDate)
+    var yearMonth = java.time.YearMonth.parse(monthKey)
+
+    repeat(24) {
+        val dueDate = yearMonth.atDay(recurring.dayOfMonth.coerceAtMost(yearMonth.lengthOfMonth()))
+        if (dueDate >= startDate) {
+            return dueDate.toString()
+        }
+        yearMonth = yearMonth.plusMonths(1)
+    }
+
     return yearMonth.atDay(recurring.dayOfMonth.coerceAtMost(yearMonth.lengthOfMonth())).toString()
 }

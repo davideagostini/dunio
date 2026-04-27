@@ -1,6 +1,7 @@
 package com.davideagostini.summ
 
 import android.app.Application
+import com.davideagostini.summ.data.work.RecurringAutoApplyScheduler
 import com.davideagostini.summ.ui.settings.language.AppLanguageManager
 import com.davideagostini.summ.ui.settings.theme.AppThemeManager
 import dagger.hilt.android.HiltAndroidApp
@@ -11,5 +12,6 @@ class SummApp : Application() {
         super.onCreate()
         AppLanguageManager.initialize(this)
         AppThemeManager.initialize(this)
+        RecurringAutoApplyScheduler.schedule(this)
     }
 }

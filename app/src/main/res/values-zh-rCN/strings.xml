@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">较上个月</string>
     <string name="widget_open_app">打开应用</string>
+    <string name="recurring_debug_tools">调试工具</string>
+    <string name="recurring_debug_tools_subtitle">仅在测试时使用。</string>
+    <string name="recurring_debug_apply_now">立即运行</string>
     <string name="widget_sign_in_required">请登录以加载 household 数据。</string>
     <string name="widget_household_required">请先创建或加入 household，才能使用此小组件。</string>
     <string name="widget_loading_error">无法加载小组件数据。</string>

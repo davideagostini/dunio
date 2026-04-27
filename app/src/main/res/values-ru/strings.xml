@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">по сравнению с прошлым месяцем</string>
     <string name="widget_open_app">Открыть приложение</string>
+    <string name="recurring_debug_tools">Инструменты отладки</string>
+    <string name="recurring_debug_tools_subtitle">Использовать только во время тестирования.</string>
+    <string name="recurring_debug_apply_now">Запустить сейчас</string>
     <string name="widget_sign_in_required">Войдите, чтобы загрузить данные household.</string>
     <string name="widget_household_required">Создайте household или присоединитесь к нему, чтобы использовать этот виджет.</string>
     <string name="widget_loading_error">Не удалось загрузить данные виджета.</string>

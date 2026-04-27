@@ -14,6 +14,7 @@ sealed interface RecurringEvent {
     data object DismissDeleteDialog : RecurringEvent
     data object ConfirmDelete : RecurringEvent
     data object ApplyDue : RecurringEvent
+    data object DebugApplyDueNow : RecurringEvent
     data class UpdateDescription(val value: String) : RecurringEvent
     data class UpdateAmount(val value: String) : RecurringEvent
     data class UpdateType(val value: String) : RecurringEvent

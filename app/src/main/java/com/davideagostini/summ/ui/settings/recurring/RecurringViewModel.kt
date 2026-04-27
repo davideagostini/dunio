@@ -10,6 +10,8 @@ import com.davideagostini.summ.data.firebase.toFirestoreUserMessage
 import com.davideagostini.summ.data.repository.CategoryRepository
 import com.davideagostini.summ.data.repository.RecurringTransactionRepository
 import com.davideagostini.summ.data.session.SessionRepository
+import com.davideagostini.summ.data.work.RecurringAutoApplyScheduler
+import com.davideagostini.summ.widget.SummWidgetsUpdater
 import com.davideagostini.summ.ui.format.DEFAULT_CURRENCY
 import com.davideagostini.summ.ui.format.currentLocalStartOfDayMillis
 import com.davideagostini.summ.ui.format.formatEditableAmount
@@ -148,6 +150,7 @@ class RecurringViewModel @Inject constructor(
             RecurringEvent.DismissDeleteDialog -> _uiState.update { it.copy(showDeleteDialog = false) }
             RecurringEvent.ConfirmDelete -> confirmDelete()
             RecurringEvent.ApplyDue -> applyDue()
+            RecurringEvent.DebugApplyDueNow -> RecurringAutoApplyScheduler.triggerNow(context)
             is RecurringEvent.UpdateDescription -> _uiState.update { it.copy(description = event.value, descriptionError = null, operationErrorMessage = null) }
             is RecurringEvent.UpdateAmount -> _uiState.update { it.copy(amount = event.value, amountError = null, operationErrorMessage = null) }
             is RecurringEvent.UpdateType -> _uiState.update { it.copy(type = event.value, operationErrorMessage = null) }
@@ -175,7 +178,8 @@ class RecurringViewModel @Inject constructor(
         _uiState.update { it.copy(isSaving = true, operationErrorMessage = null) }
         viewModelScope.launch {
             try {
-                recurringRepositoryRef.insert(recurring)
+                val savedId = recurringRepositoryRef.insert(recurring)
+                applyDueRecurringTransactionsAfterSave(recurring.copy(id = savedId))
                 _uiState.update { RecurringUiState(searchVisible = it.searchVisible, searchQuery = it.searchQuery) }
             } catch (throwable: Throwable) {
                 _uiState.update {
@@ -197,6 +201,7 @@ class RecurringViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 recurringRepositoryRef.update(recurring)
+                applyDueRecurringTransactionsAfterSave(recurring)
                 _uiState.update { RecurringUiState(searchVisible = it.searchVisible, searchQuery = it.searchQuery) }
             } catch (throwable: Throwable) {
                 _uiState.update {
@@ -235,6 +240,16 @@ class RecurringViewModel @Inject constructor(
             } catch (throwable: Throwable) {
                 _uiState.update { it.copy(operationErrorMessage = throwable.toFirestoreUserMessage(context)) }
             }
+        }
+    }
+
+    private suspend fun applyDueRecurringTransactionsAfterSave(savedRecurring: RecurringTransaction) {
+        val mergedRecurring = recurringTransactions.value
+            .filterNot { it.id == savedRecurring.id }
+            .plus(savedRecurring)
+        val createdCount = recurringRepositoryRef.applyDueRecurringTransactions(mergedRecurring)
+        if (createdCount > 0) {
+            SummWidgetsUpdater.refreshAll(context)
         }
     }
 

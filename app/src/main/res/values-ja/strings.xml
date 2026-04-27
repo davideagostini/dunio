@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">前月比</string>
     <string name="widget_open_app">アプリを開く</string>
+    <string name="recurring_debug_tools">デバッグツール</string>
+    <string name="recurring_debug_tools_subtitle">テスト中のみ使用してください。</string>
+    <string name="recurring_debug_apply_now">今すぐ実行</string>
     <string name="widget_sign_in_required">household データを読み込むにはサインインしてください。</string>
     <string name="widget_household_required">このウィジェットを使うには household を作成するか参加してください。</string>
     <string name="widget_loading_error">ウィジェットのデータを読み込めませんでした。</string>

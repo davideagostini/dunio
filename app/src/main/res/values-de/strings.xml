@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">im Vergleich zum Vormonat</string>
     <string name="widget_open_app">App öffnen</string>
+    <string name="recurring_debug_tools">Debug-Werkzeuge</string>
+    <string name="recurring_debug_tools_subtitle">Nur zum Testen verwenden.</string>
+    <string name="recurring_debug_apply_now">Jetzt ausführen</string>
     <string name="widget_sign_in_required">Melde dich an, um Haushaltsdaten zu laden.</string>
     <string name="widget_household_required">Erstelle einen Haushalt oder tritt einem bei, um dieses Widget zu verwenden.</string>
     <string name="widget_loading_error">Widget-Daten konnten nicht geladen werden.</string>

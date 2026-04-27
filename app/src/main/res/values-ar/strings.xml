@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">مقارنة بالشهر السابق</string>
     <string name="widget_open_app">فتح التطبيق</string>
+    <string name="recurring_debug_tools">أدوات التصحيح</string>
+    <string name="recurring_debug_tools_subtitle">للاستخدام أثناء الاختبار فقط.</string>
+    <string name="recurring_debug_apply_now">تشغيل الآن</string>
     <string name="widget_sign_in_required">سجّل الدخول لتحميل بيانات household.</string>
     <string name="widget_household_required">أنشئ household أو انضم إليه لاستخدام هذا الودجت.</string>
     <string name="widget_loading_error">تعذر تحميل بيانات الودجت.</string>

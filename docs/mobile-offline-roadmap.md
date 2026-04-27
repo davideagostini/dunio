@@ -14,6 +14,12 @@ regressions in the shared household model.
 - the main opportunity is not "turning offline on", but improving how the UI uses the
   cached data that already exists
 
+## Recurring transaction maintenance
+
+- recurring templates are applied immediately after a save when the due date is already in the past
+- the app also schedules a daily WorkManager check to apply any remaining due recurring transactions in the background
+- this keeps the behavior reliable without depending only on app startup or a manual `Apply` tap
+
 ## Guiding principles
 
 - prioritize offline-friendly behavior for high-frequency daily actions

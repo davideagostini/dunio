@@ -112,6 +112,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">vs previous month</string>
     <string name="widget_open_app">Open app</string>
+    <string name="recurring_debug_tools">Debug tools</string>
+    <string name="recurring_debug_tools_subtitle">Use only while testing.</string>
+    <string name="recurring_debug_apply_now">Run due now</string>
     <string name="widget_loading">Loading widget data…</string>
     <string name="widget_sign_in_required">Sign in to load household data.</string>
     <string name="widget_household_required">Create or join a household to use this widget.</string>

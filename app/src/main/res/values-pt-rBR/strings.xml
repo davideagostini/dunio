@@ -109,6 +109,9 @@
     <string name="widget_spending_secondary">%1$s · %2$s</string>
     <string name="widget_spending_vs_previous_month">em relação ao mês anterior</string>
     <string name="widget_open_app">Abrir app</string>
+    <string name="recurring_debug_tools">Ferramentas de depuração</string>
+    <string name="recurring_debug_tools_subtitle">Use apenas durante os testes.</string>
+    <string name="recurring_debug_apply_now">Executar agora</string>
     <string name="widget_sign_in_required">Faça login para carregar os dados da casa compartilhada.</string>
     <string name="widget_household_required">Crie ou entre em uma casa compartilhada para usar este widget.</string>
     <string name="widget_loading_error">Não foi possível carregar os dados do widget.</string>

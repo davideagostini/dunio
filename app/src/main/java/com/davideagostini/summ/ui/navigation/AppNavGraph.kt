@@ -36,7 +36,6 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,10 +76,6 @@ fun AppNavGraph(
     if (readyState == null) {
         AuthGateScreen(sessionViewModel)
         return
-    }
-
-    LaunchedEffect(readyState.household.id) {
-        sessionViewModel.runRecurringAutoApplyIfNeeded(readyState)
     }
 
     // Shared overlay state lives here so dashboard, assets, entries, and month close can coordinate

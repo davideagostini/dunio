@@ -75,7 +75,19 @@ class RecurringTransactionDao @Inject constructor(
         }
     }
 
-    suspend fun insert(recurring: RecurringTransaction) {
+    suspend fun getAllRecurringTransactionsOnce(householdId: String): List<RecurringTransaction> {
+        val db = requireNotNull(firestore) { "Firestore is not available." }
+        return db.collection(FirestorePaths.recurringTransactions(householdId))
+            .orderBy("description", Query.Direction.ASCENDING)
+            .get()
+            .await()
+            .documents
+            .mapNotNull { document ->
+                document.toObject(RecurringTransactionDocument::class.java)?.toRecurring(document.id)
+            }
+    }
+
+    suspend fun insert(recurring: RecurringTransaction): String {
         val db = requireNotNull(firestore) { "Firestore is not available." }
         val householdId = sessionRepository.requireHouseholdId()
         val ref = if (recurring.id.isBlank()) {
@@ -99,6 +111,7 @@ class RecurringTransactionDao @Inject constructor(
                 "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
             )
         ).await()
+        return ref.id
     }
 
     suspend fun update(recurring: RecurringTransaction) {
@@ -152,7 +165,7 @@ class RecurringTransactionDao @Inject constructor(
             if (!recurring.active) return@forEach
 
             val dueDate = getDueDateForMonth(currentMonthKey, recurring.dayOfMonth)
-            if (dueDate > today.toString() || recurring.startDate > dueDate) return@forEach
+            if (dueDate > today.toString() || dueDate < recurring.startDate) return@forEach
 
             if ((recurring.id to dueDate) in existingRecurringDates) return@forEach
 

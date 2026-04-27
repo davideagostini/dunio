@@ -17,8 +17,10 @@ class RecurringTransactionRepository @Inject constructor(
     private val dao: RecurringTransactionDao,
 ) {
     val allRecurringTransactions: Flow<List<RecurringTransaction>> = dao.getAllRecurringTransactions()
+    suspend fun allRecurringTransactionsOnce(householdId: String): List<RecurringTransaction> =
+        dao.getAllRecurringTransactionsOnce(householdId)
 
-    suspend fun insert(recurring: RecurringTransaction) = dao.insert(recurring)
+    suspend fun insert(recurring: RecurringTransaction): String = dao.insert(recurring)
     suspend fun update(recurring: RecurringTransaction) = dao.update(recurring)
     suspend fun delete(recurringId: String) = dao.delete(recurringId)
     suspend fun applyDueRecurringTransactions(recurringTransactions: List<RecurringTransaction>): Int =

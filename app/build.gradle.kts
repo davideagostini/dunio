@@ -9,8 +9,8 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-val appVersionName = "0.1.20"
-val appVersionCode = 32
+val appVersionName = "0.1.21"
+val appVersionCode = 33
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -157,6 +157,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.work.runtime.ktx)
 
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
