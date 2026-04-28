@@ -218,7 +218,6 @@ internal class WearQuickEntryRepository(
             nodeId = nodeId,
             path = WearQuickEntryProtocol.PATH_CATEGORIES,
             payload = payload,
-            requestTimeoutMillis = CATEGORY_REQUEST_TIMEOUT_MILLIS,
         )
         return WearCategoriesResponse(
             currency = response.optString("currency", "EUR"),
@@ -398,9 +397,6 @@ internal class WearQuickEntryRepository(
     private companion object {
         /** Maximum time to wait for a response after a request has been sent to the phone. */
         const val REQUEST_TIMEOUT_MILLIS = 8_000L
-
-        /** Categories should fail fast so the user sees cached content or a retry state quickly. */
-        const val CATEGORY_REQUEST_TIMEOUT_MILLIS = 2_000L
 
         /** Shorter timeout used when the user is actively interacting (save button tap). */
         const val INTERACTIVE_NODE_LOOKUP_TIMEOUT_MILLIS = 2_000L

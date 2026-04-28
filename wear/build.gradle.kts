@@ -19,10 +19,10 @@ plugins {
 }
 
 /** Human-readable version string displayed to the user and embedded in output filenames. */
-val wearVersionName = "0.1.7-wear"
+val wearVersionName = "0.1.12-wear"
 
 /** Numeric version code used by the Play Store for update ordering. */
-val wearVersionCode = 3601008
+val wearVersionCode = 3601013
 
 /**
  * Local keystore configuration loaded from keystore.properties in the project root.

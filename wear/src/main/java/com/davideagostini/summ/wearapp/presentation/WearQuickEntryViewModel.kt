@@ -85,7 +85,6 @@ internal class WearQuickEntryViewModel(
         )
     private val saveInFlight = AtomicBoolean(false)
     private var loadCategoriesJob: Job? = null
-    private var prefetchCategoriesJob: Job? = null
 
     private val navigationEvents = Channel<WearNavigationEvent>(Channel.BUFFERED)
     val navigateToRoute = navigationEvents.receiveAsFlow()
@@ -101,7 +100,6 @@ internal class WearQuickEntryViewModel(
         }
         syncQuickCategories("expense")
         loadCategories("expense")
-        warmCategoriesCache("income")
     }
 
     fun onAction(action: WearQuickEntryAction) {
@@ -324,7 +322,6 @@ internal class WearQuickEntryViewModel(
                         errorMessage = null,
                     )
                 }
-                warmCategoriesCache(oppositeType(type))
             }.onFailure { throwable ->
                 if (throwable is CancellationException) {
                     _uiState.update { it.copy(isLoadingCategories = false) }
@@ -344,15 +341,6 @@ internal class WearQuickEntryViewModel(
                     )
                 }
             }
-        }
-    }
-
-    private fun warmCategoriesCache(type: String) {
-        if (repository.readCachedCategories(type).isNotEmpty()) return
-
-        prefetchCategoriesJob?.cancel()
-        prefetchCategoriesJob = viewModelScope.launch {
-            runCatching { repository.loadCategories(type) }
         }
     }
 
@@ -433,7 +421,4 @@ internal class WearQuickEntryViewModel(
         val digitsAfter = value.substring(separatorIndex + 1).count { it.isDigit() }
         return digitsBefore > 0 && digitsAfter in 1..2
     }
-
-    private fun oppositeType(type: String): String =
-        if (type == "income") "expense" else "income"
 }

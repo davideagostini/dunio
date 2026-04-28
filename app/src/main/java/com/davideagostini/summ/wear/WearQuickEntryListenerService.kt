@@ -109,7 +109,6 @@ class WearQuickEntryListenerService : WearableListenerService() {
 
         val allCategories = categoryRepository.allCategories
             .first()
-            .filter { category -> category.type == type }
         val mostUsed = categoryUsageRepository.observeMostUsedCategories(
             householdId = readyState.household.id,
             type = type,

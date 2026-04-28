@@ -21,7 +21,6 @@ class CategoryUsageRepository @Inject constructor(
     ): Flow<List<Category>> {
         val categoriesByStableId = categories
             .asSequence()
-            .filter { category -> category.type == type }
             .associateBy { category -> category.stableUsageId() }
 
         return categoryUsageDao
