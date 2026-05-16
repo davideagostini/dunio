@@ -35,6 +35,8 @@ data class DashboardRenderState(
     val metrics: DashboardMetrics,
     val chartPoints: List<ChartPoint>,
     val monthlyChangePercent: Double?,
+    val assetsChangePercent: Double?,
+    val liabilitiesChangePercent: Double?,
     val cashFlowChangePercent: Double?,
     val savingsRateDelta: Double?,
     val monthlyExpenses: Double,

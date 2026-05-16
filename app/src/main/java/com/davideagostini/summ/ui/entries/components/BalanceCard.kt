@@ -40,7 +40,7 @@ internal fun BalanceCard(
     filterType: EntriesFilterType,
     onFilterSelected: (EntriesFilterType) -> Unit,
 ) {
-        Card(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(SummaryCardDefaults.outerPadding),
@@ -48,7 +48,7 @@ internal fun BalanceCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-            Column(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(SummaryCardDefaults.contentPadding),
@@ -93,7 +93,6 @@ internal fun BalanceCard(
                 )
             }
             Spacer(Modifier.height(SummaryCardDefaults.sectionSpacing))
-            // Keep the filter segmented control visually anchored to the summary above.
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
             ) {

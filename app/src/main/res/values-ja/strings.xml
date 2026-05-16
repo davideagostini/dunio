@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">収入から貯蓄した割合</string>
     <string name="dashboard_change_vs_3m_avg">3か月平均比 %1$s</string>
     <string name="dashboard_runway_label">持続期間</string>
+    <string name="dashboard_runway_note">流動資産によるカバー期間</string>
     <string name="dashboard_monthly_expenses_label">月間支出</string>
+    <string name="dashboard_monthly_expenses_note">今月の支出</string>
     <string name="dashboard_no_previous_month">比較する前月データがありません</string>
     <string name="dashboard_no_history_yet">まだ履歴がありません</string>
     <string name="dashboard_value_not_available">N/A</string>

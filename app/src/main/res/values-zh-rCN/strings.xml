@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">从收入中储蓄的部分</string>
     <string name="dashboard_change_vs_3m_avg">较 3 个月平均值 %1$s</string>
     <string name="dashboard_runway_label">可支撑时长</string>
+    <string name="dashboard_runway_note">流动资产覆盖期</string>
     <string name="dashboard_monthly_expenses_label">月度支出</string>
+    <string name="dashboard_monthly_expenses_note">本月已支出</string>
     <string name="dashboard_no_previous_month">没有可供比较的上个月数据</string>
     <string name="dashboard_no_history_yet">还没有历史记录</string>
     <string name="dashboard_value_not_available">不可用</string>

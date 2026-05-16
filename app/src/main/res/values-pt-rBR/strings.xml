@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">Poupado a partir da receita</string>
     <string name="dashboard_change_vs_3m_avg">%1$s em relação à média de 3 meses</string>
     <string name="dashboard_runway_label">Autonomia</string>
+    <string name="dashboard_runway_note">Cobertura com ativos líquidos</string>
     <string name="dashboard_monthly_expenses_label">Despesas mensais</string>
+    <string name="dashboard_monthly_expenses_note">Gasto neste mês</string>
     <string name="dashboard_no_previous_month">Não há mês anterior para comparar</string>
     <string name="dashboard_no_history_yet">Ainda não há histórico</string>
     <string name="dashboard_value_not_available">N/D</string>

@@ -302,7 +302,9 @@
     <string name="dashboard_get_started_add_action">Aggiungi</string>
     <string name="dashboard_get_started_continue">Continua alla dashboard</string>
     <string name="dashboard_runway_label">Autonomia</string>
+    <string name="dashboard_runway_note">Copertura con asset liquidi</string>
     <string name="dashboard_monthly_expenses_label">Spese mensili</string>
+    <string name="dashboard_monthly_expenses_note">Speso questo mese</string>
     <string name="dashboard_no_previous_month">Nessun mese precedente da confrontare</string>
     <string name="dashboard_no_history_yet">Ancora nessuno storico</string>
     <string name="dashboard_value_not_available">N/D</string>

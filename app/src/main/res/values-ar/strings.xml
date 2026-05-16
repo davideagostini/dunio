@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">المدخر من الدخل</string>
     <string name="dashboard_change_vs_3m_avg">%1$s مقارنة بمتوسط 3 أشهر</string>
     <string name="dashboard_runway_label">مدة الصمود</string>
+    <string name="dashboard_runway_note">التغطية بالأصول السائلة</string>
     <string name="dashboard_monthly_expenses_label">المصروفات الشهرية</string>
+    <string name="dashboard_monthly_expenses_note">المصروف هذا الشهر</string>
     <string name="dashboard_no_previous_month">لا يوجد شهر سابق للمقارنة</string>
     <string name="dashboard_no_history_yet">لا يوجد سجل بعد</string>
     <string name="dashboard_value_not_available">غير متاح</string>

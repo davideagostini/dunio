@@ -2,6 +2,7 @@ package com.davideagostini.summ.ui.dashboard.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.davideagostini.summ.R
@@ -53,6 +55,7 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
+import java.util.Locale
 import kotlin.math.abs
 
 @Composable
@@ -159,60 +162,85 @@ fun MetricCard(
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+        Column(
+            modifier = Modifier
+                .defaultMinSize(minHeight = 120.dp)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        ) {
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
+                text = label.uppercase(Locale.getDefault()),
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = valueColor,
                 )
                 if (!trailingValue.isNullOrBlank()) {
                     Text(
                         text = " $trailingValue",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
             if (!note.isNullOrBlank()) {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = note,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (!trendLabel.isNullOrBlank()) {
-                Spacer(Modifier.height(10.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier.defaultMinSize(minHeight = 20.dp),
+                    contentAlignment = Alignment.CenterStart,
                 ) {
-                    if (trendPositive != null) {
-                        Icon(
-                            imageVector = if (trendPositive) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
-                            contentDescription = null,
-                            tint = trendColor,
+                    Text(
+                        text = note,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+            } else {
+                Spacer(Modifier.height(16.dp))
+            }
+            Box(
+                modifier = Modifier.defaultMinSize(minHeight = 20.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                if (!trendLabel.isNullOrBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (trendPositive != null) {
+                            Icon(
+                                imageVector = if (trendPositive) Icons.Outlined.ArrowOutward else Icons.Outlined.ArrowDownward,
+                                contentDescription = null,
+                                tint = trendColor,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                        Text(
+                            text = trendLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = trendColor,
                         )
                     }
+                } else {
                     Text(
-                        text = trendLabel,
-                        style = MaterialTheme.typography.bodyLarge,
+                        text = "—",
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = trendColor,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

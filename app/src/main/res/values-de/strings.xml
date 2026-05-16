@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">Aus den Einnahmen gespart</string>
     <string name="dashboard_change_vs_3m_avg">%1$s im Vergleich zum 3-Monats-Durchschnitt</string>
     <string name="dashboard_runway_label">Reichweite</string>
+    <string name="dashboard_runway_note">Abdeckung durch liquide Mittel</string>
     <string name="dashboard_monthly_expenses_label">Monatliche Ausgaben</string>
+    <string name="dashboard_monthly_expenses_note">Diesen Monat ausgegeben</string>
     <string name="dashboard_no_previous_month">Kein Vormonat zum Vergleichen vorhanden</string>
     <string name="dashboard_no_history_yet">Noch keine Historie</string>
     <string name="dashboard_value_not_available">k. A.</string>

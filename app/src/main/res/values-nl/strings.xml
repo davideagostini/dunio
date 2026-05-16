@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">Gespaard van de inkomsten</string>
     <string name="dashboard_change_vs_3m_avg">%1$s ten opzichte van het gemiddelde over 3 maanden</string>
     <string name="dashboard_runway_label">Looptijd</string>
+    <string name="dashboard_runway_note">Dekking met liquide activa</string>
     <string name="dashboard_monthly_expenses_label">Maandelijkse uitgaven</string>
+    <string name="dashboard_monthly_expenses_note">Deze maand uitgegeven</string>
     <string name="dashboard_no_previous_month">Geen vorige maand om mee te vergelijken</string>
     <string name="dashboard_no_history_yet">Nog geen geschiedenis</string>
     <string name="dashboard_value_not_available">N.v.t.</string>

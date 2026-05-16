@@ -315,7 +315,9 @@
     <string name="dashboard_get_started_add_action">Add</string>
     <string name="dashboard_get_started_continue">Continue to dashboard</string>
     <string name="dashboard_runway_label">Runway</string>
+    <string name="dashboard_runway_note">Liquid assets coverage</string>
     <string name="dashboard_monthly_expenses_label">Monthly expenses</string>
+    <string name="dashboard_monthly_expenses_note">Spent this month</string>
     <string name="dashboard_no_previous_month">No previous month to compare</string>
     <string name="dashboard_no_history_yet">No history yet</string>
     <string name="dashboard_value_not_available">N/A</string>

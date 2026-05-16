@@ -11,14 +11,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -36,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -197,16 +201,23 @@ private fun DashboardMetricRowSkeleton(shimmer: Brush) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        DashboardMetricSkeletonCard(
-            shimmer = shimmer,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        DashboardMetricSkeletonCard(
-            shimmer = shimmer,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        repeat(3) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                DashboardMetricSkeletonCard(
+                    shimmer = shimmer,
+                    modifier = Modifier.weight(1f),
+                )
+                DashboardMetricSkeletonCard(
+                    shimmer = shimmer,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
     }
 }
 
@@ -220,25 +231,36 @@ private fun DashboardMetricSkeletonCard(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+        Column(
+            modifier = Modifier
+                .defaultMinSize(minHeight = 150.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        ) {
             DashboardSkeletonBlock(
                 brush = shimmer,
                 modifier = Modifier
-                    .width(84.dp)
+                    .width(72.dp)
                     .height(12.dp),
             )
             androidx.compose.foundation.layout.Spacer(Modifier.height(12.dp))
             DashboardSkeletonBlock(
                 brush = shimmer,
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(28.dp),
+                    .fillMaxWidth(0.9f)
+                    .height(24.dp),
             )
-            androidx.compose.foundation.layout.Spacer(Modifier.height(10.dp))
+            androidx.compose.foundation.layout.Spacer(Modifier.height(8.dp))
             DashboardSkeletonBlock(
                 brush = shimmer,
                 modifier = Modifier
-                    .fillMaxWidth(0.55f)
+                    .fillMaxWidth(0.7f)
+                    .height(12.dp),
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(8.dp))
+            DashboardSkeletonBlock(
+                brush = shimmer,
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
                     .height(12.dp),
             )
         }
@@ -382,95 +404,8 @@ private fun DashboardContent(
                 }
 
                 item {
-                    MetricCard(
-                        label = stringResource(R.string.dashboard_assets_label),
-                        value = formatCurrency(renderState.metrics.totalAssets, renderState.householdCurrency),
-                        note = stringResource(R.string.dashboard_current_value),
-                        modifier = Modifier.padding(top = 12.dp),
-                    )
-                }
-
-                item {
-                    MetricCard(
-                        label = stringResource(R.string.dashboard_liabilities_label),
-                        value = formatCurrency(renderState.metrics.totalLiabilities, renderState.householdCurrency),
-                        note = stringResource(R.string.dashboard_outstanding),
-                        modifier = Modifier.padding(top = 12.dp),
-                    )
-                }
-
-                item {
-                    MetricCard(
-                        label = stringResource(R.string.dashboard_cash_flow_label),
-                        value = formatCurrency(renderState.metrics.monthlyCashFlow, renderState.householdCurrency),
-                        note = stringResource(R.string.dashboard_cash_flow_note),
-                        trendLabel = renderState.cashFlowChangePercent?.let {
-                            stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
-                        },
-                        trendPositive = renderState.cashFlowChangePercent?.let { it >= 0 },
-                        trendColor = when {
-                            renderState.cashFlowChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                            renderState.cashFlowChangePercent > 0 -> IncomeGreen
-                            renderState.cashFlowChangePercent < 0 -> ExpenseRed
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        valueColor = if (renderState.metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
-                        modifier = Modifier.padding(top = 12.dp),
-                    )
-                }
-
-                item {
-                    MetricCard(
-                        label = stringResource(R.string.dashboard_savings_rate_label),
-                        value = renderState.metrics.savingsRate?.let { formatPercent(it) } ?: stringResource(R.string.dashboard_value_not_available),
-                        note = stringResource(R.string.dashboard_savings_rate_note),
-                        trendLabel = renderState.savingsRateDelta?.let {
-                            stringResource(R.string.dashboard_change_vs_3m_avg, formatPercent(abs(it)))
-                        },
-                        trendPositive = renderState.savingsRateDelta?.let { it >= 0 },
-                        trendColor = when {
-                            renderState.savingsRateDelta == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                            renderState.savingsRateDelta > 0 -> IncomeGreen
-                            renderState.savingsRateDelta < 0 -> ExpenseRed
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier.padding(top = 12.dp),
-                    )
-                }
-
-                item {
-                    MetricCard(
-                        label = stringResource(R.string.dashboard_runway_label),
-                        value = renderState.metrics.financialRunway?.let { formatRunwayMonths(it) } ?: stringResource(R.string.dashboard_value_not_available),
-                        trailingValue = renderState.metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
-                        trendLabel = renderState.runwayChangePercent?.let {
-                            stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
-                        },
-                        trendPositive = renderState.runwayChangePercent?.let { it >= 0 },
-                        trendColor = when {
-                            renderState.runwayChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                            renderState.runwayChangePercent > 0 -> IncomeGreen
-                            renderState.runwayChangePercent < 0 -> ExpenseRed
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier.padding(top = 12.dp),
-                    )
-                }
-
-                item {
-                    MetricCard(
-                        label = stringResource(R.string.dashboard_monthly_expenses_label),
-                        value = formatCurrency(renderState.monthlyExpenses, renderState.householdCurrency),
-                        trendLabel = renderState.monthlyExpensesChangePercent?.let {
-                            stringResource(R.string.dashboard_change_vs_previous_month, formatPercent(abs(it)))
-                        },
-                        trendPositive = renderState.monthlyExpensesChangePercent?.let { it >= 0 },
-                        trendColor = when {
-                            renderState.monthlyExpensesChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                            renderState.monthlyExpensesChangePercent < 0 -> IncomeGreen
-                            renderState.monthlyExpensesChangePercent > 0 -> ExpenseRed
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
+                    DashboardMetricsGrid(
+                        renderState = renderState,
                         modifier = Modifier.padding(top = 12.dp),
                     )
                 }
@@ -487,3 +422,132 @@ private fun DashboardContent(
         )
     }
 }
+
+@Composable
+private fun DashboardMetricsGrid(
+    renderState: DashboardRenderState,
+    modifier: Modifier = Modifier,
+) {
+    val cards = listOf(
+        DashboardMetricCardData(
+            label = stringResource(R.string.dashboard_assets_label),
+            value = formatCurrency(renderState.metrics.totalAssets, renderState.householdCurrency),
+            trendLabel = renderState.assetsChangePercent?.let { formatPercent(abs(it)) },
+            trendPositive = renderState.assetsChangePercent?.let { it >= 0 },
+            trendColor = when {
+                renderState.assetsChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                renderState.assetsChangePercent > 0 -> IncomeGreen
+                renderState.assetsChangePercent < 0 -> ExpenseRed
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        ),
+        DashboardMetricCardData(
+            label = stringResource(R.string.dashboard_liabilities_label),
+            value = formatCurrency(renderState.metrics.totalLiabilities, renderState.householdCurrency),
+            trendLabel = renderState.liabilitiesChangePercent?.let { formatPercent(abs(it)) },
+            trendPositive = renderState.liabilitiesChangePercent?.let { it >= 0 },
+            trendColor = when {
+                renderState.liabilitiesChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                renderState.liabilitiesChangePercent > 0 -> ExpenseRed
+                renderState.liabilitiesChangePercent < 0 -> IncomeGreen
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        ),
+        DashboardMetricCardData(
+            label = stringResource(R.string.dashboard_cash_flow_label),
+            value = formatCurrency(renderState.metrics.monthlyCashFlow, renderState.householdCurrency),
+            trendLabel = renderState.cashFlowChangePercent?.let { formatPercent(abs(it)) },
+            trendPositive = renderState.cashFlowChangePercent?.let { it >= 0 },
+            trendColor = when {
+                renderState.cashFlowChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                renderState.cashFlowChangePercent > 0 -> IncomeGreen
+                renderState.cashFlowChangePercent < 0 -> ExpenseRed
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            valueColor = if (renderState.metrics.monthlyCashFlow >= 0) IncomeGreen else ExpenseRed,
+        ),
+        DashboardMetricCardData(
+            label = stringResource(R.string.dashboard_savings_rate_label),
+            value = renderState.metrics.savingsRate?.let { formatPercent(it) }
+                ?: stringResource(R.string.dashboard_value_not_available),
+            trendLabel = renderState.savingsRateDelta?.let {
+                stringResource(R.string.dashboard_change_vs_3m_avg, formatPercent(abs(it)))
+            },
+            trendPositive = renderState.savingsRateDelta?.let { it >= 0 },
+            trendColor = when {
+                renderState.savingsRateDelta == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                renderState.savingsRateDelta > 0 -> IncomeGreen
+                renderState.savingsRateDelta < 0 -> ExpenseRed
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        ),
+        DashboardMetricCardData(
+            label = stringResource(R.string.dashboard_runway_label),
+            value = renderState.metrics.financialRunway?.let { formatRunwayMonths(it) }
+                ?: stringResource(R.string.dashboard_value_not_available),
+            trailingValue = renderState.metrics.financialRunway?.let { "/ ${formatRunwayYears(it)}" },
+            trendLabel = renderState.runwayChangePercent?.let { formatPercent(abs(it)) },
+            trendPositive = renderState.runwayChangePercent?.let { it >= 0 },
+            trendColor = when {
+                renderState.runwayChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                renderState.runwayChangePercent > 0 -> IncomeGreen
+                renderState.runwayChangePercent < 0 -> ExpenseRed
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        ),
+        DashboardMetricCardData(
+            label = stringResource(R.string.dashboard_monthly_expenses_label),
+            value = formatCurrency(renderState.monthlyExpenses, renderState.householdCurrency),
+            trendLabel = renderState.monthlyExpensesChangePercent?.let { formatPercent(abs(it)) },
+            trendPositive = renderState.monthlyExpensesChangePercent?.let { it >= 0 },
+            trendColor = when {
+                renderState.monthlyExpensesChangePercent == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                renderState.monthlyExpensesChangePercent < 0 -> IncomeGreen
+                renderState.monthlyExpensesChangePercent > 0 -> ExpenseRed
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        ),
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        cards.chunked(2).forEach { rowCards ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                rowCards.forEach { card ->
+                    MetricCard(
+                        label = card.label,
+                        value = card.value,
+                        note = card.note,
+                        trailingValue = card.trailingValue,
+                        trendLabel = card.trendLabel,
+                        trendPositive = card.trendPositive,
+                        valueColor = card.valueColor ?: MaterialTheme.colorScheme.onSurface,
+                        trendColor = card.trendColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                if (rowCards.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+private data class DashboardMetricCardData(
+    val label: String,
+    val value: String,
+    val note: String? = null,
+    val trailingValue: String? = null,
+    val trendLabel: String? = null,
+    val trendPositive: Boolean? = null,
+    val valueColor: Color? = null,
+    val trendColor: Color? = null,
+)

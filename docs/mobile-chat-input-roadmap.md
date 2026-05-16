@@ -28,6 +28,32 @@ Target examples:
 - take a photo of a receipt and receive a draft entry
 - speak an expense and receive a draft entry
 
+## Product positioning relative to existing quick entry
+
+The current Dunio quick entry is already fast and useful.
+
+That matters for this roadmap because the goal is not to replace the existing flow with a more
+complex assistant surface just because it is possible.
+
+The intended product direction is:
+
+- keep manual quick entry as the default, reliable baseline
+- keep Wear quick entry as the fastest companion flow on the watch
+- add chat input, voice, and OCR as optional accelerators for cases where typing is less convenient
+
+This means the feature should be framed as:
+
+- an additional fast-input surface
+- not a forced replacement for the current entry flow
+- not a dependency for core logging
+
+The value proposition is therefore:
+
+1. manual quick entry remains the simplest and most predictable path
+2. Wear remains the fastest low-friction logging path from the wrist
+3. chat input, voice, and OCR improve convenience when the user prefers natural input, dictation,
+   or receipt capture
+
 ## Why this roadmap starts locally
 
 For a first version, local device capabilities are enough to validate the user value:
@@ -73,6 +99,13 @@ Supported V1 use cases:
 5. query simple category totals for the current month
 6. create a draft entry from receipt OCR text
 7. create a draft entry from voice transcript
+
+The roadmap below should be read with one important priority rule:
+
+- every new input mode must reuse the same entry confirmation standards as the current manual quick
+  entry
+- every new input mode must degrade gracefully when unavailable
+- every new input mode must remain optional
 
 Out of scope for V1:
 
@@ -762,6 +795,18 @@ Deliverables:
    - monthly totals
 4. draft confirmation before saving
 
+Entry criteria:
+
+- keep the existing quick entry unchanged
+- implement the new feature behind a separate screen entry point
+- support only a narrow set of typed commands
+
+Success criteria:
+
+- the feature is understandable without onboarding
+- typed input produces reliable drafts
+- unsupported commands fail clearly and gracefully
+
 ### Phase 2: voice input
 
 Goal:
@@ -773,6 +818,17 @@ Deliverables:
 1. `SpeechRecognizer` integration
 2. transcript-to-parser flow
 3. microphone states and permission handling
+
+Entry criteria:
+
+- Phase 1 typed flow is stable
+- the draft confirmation UX already works well for parsed entry commands
+
+Success criteria:
+
+- voice produces the same draft quality as typed commands for supported phrases
+- permission denial and recognizer failure are handled cleanly
+- no voice-only logic leaks into the save flow
 
 ### Phase 3: OCR import
 
@@ -786,6 +842,17 @@ Deliverables:
 2. ML Kit OCR integration
 3. receipt text parser
 4. draft confirmation from OCR result
+
+Entry criteria:
+
+- Phase 2 is stable or intentionally deferred
+- OCR can be introduced independently from voice if product timing requires it
+
+Success criteria:
+
+- OCR produces useful drafts from a meaningful subset of receipts
+- the user can always edit before saving
+- failure cases remain understandable and non-blocking
 
 ### Phase 4: optional online AI support
 
@@ -801,6 +868,175 @@ Potential use cases for online AI later:
 2. ambiguous command recovery
 3. better receipt interpretation
 4. richer finance question handling
+
+Entry criteria:
+
+- local parsing has already been validated with real user behavior
+- product has evidence that local parsing is the main limitation
+
+Success criteria:
+
+- online AI improves ambiguous cases without replacing stable local paths
+- costs, privacy, and latency remain acceptable
+- the app still works when the online interpretation layer is unavailable
+
+## Step-by-step implementation roadmap
+
+The phases above describe delivery layers. The checklist below translates them into a more
+practical build order.
+
+### Step 1: define the command contract
+
+Goal:
+
+- make the supported inputs explicit before building UI complexity
+
+Tasks:
+
+1. define the initial supported commands for:
+   - add expense
+   - add income
+   - monthly expense total
+   - monthly income total
+2. define the unsupported cases explicitly
+3. define the draft model that all inputs will map to
+4. define the result card model for queries
+
+Output:
+
+- stable `ChatIntent`
+- stable `EntryDraft`
+- stable `ChatMessage` model
+
+### Step 2: build the typed text prototype
+
+Goal:
+
+- validate the product interaction with the lowest-risk input mode
+
+Tasks:
+
+1. create the chat-like screen
+2. add composer with text input and send action
+3. wire deterministic local parsing
+4. render:
+   - user bubbles
+   - system messages
+   - draft cards
+   - query result cards
+5. execute only after explicit confirmation
+
+Why this step comes first:
+
+- it proves the UX before camera and mic complexity
+- it tests whether the chat surface actually feels better than jumping directly into forms
+
+### Step 3: refine the UI around Material 3 patterns
+
+Goal:
+
+- make the screen feel like a real Dunio feature, not a prototype
+
+Tasks:
+
+1. add the calm Material 3 visual treatment described above
+2. add suggestion chips for common commands
+3. polish loading, error, and empty states
+4. verify mobile ergonomics:
+   - one-hand reach
+   - keyboard overlap
+   - long-message wrapping
+
+Output:
+
+- a typed chat surface that already feels product-ready
+
+### Step 4: add voice logging
+
+Goal:
+
+- allow the user to dictate supported commands
+
+Tasks:
+
+1. integrate `SpeechRecognizer`
+2. add microphone states:
+   - idle
+   - listening
+   - processing
+   - failed
+3. feed transcripts into the same parser used for typed input
+4. reuse the same draft confirmation flow
+
+Important rule:
+
+- voice must not create a parallel save path
+- it must reuse the same confirmation and execution pipeline as typed input
+
+### Step 5: add OCR receipt import
+
+Goal:
+
+- let the user start from a photo instead of typing
+
+Tasks:
+
+1. add camera / gallery entry point in the composer
+2. integrate ML Kit OCR
+3. create `ReceiptInputExtractor`
+4. create `ReceiptTextParser`
+5. map OCR results into the same draft card model
+
+Important rule:
+
+- OCR should create editable drafts, not auto-save transactions
+
+### Step 6: connect the feature to real user workflows
+
+Goal:
+
+- make the feature reachable without displacing the existing quick entry
+
+Tasks:
+
+1. decide where the screen lives:
+   - dashboard shortcut
+   - quick entry alternative
+   - dedicated action from bottom navigation context
+2. keep manual quick entry clearly available
+3. keep Wear quick entry unchanged
+4. make the feature discoverable but optional
+
+### Step 7: collect product evidence
+
+Goal:
+
+- understand whether the feature is truly valuable before adding online AI
+
+Tasks:
+
+1. observe which commands users actually try
+2. measure unknown / failed parse frequency
+3. measure how often users prefer:
+   - typing
+   - voice
+   - OCR
+4. identify the next bottleneck:
+   - parsing ambiguity
+   - receipt quality
+   - language flexibility
+
+### Step 8: only then evaluate online AI
+
+Goal:
+
+- improve interpretation only if local-first patterns prove insufficient
+
+Tasks:
+
+1. keep local parser as the fast default path where possible
+2. add AI interpretation only behind stable interfaces
+3. use it for ambiguity resolution, not as a mandatory dependency for all requests
 
 ## Decision criteria for adding online AI later
 

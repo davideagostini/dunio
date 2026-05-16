@@ -269,7 +269,9 @@
     <string name="dashboard_savings_rate_note">Ahorrado a partir de los ingresos</string>
     <string name="dashboard_change_vs_3m_avg">%1$s frente a la media de 3 meses</string>
     <string name="dashboard_runway_label">Autonomía</string>
+    <string name="dashboard_runway_note">Cobertura con activos líquidos</string>
     <string name="dashboard_monthly_expenses_label">Gastos mensuales</string>
+    <string name="dashboard_monthly_expenses_note">Gastado este mes</string>
     <string name="dashboard_no_previous_month">No hay un mes anterior para comparar</string>
     <string name="dashboard_no_history_yet">Todavía no hay historial</string>
     <string name="dashboard_value_not_available">N/D</string>

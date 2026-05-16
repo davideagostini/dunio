@@ -145,6 +145,22 @@ class DashboardViewModel @Inject constructor(
         } else {
             null
         }
+        val assetsChangePercent = if (previousSummary.activeAssetCount > 0) {
+            calculateRelativeChange(
+                currentValue = metrics.totalAssets,
+                previousValue = previousSummary.totalAssets,
+            )
+        } else {
+            null
+        }
+        val liabilitiesChangePercent = if (previousSummary.totalLiabilities != 0.0) {
+            calculateRelativeChange(
+                currentValue = metrics.totalLiabilities,
+                previousValue = previousSummary.totalLiabilities,
+            )
+        } else {
+            null
+        }
         val cashFlowChangePercent = if (previousSummary.transactionCount > 0) {
             calculateRelativeChange(
                 currentValue = metrics.monthlyCashFlow,
@@ -177,6 +193,8 @@ class DashboardViewModel @Inject constructor(
             metrics = metrics,
             chartPoints = chartPoints,
             monthlyChangePercent = monthlyChangePercent,
+            assetsChangePercent = assetsChangePercent,
+            liabilitiesChangePercent = liabilitiesChangePercent,
             cashFlowChangePercent = cashFlowChangePercent,
             savingsRateDelta = savingsRateDelta,
             monthlyExpenses = selectedSummary.monthlyExpenses,
@@ -193,6 +211,8 @@ class DashboardViewModel @Inject constructor(
             metrics = DashboardMetrics(0.0, 0.0, 0.0, null, 0.0, null),
             chartPoints = emptyList(),
             monthlyChangePercent = null,
+            assetsChangePercent = null,
+            liabilitiesChangePercent = null,
             cashFlowChangePercent = null,
             savingsRateDelta = null,
             monthlyExpenses = 0.0,
@@ -215,6 +235,8 @@ class DashboardViewModel @Inject constructor(
             metrics = baseState.metrics,
             chartPoints = baseState.chartPoints,
             monthlyChangePercent = baseState.monthlyChangePercent,
+            assetsChangePercent = baseState.assetsChangePercent,
+            liabilitiesChangePercent = baseState.liabilitiesChangePercent,
             cashFlowChangePercent = baseState.cashFlowChangePercent,
             savingsRateDelta = baseState.savingsRateDelta,
             monthlyExpenses = baseState.monthlyExpenses,
@@ -233,6 +255,8 @@ class DashboardViewModel @Inject constructor(
             metrics = DashboardMetrics(0.0, 0.0, 0.0, null, 0.0, null),
             chartPoints = emptyList(),
             monthlyChangePercent = null,
+            assetsChangePercent = null,
+            liabilitiesChangePercent = null,
             cashFlowChangePercent = null,
             savingsRateDelta = null,
             monthlyExpenses = 0.0,
@@ -291,6 +315,8 @@ private data class DashboardBaseState(
     val metrics: DashboardMetrics,
     val chartPoints: List<ChartPoint>,
     val monthlyChangePercent: Double?,
+    val assetsChangePercent: Double?,
+    val liabilitiesChangePercent: Double?,
     val cashFlowChangePercent: Double?,
     val savingsRateDelta: Double?,
     val monthlyExpenses: Double,
