@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calcolatore budget di coppia: dividi le spese condivise | Dunio</title>
+    <meta
+      name="description"
+      content="Calcola come dividere le spese condivise di coppia: confronta la divisione 50/50 con quella proporzionale al reddito e scopri quanto resta a ciascuno ogni mese."
+    />
+    <meta
+      name="keywords"
+      content="calcolatore budget coppia, dividere spese di coppia, divisione proporzionale reddito, calcolo spese condivise, budget di coppia"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="canonical" href="https://dunio.app/it/calcolatore-budget-di-coppia/" />
+    <link rel="alternate" hreflang="it" href="https://dunio.app/it/calcolatore-budget-di-coppia/" />
+    <link rel="icon" href="../../assets/ic_launcher-playstore.png?v=20260420-3" />
+    <link rel="apple-touch-icon" href="../../assets/ic_launcher-playstore.png?v=20260420-3" />
+    <meta property="og:title" content="Calcolatore budget di coppia: dividi le spese condivise" />
+    <meta
+      property="og:description"
+      content="Confronta la divisione 50/50 e quella proporzionale al reddito e scopri quanto resta a ciascuno ogni mese."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dunio.app/it/calcolatore-budget-di-coppia/" />
+    <meta property="og:site_name" content="Dunio" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:image" content="https://dunio.app/assets/cover.png?v=20260420-3" />
+    <meta property="og:image:alt" content="Immagine di copertina di Dunio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Calcolatore budget di coppia: dividi le spese condivise" />
+    <meta
+      name="twitter:description"
+      content="Confronta la divisione 50/50 e quella proporzionale al reddito e scopri quanto resta a ciascuno ogni mese."
+    />
+    <meta name="twitter:image" content="https://dunio.app/assets/cover.png?v=20260420-3" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://dunio.app/it/calcolatore-budget-di-coppia/#app",
+            "name": "Calcolatore budget di coppia",
+            "url": "https://dunio.app/it/calcolatore-budget-di-coppia/",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript",
+            "inLanguage": "it-IT",
+            "isAccessibleForFree": true,
+            "description": "Calcola come dividere le spese condivise di coppia confrontando la divisione 50/50 con quella proporzionale al reddito.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+            "publisher": { "@id": "https://dunio.app/#organization" }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://dunio.app/it/calcolatore-budget-di-coppia/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Come si calcola la quota di spese condivise?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Con la divisione 50/50 ogni persona copre metà delle spese condivise. Con la divisione proporzionale al reddito, ognuno copre la stessa percentuale del proprio reddito: la quota si ottiene moltiplicando le spese condivise per il rapporto tra il reddito della persona e il reddito totale della coppia."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Qual è la differenza tra divisione 50/50 e proporzionale?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "La divisione 50/50 divide le spese in parti uguali, quindi pesa di più su chi guadagna meno. La divisione proporzionale fa pesare le spese allo stesso modo sul reddito di entrambi, quindi chi guadagna di più versa di più."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Il calcolatore salva o invia i miei dati?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Il calcolo avviene interamente nel browser e nessun dato viene inviato o salvato su un server."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://dunio.app/it/calcolatore-budget-di-coppia/#breadcrumb",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Dunio", "item": "https://dunio.app/it/" },
+              { "@type": "ListItem", "position": 2, "name": "Risorse", "item": "https://dunio.app/it/resources/" },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Calcolatore budget di coppia",
+                "item": "https://dunio.app/it/calcolatore-budget-di-coppia/"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body { margin: 0; }
+
+      :root {
+        color-scheme: light;
+        --surface-1: #fcfcfb;
+        --plane: #f9f9f7;
+        --ink: #0b0b0b;
+        --ink-2: #52514e;
+        --muted: #898781;
+        --grid: #e1e0d9;
+        --axis: #c3c2b7;
+        --hair: rgba(11, 11, 11, 0.10);
+        --wash: rgba(11, 11, 11, 0.04);
+        --good: #006300;
+        --bad: #d03b3b;
+        --warn: #fab219;
+        --s1: #2a78d6; --s2: #008300; --s3: #e87ba4; --s4: #eda100;
+        --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #e34948;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:where(:not([data-theme="light"])) {
+          color-scheme: dark;
+          --surface-1: #1a1a19;
+          --plane: #0d0d0d;
+          --ink: #ffffff;
+          --ink-2: #c3c2b7;
+          --muted: #898781;
+          --grid: #2c2c2a;
+          --axis: #383835;
+          --hair: rgba(255, 255, 255, 0.10);
+          --wash: rgba(255, 255, 255, 0.06);
+          --good: #0ca30c;
+          --bad: #e66767;
+          --s1: #3987e5; --s2: #008300; --s3: #d55181; --s4: #c98500;
+          --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+        }
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --surface-1: #1a1a19;
+        --plane: #0d0d0d;
+        --ink: #ffffff;
+        --ink-2: #c3c2b7;
+        --muted: #898781;
+        --grid: #2c2c2a;
+        --axis: #383835;
+        --hair: rgba(255, 255, 255, 0.10);
+        --wash: rgba(255, 255, 255, 0.06);
+        --good: #0ca30c;
+        --bad: #e66767;
+        --s1: #3987e5; --s2: #008300; --s3: #d55181; --s4: #c98500;
+        --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+      }
+
+      body {
+        background: var(--plane);
+        color: var(--ink);
+        font: 400 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      a { color: var(--s1); }
+      .app { max-width: 1080px; margin: 0 auto; padding: 20px 20px 80px; }
+
+      /* topbar */
+      .topbar {
+        display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap;
+        padding-bottom: 14px; margin-bottom: 22px; border-bottom: 1px solid var(--hair);
+      }
+      .brand {
+        display: inline-flex; align-items: center; gap: 9px;
+        font-weight: 600; color: var(--ink); text-decoration: none; letter-spacing: -0.01em;
+      }
+      .brand img { width: 26px; height: 26px; border-radius: 7px; }
+      .topbar nav { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13.5px; }
+      .topbar nav a { color: var(--ink-2); text-decoration: none; }
+      .topbar nav a:hover { color: var(--ink); }
+      .spacer { flex: 1 1 auto; }
+
+      button, .btn {
+        font: inherit; color: var(--ink); background: var(--surface-1);
+        border: 1px solid var(--hair); border-radius: 9px;
+        padding: 8px 13px; cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 8px;
+      }
+      button:hover, .btn:hover { background: var(--wash); }
+      button:focus-visible, .btn:focus-visible, input:focus-visible {
+        outline: 2px solid var(--s1); outline-offset: 1px;
+      }
+      button.primary, .btn.primary {
+        background: var(--s1); color: #fff; border-color: transparent; font-weight: 500;
+      }
+      button.primary:hover, .btn.primary:hover { filter: brightness(1.08); }
+      button.ghost {
+        background: transparent; border-color: transparent; color: var(--ink-2);
+        padding: 6px 9px; font-size: 16px;
+      }
+      button.ghost:hover { background: var(--wash); }
+
+      h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 10px; }
+      .lead { color: var(--ink-2); font-size: 1.03rem; margin: 0 0 6px; max-width: 64ch; }
+      .updated { color: var(--muted); font-size: 12.5px; margin: 0 0 24px; }
+
+      .card {
+        background: var(--surface-1); border: 1px solid var(--hair); border-radius: 14px;
+        padding: 18px 20px; margin-bottom: 18px;
+      }
+      .card > h2 { font-size: 1.1rem; margin: 0 0 4px; }
+      .card .desc { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
+
+      .ctrl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .fld { display: flex; flex-direction: column; gap: 6px; }
+      .fld span { color: var(--ink-2); font-size: 12.5px; }
+      .fld input {
+        font: inherit; color: var(--ink); background: var(--plane);
+        border: 1px solid var(--hair); border-radius: 9px; padding: 10px 12px;
+        text-align: right; font-variant-numeric: tabular-nums; width: 100%;
+      }
+
+      .methods { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .tile { background: var(--plane); border: 1px solid var(--hair); border-radius: 12px; padding: 14px 16px; }
+      .tile .label { color: var(--ink-2); font-size: 12.5px; font-weight: 500; }
+      .mline { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 8px; }
+      .mline span { color: var(--muted); font-size: 12.5px; }
+      .mline strong { font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+      .tile .foot { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+      .allocbar {
+        display: flex; height: 20px; border-radius: 6px; overflow: hidden;
+        margin-top: 12px; border: 1px solid var(--hair); background: var(--wash);
+      }
+      .allocbar > div { height: 100%; width: 50%; transition: width 0.18s ease; }
+      .bar-a { background: var(--s1); }
+      .bar-b { background: var(--s5); }
+
+      .tablewrap { overflow-x: auto; }
+      table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+      th {
+        text-align: left; font-weight: 500; color: var(--ink-2); font-size: 12px;
+        padding: 8px 10px; border-bottom: 1px solid var(--axis); white-space: nowrap;
+      }
+      td { padding: 8px 10px; border-bottom: 1px solid var(--grid); }
+      td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+      tbody tr:hover { background: var(--wash); }
+      .neg { color: var(--bad); }
+
+      .adv { margin: 14px 0 0; padding: 0; list-style: none; }
+      .adv li {
+        padding: 10px 13px; border-left: 3px solid var(--s1); background: var(--wash);
+        border-radius: 0 8px 8px 0; margin-bottom: 7px; font-size: 13.5px; color: var(--ink-2);
+      }
+      .adv li.ok { border-left-color: var(--good); }
+      .adv li.warn { border-left-color: var(--warn); }
+
+      .empty {
+        color: var(--ink-2); font-size: 13.5px; padding: 16px;
+        border: 1px dashed var(--axis); border-radius: 10px;
+      }
+
+      .prose h2 { font-size: 1.25rem; margin: 0 0 10px; }
+      .prose h3 { font-size: 1rem; margin: 18px 0 6px; }
+      .prose p { margin: 0 0 12px; color: var(--ink-2); }
+      .prose p:last-child { margin-bottom: 0; }
+      .prose ul { padding-left: 20px; color: var(--ink-2); margin: 0 0 12px; }
+      .prose li { margin: 5px 0; }
+
+      .faq-item {
+        border: 1px solid var(--hair); border-radius: 12px; background: var(--surface-1);
+        margin-bottom: 10px; overflow: hidden;
+      }
+      .faq-item summary {
+        cursor: pointer; padding: 15px 44px 15px 16px; font-weight: 500;
+        list-style: none; position: relative;
+      }
+      .faq-item summary::-webkit-details-marker { display: none; }
+      .faq-item summary::after {
+        content: "+"; position: absolute; right: 16px; top: 50%;
+        transform: translateY(-50%); color: var(--muted); font-size: 18px; line-height: 1;
+      }
+      .faq-item[open] summary::after { content: "−"; }
+      .faq-item p { margin: 0; padding: 0 16px 16px; color: var(--ink-2); font-size: 14px; }
+
+      .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+      .site-footer {
+        margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--hair);
+        color: var(--muted); font-size: 12.5px;
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      }
+      .site-footer img { width: 22px; height: 22px; border-radius: 6px; }
+      .hidden { display: none !important; }
+
+      @media (max-width: 640px) {
+        .ctrl, .methods { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <a class="brand" href="../index.html">
+          <img src="../../assets/ic_launcher-playstore.png?v=20260420-3" alt="Icona di Dunio" />
+          <span>Dunio</span>
+        </a>
+        <nav>
+          <a href="../index.html">Homepage</a>
+          <a href="../resources/">Risorse</a>
+          <a href="../come-dividere-le-spese-di-coppia/">Guida: dividere le spese</a>
+        </nav>
+        <span class="spacer"></span>
+        <button id="btn-theme" class="ghost" type="button" aria-label="Cambia tema">☾</button>
+      </div>
+
+      <main>
+        <h1>Calcolatore budget di coppia</h1>
+        <p class="lead">
+          Inserisci i redditi mensili e le spese condivise: il calcolatore confronta la divisione
+          50/50 con quella proporzionale al reddito e mostra quanto resta a ciascuno.
+        </p>
+        <p class="updated">Ultimo aggiornamento: 23 settembre 2026 · Il calcolo avviene solo nel tuo browser.</p>
+
+        <section class="card" aria-label="Dati del calcolo">
+          <h2>I vostri numeri</h2>
+          <p class="desc">Valori mensili, nella valuta che preferisci.</p>
+          <div class="ctrl">
+            <label class="fld">
+              <span>Reddito mensile — Persona A</span>
+              <input id="incA" type="text" inputmode="decimal" autocomplete="off" value="2000" />
+            </label>
+            <label class="fld">
+              <span>Reddito mensile — Persona B</span>
+              <input id="incB" type="text" inputmode="decimal" autocomplete="off" value="3000" />
+            </label>
+            <label class="fld">
+              <span>Spese condivise al mese</span>
+              <input id="shared" type="text" inputmode="decimal" autocomplete="off" value="1500" />
+            </label>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Risultato</h2>
+          <p class="desc">Confronto tra i due metodi di divisione.</p>
+
+          <div id="empty" class="empty hidden">
+            Inserisci un reddito totale e una spesa condivisa maggiori di zero per vedere il calcolo.
+          </div>
+
+          <div id="results" aria-live="polite">
+            <div class="methods">
+              <div class="tile">
+                <div class="label">Divisione 50/50</div>
+                <div class="mline"><span>Persona A</span><strong id="m50a">—</strong></div>
+                <div class="mline"><span>Persona B</span><strong id="m50b">—</strong></div>
+                <div class="allocbar" aria-hidden="true">
+                  <div id="bar50a" class="bar-a"></div>
+                  <div id="bar50b" class="bar-b"></div>
+                </div>
+                <p class="foot" id="f50"></p>
+              </div>
+              <div class="tile">
+                <div class="label">Divisione proporzionale al reddito</div>
+                <div class="mline"><span>Persona A</span><strong id="mpa">—</strong></div>
+                <div class="mline"><span>Persona B</span><strong id="mpb">—</strong></div>
+                <div class="allocbar" aria-hidden="true">
+                  <div id="barpa" class="bar-a"></div>
+                  <div id="barpb" class="bar-b"></div>
+                </div>
+                <p class="foot" id="fprop"></p>
+              </div>
+            </div>
+
+            <div class="tablewrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Voce</th>
+                    <th class="num">Persona A</th>
+                    <th class="num">Persona B</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Reddito mensile</td>
+                    <td class="num" id="t-inca">—</td>
+                    <td class="num" id="t-incb">—</td>
+                  </tr>
+                  <tr>
+                    <td>Quota con divisione 50/50</td>
+                    <td class="num" id="t-50a">—</td>
+                    <td class="num" id="t-50b">—</td>
+                  </tr>
+                  <tr>
+                    <td>Quota proporzionale al reddito</td>
+                    <td class="num" id="t-pa">—</td>
+                    <td class="num" id="t-pb">—</td>
+                  </tr>
+                  <tr>
+                    <td>Resta dopo le spese (50/50)</td>
+                    <td class="num" id="t-r50a">—</td>
+                    <td class="num" id="t-r50b">—</td>
+                  </tr>
+                  <tr>
+                    <td>Resta dopo le spese (proporzionale)</td>
+                    <td class="num" id="t-rpa">—</td>
+                    <td class="num" id="t-rpb">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <ul class="adv" id="advice"></ul>
+          </div>
+        </section>
+
+        <section class="card prose">
+          <h2>Come funziona la divisione proporzionale</h2>
+          <p>
+            Con la divisione proporzionale ogni persona copre la stessa percentuale del proprio
+            reddito. La quota si calcola moltiplicando le spese condivise per il rapporto tra il
+            reddito della persona e il reddito totale della coppia.
+          </p>
+          <p>
+            Esempio: se le spese condivise sono 1.500 € e i redditi sono 2.000 € e 3.000 €, il
+            reddito totale è 5.000 €. Persona A copre il 40% (2.000 / 5.000) e versa 600 €, Persona
+            B copre il 60% e versa 900 €. Il peso sul reddito è identico: in entrambi i casi il 30%.
+          </p>
+        </section>
+
+        <section class="card prose">
+          <h2>50/50 o proporzionale?</h2>
+          <p>
+            La divisione 50/50 è la più semplice: metà a testa, nessun calcolo. Funziona bene quando
+            i redditi sono simili. Quando i redditi sono molto diversi, però, la stessa cifra pesa
+            molto di più su chi guadagna meno.
+          </p>
+          <p>
+            La divisione proporzionale è più equa in quel caso, ma richiede un calcolo e va aggiornata
+            quando i redditi cambiano. In generale: redditi simili → 50/50; redditi diversi →
+            proporzionale.
+          </p>
+        </section>
+
+        <section class="card prose">
+          <h2>Come usare il risultato</h2>
+          <ul>
+            <li>scegli il metodo e usalo in modo costante, senza ricalcolarlo ogni mese</li>
+            <li>registra le spese condivise in un unico posto, così la quota resta verificabile</li>
+            <li>rivedi il calcolo solo quando cambia un reddito o una spesa fissa</li>
+            <li>controlla una volta al mese quanto resta a ciascuno</li>
+          </ul>
+          <p>
+            Il calcolatore ti dà la quota; per tenerla aggiornata nel tempo serve un posto condiviso
+            dove registrare spese, entrate e pagamenti ricorrenti. È esattamente ciò che fa Dunio.
+          </p>
+        </section>
+
+        <section class="card prose">
+          <h2>Domande frequenti</h2>
+          <div class="faq-item">
+            <details>
+              <summary>Come si calcola la quota di spese condivise?</summary>
+              <p>
+                Con la divisione 50/50 ogni persona copre metà delle spese condivise. Con la
+                divisione proporzionale al reddito, ognuno copre la stessa percentuale del proprio
+                reddito: la quota si ottiene moltiplicando le spese condivise per il rapporto tra il
+                reddito della persona e il reddito totale della coppia.
+              </p>
+            </details>
+          </div>
+          <div class="faq-item">
+            <details>
+              <summary>Qual è la differenza tra divisione 50/50 e proporzionale?</summary>
+              <p>
+                La divisione 50/50 divide le spese in parti uguali, quindi pesa di più su chi guadagna
+                meno. La divisione proporzionale fa pesare le spese allo stesso modo sul reddito di
+                entrambi, quindi chi guadagna di più versa di più.
+              </p>
+            </details>
+          </div>
+          <div class="faq-item">
+            <details>
+              <summary>Il calcolatore salva o invia i miei dati?</summary>
+              <p>
+                No. Il calcolo avviene interamente nel browser e nessun dato viene inviato o salvato
+                su un server.
+              </p>
+            </details>
+          </div>
+        </section>
+
+        <section class="card prose">
+          <h2>Prova Dunio</h2>
+          <p>
+            Se vuoi dividere le spese di coppia senza rifare i conti ogni mese, Dunio tiene spese,
+            entrate, patrimonio netto e pagamenti ricorrenti in un unico spazio condiviso.
+          </p>
+          <div class="cta">
+            <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.davideagostini.summ">Scarica su Google Play</a>
+            <a class="btn" href="../come-dividere-le-spese-di-coppia/">Leggi la guida completa</a>
+            <a class="btn" href="../resources/">Tutte le risorse</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <img src="../../assets/ic_launcher-playstore.png?v=20260420-3" alt="Icona di Dunio" />
+        <span>Dunio — finanze condivise per coppie e famiglie.</span>
+        <span class="spacer"></span>
+        <span>&copy; 2026 Dunio. Tutti i diritti riservati.</span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var root = document.documentElement;
+        var LS_THEME = "dunio.calc.theme";
+
+        var nfMoney = new Intl.NumberFormat("it-IT", {
+          style: "currency",
+          currency: "EUR",
+          maximumFractionDigits: 2
+        });
+        var nfPct = new Intl.NumberFormat("it-IT", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        });
+
+        function money(v) { return nfMoney.format(isFinite(v) ? v : 0); }
+        function pctText(v) { return nfPct.format(isFinite(v) ? v : 0) + "%"; }
+        function $(id) { return document.getElementById(id); }
+
+        function parse(v) {
+          var s = String(v == null ? "" : v).trim().replace(/\s|€/g, "");
+          if (!s) return 0;
+          if (s.indexOf(",") > -1) {
+            // virgola decimale: i punti sono separatori delle migliaia
+            s = s.replace(/\./g, "").replace(",", ".");
+          } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+            // solo punti a gruppi di tre cifre: separatori delle migliaia (es. 2.500)
+            s = s.replace(/\./g, "");
+          }
+          var n = parseFloat(s);
+          return isFinite(n) && n > 0 ? n : 0;
+        }
+
+        function setText(id, t) { var n = $(id); if (n) n.textContent = t; }
+        function setMoney(id, v) {
+          var n = $(id); if (!n) return;
+          n.textContent = money(v);
+          n.classList.toggle("neg", v < -0.005);
+        }
+        function setBar(id, frac) {
+          var n = $(id); if (!n) return;
+          n.style.width = Math.max(0, Math.min(1, frac)) * 100 + "%";
+        }
+
+        function compute() {
+          var a = parse($("incA").value);
+          var b = parse($("incB").value);
+          var s = parse($("shared").value);
+          var total = a + b;
+          var hasData = total > 0 && s > 0;
+
+          $("empty").classList.toggle("hidden", hasData);
+          $("results").classList.toggle("hidden", !hasData);
+          if (!hasData) return;
+
+          var q50a = s / 2, q50b = s / 2;
+          var pa = a / total, qpa = s * pa, qpb = s - qpa;
+
+          setMoney("m50a", q50a);
+          setMoney("m50b", q50b);
+          setMoney("mpa", qpa);
+          setMoney("mpb", qpb);
+          setBar("bar50a", 0.5);
+          setBar("bar50b", 0.5);
+          setBar("barpa", pa);
+          setBar("barpb", 1 - pa);
+
+          setText("f50", "Persona A: " + pctText(a > 0 ? (q50a / a) * 100 : 0) +
+            " del reddito · Persona B: " + pctText(b > 0 ? (q50b / b) * 100 : 0) + ".");
+          setText("fprop", "Entrambi coprono il " + pctText((s / total) * 100) + " del proprio reddito.");
+
+          setMoney("t-inca", a);
+          setMoney("t-incb", b);
+          setMoney("t-50a", q50a);
+          setMoney("t-50b", q50b);
+          setMoney("t-pa", qpa);
+          setMoney("t-pb", qpb);
+          setMoney("t-r50a", a - q50a);
+          setMoney("t-r50b", b - q50b);
+          setMoney("t-rpa", a - qpa);
+          setMoney("t-rpb", b - qpb);
+
+          var advice = $("advice");
+          while (advice.firstChild) advice.removeChild(advice.firstChild);
+          function addAdvice(cls, text) {
+            var li = document.createElement("li");
+            if (cls) li.className = cls;
+            li.textContent = text;
+            advice.appendChild(li);
+          }
+
+          var diff = Math.abs(a - b) / total;
+          if (diff < 0.05) {
+            addAdvice("ok", "I due redditi sono simili: la divisione 50/50 e quella proporzionale danno quasi lo stesso risultato.");
+          } else {
+            addAdvice(null, "Con redditi diversi, la divisione proporzionale assegna " + money(qpa) +
+              " a Persona A e " + money(qpb) + " a Persona B, mantenendo lo stesso peso sul reddito di entrambi.");
+            addAdvice(null, "La divisione 50/50 chiederebbe invece " + money(q50a) +
+              " a ciascuno: più semplice, ma pesa di più su chi guadagna meno.");
+          }
+          if (a - qpa < 0 || b - qpb < 0 || a - q50a < 0 || b - q50b < 0) {
+            addAdvice("warn", "Attenzione: la spesa condivisa supera il reddito di una delle due persone con almeno un metodo.");
+          }
+        }
+
+        try {
+          var stored = localStorage.getItem(LS_THEME);
+          if (stored) root.setAttribute("data-theme", stored);
+        } catch (e) { /* storage non disponibile */ }
+
+        var themeBtn = $("btn-theme");
+        function prefersDark() {
+          var attr = root.getAttribute("data-theme");
+          if (attr === "dark") return true;
+          if (attr === "light") return false;
+          return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+        function paintThemeBtn() {
+          themeBtn.textContent = prefersDark() ? "☀" : "☾";
+          themeBtn.setAttribute("aria-label", prefersDark() ? "Passa al tema chiaro" : "Passa al tema scuro");
+        }
+        themeBtn.addEventListener("click", function () {
+          var next = prefersDark() ? "light" : "dark";
+          root.setAttribute("data-theme", next);
+          try { localStorage.setItem(LS_THEME, next); } catch (e) { /* ignora */ }
+          paintThemeBtn();
+        });
+        paintThemeBtn();
+
+        ["incA", "incB", "shared"].forEach(function (id) {
+          $(id).addEventListener("input", compute);
+        });
+        compute();
+      })();
+    </script>
+  </body>
+</html>
